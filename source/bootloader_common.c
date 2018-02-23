@@ -44,12 +44,12 @@ void arm_ucp_event_handler(uint32_t event)
  * Helper function to print a SHA-256 in a nice format.
  * @param [in]  SHA  The array of PAL_SHA256_SIZE containing the SHA256
  */
-void printSHA256(const uint8_t SHA[PAL_SHA256_SIZE])
+void printSHA256(const uint8_t SHA[SIZEOF_SHA256])
 {
     /* allocate space for string */
-    char buffer[2 * PAL_SHA256_SIZE + 1] = { 0 };
+    char buffer[2 * SIZEOF_SHA256 + 1] = { 0 };
 
-    for (uint_least8_t index = 0; index < PAL_SHA256_SIZE; index++)
+    for (uint_least8_t index = 0; index < SIZEOF_SHA256; index++)
     {
         uint8_t value = SHA[index];
 

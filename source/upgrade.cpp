@@ -26,7 +26,7 @@
 #include "active_application.h"
 #include "bootloader_common.h"
 
-#include "pal.h"
+#include "mbedtls/sha256.h"
 #include "mbed.h"
 
 #include <inttypes.h>
@@ -84,15 +84,20 @@ bool checkStoredApplication(uint32_t source,
         };
 
         /* initialize hashing facility */
-        palMDHandle_t md = { 0 };
-        pal_mdInit(&md, PAL_SHA256);
-        uint32_t offset = 0;
+        mbedtls_sha256_context mbedtls_ctx;
+        mbedtls_sha256_init(&mbedtls_ctx);
+        mbedtls_sha256_starts(&mbedtls_ctx, 0);
 
         /* read full firmware using PAL Update API */
+        uint32_t offset = 0;
         while (offset < details->size)
         {
             /* clear most recent UCP event */
             event_callback = CLEAR_EVENT;
+
+            /* set the number of bytes expected */
+            buffer.size = (details->size - offset) > buffer.size_max ?
+                            buffer.size_max : (details->size - offset);
 
             /* fill buffer using UCP */
             arm_uc_error_t ucp_status = ARM_UCP_Read(source,
@@ -113,7 +118,7 @@ bool checkStoredApplication(uint32_t source,
                 (buffer.size > 0))
             {
                 /* update hash */
-                pal_mdUpdate(md, buffer.ptr, buffer.size);
+                mbedtls_sha256_update(&mbedtls_ctx, buffer.ptr, buffer.size);
 
                 offset += buffer.size;
             }
@@ -130,26 +135,26 @@ bool checkStoredApplication(uint32_t source,
         }
 
 /* make sure buffer is large enough to contain both the SHA and HMAC */
-#if BUFFER_SIZE < (2*PAL_SHA256_SIZE)
+#if BUFFER_SIZE < (2*SIZEOF_SHA256)
 #error "BUFFER_SIZE too small to contain SHA and HMAC"
 #endif
 
         /* now we are finished with the buffer we can reuse the underlying buffer */
         arm_uc_buffer_t hash_buffer = {
-            .size_max = PAL_SHA256_SIZE,
+            .size_max = SIZEOF_SHA256,
             .size     = 0,
             .ptr      = buffer_array
         };
 
         /* finalize hash */
-        pal_mdFinal(md, hash_buffer.ptr);
-        pal_mdFree(&md);
-        hash_buffer.size = PAL_SHA256_SIZE;
+        mbedtls_sha256_finish(&mbedtls_ctx, hash_buffer.ptr);
+        mbedtls_sha256_free(&mbedtls_ctx);
+        hash_buffer.size = SIZEOF_SHA256;
 
         /* compare calculated hash with hash from header */
         int diff = memcmp(details->hash,
                           hash_buffer.ptr,
-                          PAL_SHA256_SIZE);
+                          SIZEOF_SHA256);
 
         if (diff == 0)
         {
@@ -322,7 +327,7 @@ bool upgradeApplicationFromStorage(void)
             */
             if ((imageDetails.version > bestStoredFirmwareImageDetails.version) &&
                 (imageDetails.size > 0) &&
-                (firmwareDifferentFromActive))
+                (firmwareDifferentFromActive || !activeFirmwareValid))
             {
                 tr_info("Slot %" PRIu32 " firmware integrity check:",
                         index);
@@ -337,16 +342,28 @@ bool upgradeApplicationFromStorage(void)
                     printSHA256(imageDetails.hash);
                     tr_info("Version: %" PRIu64, imageDetails.version);
 
-                    /* Update best candidate information */
-                    bestStoredFirmwareIndex = index;
-                    bestStoredFirmwareImageDetails.version = imageDetails.version;
-                    bestStoredFirmwareImageDetails.size = imageDetails.size;
-                    memcpy(bestStoredFirmwareImageDetails.hash,
-                           imageDetails.hash,
-                           ARM_UC_SHA256_SIZE);
-                    memcpy(bestStoredFirmwareImageDetails.campaign,
-                           imageDetails.campaign,
-                           ARM_UC_GUID_SIZE);
+                    /* check firmware size fits */
+                    if (imageDetails.size <= MBED_CONF_APP_MAX_APPLICATION_SIZE)
+                    {
+                        /* Update best candidate information */
+                        bestStoredFirmwareIndex = index;
+                        bestStoredFirmwareImageDetails.version = imageDetails.version;
+                        bestStoredFirmwareImageDetails.size = imageDetails.size;
+                        memcpy(bestStoredFirmwareImageDetails.hash,
+                               imageDetails.hash,
+                               ARM_UC_SHA256_SIZE);
+                        memcpy(bestStoredFirmwareImageDetails.campaign,
+                               imageDetails.campaign,
+                               ARM_UC_GUID_SIZE);
+                    }
+                    else
+                    {
+                        /* Firmware candidate size too large */
+                        tr_error("Slot %" PRIu32 " firmware size too large %"
+                                 PRIu32 " > %" PRIu32, index,
+                                 (uint32_t) imageDetails.size,
+                                 (uint32_t) MBED_CONF_APP_MAX_APPLICATION_SIZE);
+                    }
                 }
                 else
                 {

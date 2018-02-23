@@ -18,8 +18,6 @@
 
 #include "update-client-paal/arm_uc_paal_update_api.h"
 
-#include "pal.h"
-
 #include <stdint.h>
 
 bool activeStorageInit(void);

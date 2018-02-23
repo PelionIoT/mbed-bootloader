@@ -22,7 +22,6 @@
 #include "update-client-paal/arm_uc_paal_update.h"
 #include "bootloader_common.h"
 #include "active_application.h"
-#include "pal.h"
 #include "mbed.h"
 #include "mbedtls/sha256.h"
 
@@ -38,8 +37,7 @@ void copyAppToSDCard(uint32_t firmware_size)
 
     tr_info("calculate firmware SHA256\r\n");
     const uint8_t* appStart =
-        (const uint8_t*) (MBED_CONF_APP_FIRMWARE_METADATA_HEADER_ADDRESS +
-                          MBED_CONF_APP_FIRMWARE_METADATA_HEADER_SIZE);
+        (const uint8_t*) (MBED_CONF_APP_APPLICATION_START_ADDRESS);
     mbedtls_sha256(appStart, firmware_size, details.hash, 0);
 
     details.version = UINT32_MAX - 1;

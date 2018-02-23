@@ -19,6 +19,7 @@
 import mbed_host_tests as mht
 # from mbed_host_tests import BaseHostTest,BaseHostTestAbstract
 from time import time
+from time import sleep
 import threading
 import uuid
 from random import uniform
@@ -94,7 +95,9 @@ class JigAuto(mht.BaseHostTest):
     def send_init(self):
         cutPoint = self.nextCutPoint()
         self.send_kv("jig_state", cutPoint['state'])
+        sleep(0.1)
         self.send_kv("jig_delay", cutPoint['delay'])
+        sleep(0.1)
         self.send_kv("go",0);
         self.__cutIdx += 1
 

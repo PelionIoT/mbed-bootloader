@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright 2016-2017 ARM Ltd.
+// Copyright 2018 ARM Ltd.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -16,17 +16,16 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------
 
-#include <stdint.h>
+#ifndef PAL_HEADER_SOTP_FS
+#define PAL_HEADER_SOTP_FS
 
-#ifndef MAX_COPY_RETRIES
-#define MAX_COPY_RETRIES 1
-#endif
+#define PAL_USE_HW_ROT 0
+#define PAL_USE_HW_RTC 0
+#define PAL_USE_HW_TRNG 1
+#define PAL_SIMULATOR_FLASH_OVER_FILE_SYSTEM 0
+#define PAL_USE_INTERNAL_FLASH 1
+#define PAL_USE_SECURE_TIME 1
 
-extern uint64_t* heapVersion;
-extern uint8_t* bootCounter;
+#include "mbedOS_default.h"
 
-/**
- * Find suitable update candidate and copy firmware into active region
- * @return true if the active firmware region is valid.
- */
-bool upgradeApplicationFromStorage(void);
+#endif //PAL_HEADER_SOTP_FS

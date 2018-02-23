@@ -23,9 +23,10 @@
 #include "active_application.h"
 #include "bootloader_common.h"
 
-#include "update-client-common/arm_uc_utilities.h"
 #include "update-client-common/arm_uc_metadata_header_v2.h"
+#include "update-client-common/arm_uc_utilities.h"
 #include "update-client-paal/arm_uc_paal_update.h"
+#include "mbedtls/sha256.h"
 #include "mbed.h"
 
 #include <inttypes.h>
@@ -112,21 +113,19 @@ int checkActiveApplication(arm_uc_firmware_details_t* details)
         /* calculate hash if header is valid and slot is not empty */
         if ((headerValid) && (details->size > 0))
         {
-            uint32_t appStart = MBED_CONF_APP_FIRMWARE_METADATA_HEADER_ADDRESS +
-                                MBED_CONF_APP_FIRMWARE_METADATA_HEADER_SIZE;
+            uint32_t appStart = MBED_CONF_APP_APPLICATION_START_ADDRESS;
 
             tr_debug("header start: 0x%08" PRIX32,
-                     (uint32_t) MBED_CONF_APP_FIRMWARE_METADATA_HEADER_ADDRESS);
-            tr_debug("header size: %" PRIu32,
-                     (uint32_t) MBED_CONF_APP_FIRMWARE_METADATA_HEADER_SIZE);
+                     (uint32_t) FIRMWARE_METADATA_HEADER_ADDRESS);
             tr_debug("app start: 0x%08" PRIX32, appStart);
             tr_debug("app size: %" PRIu64, details->size);
 
             /* initialize hashing facility */
-            palMDHandle_t md = { 0 };
-            pal_mdInit(&md, PAL_SHA256);
+            mbedtls_sha256_context mbedtls_ctx;
+            mbedtls_sha256_init(&mbedtls_ctx);
+            mbedtls_sha256_starts(&mbedtls_ctx, 0);
 
-            uint8_t SHA[PAL_SHA256_SIZE] = { 0 };
+            uint8_t SHA[SIZEOF_SHA256] = { 0 };
             uint32_t remaining = details->size;
             int32_t status = 0;
 
@@ -143,7 +142,7 @@ int checkActiveApplication(arm_uc_firmware_details_t* details)
                                     readSize);
 
                 /* update hash */
-                pal_mdUpdate(md, buffer_array, readSize);
+                mbedtls_sha256_update(&mbedtls_ctx, buffer_array, readSize);
 
                 /* update remaining bytes */
                 remaining -= readSize;
@@ -155,11 +154,11 @@ int checkActiveApplication(arm_uc_firmware_details_t* details)
             }
 
             /* finalize hash */
-            pal_mdFinal(md, SHA);
-            pal_mdFree(&md);
+            mbedtls_sha256_finish(&mbedtls_ctx, SHA);
+            mbedtls_sha256_free(&mbedtls_ctx);
 
             /* compare calculated hash with hash from header */
-            int diff = memcmp(details->hash, SHA, PAL_SHA256_SIZE);
+            int diff = memcmp(details->hash, SHA, SIZEOF_SHA256);
 
             if (diff == 0)
             {
@@ -188,27 +187,52 @@ bool eraseActiveFirmware(uint32_t firmwareSize)
 {
     tr_debug("eraseActiveFirmware");
 
-    /* get sector size of where the new firmware would end */
-    uint32_t lastSectorSize =
-        flash.get_sector_size(MBED_CONF_APP_FIRMWARE_METADATA_HEADER_ADDRESS +
-                              MBED_CONF_APP_FIRMWARE_METADATA_HEADER_SIZE +
-                              firmwareSize);
+    /* Find the exact end sector boundary. Some platforms have different sector
+       sizes from sector to sector. Hence we count the sizes 1 sector at a time here */
+    uint32_t erase_address = FIRMWARE_METADATA_HEADER_ADDRESS;
+    uint32_t size_needed = FIRMWARE_METADATA_HEADER_SIZE + firmwareSize;
+    while (erase_address < (FIRMWARE_METADATA_HEADER_ADDRESS + size_needed))
+    {
+        erase_address += flash.get_sector_size(erase_address);
+    }
 
-    /* full size of header and application */
-    uint32_t sizeRoundedUp = MBED_CONF_APP_FIRMWARE_METADATA_HEADER_SIZE +
-                             firmwareSize;
+    /* check that the erase will not exceed MBED_CONF_APP_MAX_APPLICATION_SIZE */
+    int result = -1;
+    if (erase_address < (MBED_CONF_APP_MAX_APPLICATION_SIZE + \
+                         MBED_CONF_APP_APPLICATION_START_ADDRESS))
+    {
+        tr_debug("Erasing from 0x%08" PRIX32 " to 0x%08" PRIX32,
+                 (uint32_t) FIRMWARE_METADATA_HEADER_ADDRESS,
+                 (uint32_t) erase_address);
 
-    /* full size rounded up to erase sector boundary */
-    sizeRoundedUp = ((sizeRoundedUp + lastSectorSize - 1) / lastSectorSize)
-                    * lastSectorSize;
-
-    tr_debug("Erasing from 0x%08" PRIX32 " to 0x%08" PRIX32,
-             (uint32_t) MBED_CONF_APP_FIRMWARE_METADATA_HEADER_ADDRESS,
-             (uint32_t) MBED_CONF_APP_FIRMWARE_METADATA_HEADER_ADDRESS + sizeRoundedUp);
-
-    /* erase flash to make place for new application */
-    int result = flash.erase(MBED_CONF_APP_FIRMWARE_METADATA_HEADER_ADDRESS,
-                             sizeRoundedUp);
+        /* Erase flash to make place for new application. Erasing sector by sector as some
+           platforms have varible sector sizes and mbed-os cannot deal with erasing multiple
+           sectors successfully in that case. https://github.com/ARMmbed/mbed-os/issues/6077 */
+        erase_address = FIRMWARE_METADATA_HEADER_ADDRESS;
+        while (erase_address < (FIRMWARE_METADATA_HEADER_ADDRESS + size_needed))
+        {
+            uint32_t sector_size = flash.get_sector_size(erase_address);
+            result = flash.erase(erase_address,
+                                 sector_size);
+            if (result != 0)
+            {
+                tr_debug("Erasing from 0x%08" PRIX32 " to 0x%08" PRIX32 " failed with retval %i",
+                         erase_address, erase_address + sector_size, result);
+                break;
+            }
+            else
+            {
+                erase_address += sector_size;
+            }
+        }
+    }
+    else
+    {
+        tr_error("Firmware size 0x%" PRIX32 " rounded up to the nearest sector boundary 0x%" \
+                 PRIX32 " is larger than the maximum application size 0x%" PRIX32,
+                 firmwareSize, erase_address - MBED_CONF_APP_APPLICATION_START_ADDRESS,
+                 MBED_CONF_APP_MAX_APPLICATION_SIZE);
+    }
 
     return (result == 0);
 }
@@ -226,13 +250,15 @@ bool writeActiveFirmwareHeader(arm_uc_firmware_details_t* details)
         const uint32_t programSize = (ARM_UC_INTERNAL_HEADER_SIZE_V2 + pageSize - 1)
                                      / pageSize * pageSize;
 
-        ASSERT((programSize <= BUFFER_SIZE),
+        /* coverity[no_escape] */
+        MBED_BOOTLOADER_ASSERT((programSize <= BUFFER_SIZE),
                "Header program size %" PRIu32 " bigger than buffer %d\r\n",
                programSize, BUFFER_SIZE);
 
-        ASSERT((programSize <= MBED_CONF_APP_FIRMWARE_METADATA_HEADER_SIZE),
+        /* coverity[no_escape] */
+        MBED_BOOTLOADER_ASSERT((programSize <= FIRMWARE_METADATA_HEADER_SIZE),
                "Header program size %" PRIu32 " bigger than expected header %d\r\n",
-               programSize, MBED_CONF_APP_FIRMWARE_METADATA_HEADER_SIZE);
+               programSize, FIRMWARE_METADATA_HEADER_SIZE);
 
         /* pad buffer to 0xFF */
         memset(buffer_array, 0xFF, programSize);
@@ -252,7 +278,7 @@ bool writeActiveFirmwareHeader(arm_uc_firmware_details_t* details)
         {
             /* write header using FlashIAP API */
             int ret = flash.program(buffer_array,
-                                    MBED_CONF_APP_FIRMWARE_METADATA_HEADER_ADDRESS,
+                                    FIRMWARE_METADATA_HEADER_ADDRESS,
                                     programSize);
 
             result = (ret == 0);
@@ -273,10 +299,10 @@ bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t* details)
         const uint32_t pageSize = flash.get_page_size();
 
         /* we require app_start_addr fall on a page size boundary */
-        uint32_t app_start_addr = MBED_CONF_APP_FIRMWARE_METADATA_HEADER_ADDRESS
-                                + MBED_CONF_APP_FIRMWARE_METADATA_HEADER_SIZE;
+        uint32_t app_start_addr = MBED_CONF_APP_APPLICATION_START_ADDRESS;
 
-        ASSERT((app_start_addr % pageSize) == 0,
+        /* coverity[no_escape] */
+        MBED_BOOTLOADER_ASSERT((app_start_addr % pageSize) == 0,
                "Application (0x%" PRIX32 ") does not start on a "
                "page size (0x%" PRIX32 ") aligned address\r\n",
                app_start_addr,
@@ -302,6 +328,10 @@ bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t* details)
         {
             /* clear most recent UCP event */
             event_callback = CLEAR_EVENT;
+
+            /* set the number of bytes expected */
+            buffer.size = (details->size - offset) > buffer.size_max ?
+                            buffer.size_max : (details->size - offset);
 
             /* fill buffer using UCP */
             arm_uc_error_t ucp_status = ARM_UCP_Read(index, offset, &buffer);
