@@ -118,3 +118,7 @@ The firmware update candidates can be stored on an external sd card. The firmwar
     |                          |
     +--------------------------+ <-+ Start of SD card block device (ie 0x0)
 ```
+
+## Debug
+
+Debug prints can be turned on by enabling the define `#define tr_debug(fmt, ...) printf("[DBG ] " fmt "\r\n", ##__VA_ARGS__)` in `source/bootloader_common.h` and setting the `ARM_UC_ALL_TRACE_ENABLE=1` macro on command line `mbed compile -DARM_UC_ALL_TRACE_ENABLE=1`.
