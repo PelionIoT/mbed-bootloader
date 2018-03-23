@@ -1,11 +1,6 @@
 # mbed-bootloader
 
-Generic bootloader to be used in conjunction with [mbed-cloud-client](https://github.com/ARMmbed/mbed-cloud-client-restricted).
-
-For an overview of high-level requirements of the bootloader, refer to [this document](docs/requirements.md).
-For pseudo-code of the bootloader, refer to [this document](docs/pseudo-code.md).
-
-The interface between the bootloader and an 'update-client' have been described [here](docs/update-interface.md).
+Generic bootloader to be used in conjunction with [mbed-cloud-client](https://github.com/ARMmbed/mbed-cloud-client).
 
 ## Build instructions
 
@@ -14,6 +9,12 @@ The interface between the bootloader and an 'update-client' have been described 
 1. Compile by running `mbed compile -t GCC_ARM -m (K64F|NUCLEO_F429ZI|UBLOX_EVK_ODIN_W2) --profile=tiny.json`
 1. Use this [script](https://github.com/ARMmbed/mbed-cloud-client-example/blob/master/tools/combine_bootloader_with_app.py) to combine the bootloader with application `python tools/combine_bootloader_with_app.py -a {application.bin} -b {bootloader.bin} --app-offset {firmware_metadata_header_address+firmware_metadata_header_size} --header-offset {firmware_metadata_header_address} -o {combined.bin}`.
 1. Flash `{combined.bin}` to device by drag and drop.
+
+## Metadata Header
+
+The metadata header is the bootloader update interface. Each stage of the boot sequence leading up to and including the application (except the root bootloader) is paired with a metadata header (containing version, size, hash etc.). Information contained in the metadata header allows validation and ordering of available firmwares.
+
+The firmware metadata header structure can be found [here](https://github.com/ARMmbed/mbed-cloud-client/blob/master/update-client-hub/modules/common/update-client-common/arm_uc_metadata_header_v2.h). There are two header formats, internal and external. The external header format is meant to be used when storing firmware on external storage which is assumed to be insecure. Hence the external header format contains extra security information prevent external tampering of the header data.
 
 ## Configurations
 
