@@ -1,0 +1,156 @@
+{
+    "macros": [
+        "MBEDTLS_USER_CONFIG_FILE=\"mbedtls_mbed_client_config.h\"",
+        "PAL_USER_DEFINED_CONFIGURATION=\"sotp_fs_config_MbedOS.h\"",
+        "MAX_COPY_RETRIES=1",
+        "SHOW_PROGRESS_BAR=1",
+        "MAX_BOOT_RETRIES=3",
+        "Mutex=PlatformMutex",
+        "PAL_USE_INTERNAL_FLASH=1",
+        "PAL_THREAD_SAFETY=0",
+        "ARM_UC_USE_PAL_CRYPTO=0",
+        "ARM_UC_USE_SOTP=1",
+        "ARM_UC_USE_PAL_BLOCKDEVICE=1",
+        "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP_BLOCKDEVICE",
+        "DEFAULT_MAX_APPLICATION_SIZE=(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - MBED_CONF_APP_APPLICATION_START_ADDRESS)"
+    ],
+    "config": {
+        "application-start-address": {
+            "help": "Address of the active application firmware in flash",
+            "value": null
+        },
+        "max-application-size": {
+            "help": "Maximum size of the active application",
+            "value": null
+        },
+        "sotp-section-1-address": {
+            "help": "Flash sector address for SOTP sector 1",
+            "macro_name": "PAL_INTERNAL_FLASH_SECTION_1_ADDRESS",
+            "value": null
+        },
+        "sotp-section-1-size": {
+            "help": "Flash sector size for SOTP sector 1",
+            "macro_name": "PAL_INTERNAL_FLASH_SECTION_1_SIZE",
+            "value": null
+        },
+        "sotp-section-2-address": {
+            "help": "Flash sector address for SOTP sector 2",
+            "macro_name": "PAL_INTERNAL_FLASH_SECTION_2_ADDRESS",
+            "value": null
+        },
+        "sotp-section-2-size": {
+            "help": "Flash sector size for SOTP sector 2",
+            "macro_name": "PAL_INTERNAL_FLASH_SECTION_2_SIZE",
+            "value": null
+        },
+        "flash-start-address": {
+            "help": "Start address of internal flash. Only used in this config to help the definition of other macros.",
+            "value": null
+        },
+        "flash-size": {
+            "help": "Total size of internal flash. Only used in this config to help the definition of other macros.",
+            "value": null
+        }
+    },
+    "target_overrides": {
+        "*": {
+            "target.features_remove": ["LWIP"],
+            "target.features_add"   : ["COMMON_PAL"],
+            "platform.stdio-baud-rate"    : 115200,
+            "platform.stdio-flush-at-exit": false,
+            "update-client.storage-address"  : "(1024*1024*64)",
+            "update-client.storage-size"     : "(1024*1024*2)",
+            "update-client.storage-locations": 1,
+            "update-client.firmware-header-version": "2"
+        },
+        "K64F": {
+            "flash-start-address"              : "0x0",
+            "flash-size"                       : "(1024*1024)",
+            "sotp-section-1-address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
+            "sotp-section-1-size"              : "(4*1024)",
+            "sotp-section-2-address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+36*1024)",
+            "sotp-section-2-size"              : "(4*1024)",
+            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+40*1024)",
+            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+41*1024)",
+            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+        },
+        "K66F": {
+            "flash-start-address"              : "0x0",
+            "flash-size"                       : "(2048*1024)",
+            "sotp-section-1-address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
+            "sotp-section-1-size"              : "(4*1024)",
+            "sotp-section-2-address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+36*1024)",
+            "sotp-section-2-size"              : "(4*1024)",
+            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+40*1024)",
+            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+41*1024)",
+            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+        },
+        "KW24D": {
+            "flash-start-address"              : "0x0",
+            "flash-size"                       : "(512*1024)",
+            "sotp-section-1-address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
+            "sotp-section-1-size"              : "(2*1024)",
+            "sotp-section-2-address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+34*1024)",
+            "sotp-section-2-size"              : "(2*1024)",
+            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+36*1024)",
+            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+37*1024)",
+            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+        },
+        "NUCLEO_L476RG": {
+            "flash-start-address"              : "0x08000000",
+            "flash-size"                       : "(1024*1024)",
+            "sotp-section-1-address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
+            "sotp-section-1-size"              : "(2*1024)",
+            "sotp-section-2-address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+34*1024)",
+            "sotp-section-2-size"              : "(2*1024)",
+            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+36*1024)",
+            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+38*1024)",
+            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+        },
+        "DISCO_L476VG": {
+            "flash-start-address"              : "0x08000000",
+            "flash-size"                       : "(1024*1024)",
+            "sotp-section-1-address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
+            "sotp-section-1-size"              : "(2*1024)",
+            "sotp-section-2-address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+34*1024)",
+            "sotp-section-2-size"              : "(2*1024)",
+            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+36*1024)",
+            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+38*1024)",
+            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+        },
+        "NUCLEO_F429ZI": {
+            "flash-start-address"              : "0x08000000",
+            "flash-size"                       : "(2048*1024)",
+            "sotp-section-1-address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
+            "sotp-section-1-size"              : "(16*1024)",
+            "sotp-section-2-address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+48*1024)",
+            "sotp-section-2-size"              : "(16*1024)",
+            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+64*1024)",
+            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+65*1024)",
+            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+        },
+        "UBLOX_EVK_ODIN_W2": {
+            "target.device_has_remove": ["EMAC"],
+            "flash-start-address"              : "0x08000000",
+            "flash-size"                       : "(2048*1024)",
+            "sotp-section-1-address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
+            "sotp-section-1-size"              : "(16*1024)",
+            "sotp-section-2-address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+48*1024)",
+            "sotp-section-2-size"              : "(16*1024)",
+            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+64*1024)",
+            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+65*1024)",
+            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+        },
+        "UBLOX_C030_U201": {
+            "flash-start-address"              : "0x08000000",
+            "flash-size"                       : "(1024*1024)",
+            "sotp-section-1-address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
+            "sotp-section-1-size"              : "(16*1024)",
+            "sotp-section-2-address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+48*1024)",
+            "sotp-section-2-size"              : "(16*1024)",
+            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+64*1024)",
+            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+65*1024)",
+            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+        }
+    }
+}
