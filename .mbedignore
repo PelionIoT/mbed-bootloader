@@ -13,6 +13,9 @@ mbed-os/features/FEATURE_COMMON_PAL/nanostack-libservice/source/*
 mbed-os/features/FEATURE_COMMON_PAL/nanostack-libservice/test/*
 mbed-os/features/FEATURE_UVISOR/*
 mbed-os/features/nanostack/*
+mbed-os/features/cellular/*
+mbed-os/features/lorawan/*
+mbed-os/features/nvstore/*
 mbed-os/features/netsocket/*
 mbed-os/features/storage/*
 mbed-os/features/filesystem/littlefs/*
