@@ -26,7 +26,8 @@ uint32_t event_callback = CLEAR_EVENT;
 
 /* lookup table for printing hexadecimal values */
 const char hexTable[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
-                           '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+                           '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+                          };
 
 /**
  * @brief Event handler for UCP callbacks.
@@ -49,8 +50,7 @@ void printSHA256(const uint8_t SHA[SIZEOF_SHA256])
     /* allocate space for string */
     char buffer[2 * SIZEOF_SHA256 + 1] = { 0 };
 
-    for (uint_least8_t index = 0; index < SIZEOF_SHA256; index++)
-    {
+    for (uint_least8_t index = 0; index < SIZEOF_SHA256; index++) {
         uint8_t value = SHA[index];
 
         buffer[2 * index]     = hexTable[value >> 4];
@@ -67,31 +67,23 @@ void printProgress(uint32_t progress, uint32_t total)
     /* use 70 characters for the progress bar */
     uint8_t percent = progress * 70 / total;
 
-    if (last_percent != percent)
-    {
+    if (last_percent != percent) {
         last_percent = percent;
         tr_trace("\r[BOOT] [");
 
         /* print + for progress or a space otherwise */
-        for (uint8_t index = 0; index < 70; index++)
-        {
-            if (index <= percent)
-            {
+        for (uint8_t index = 0; index < 70; index++) {
+            if (index <= percent) {
                 tr_trace("+");
-            }
-            else
-            {
+            } else {
                 tr_trace(" ");
             }
         }
 
         /* finish progress bar with a newline once complete */
-        if (progress >= total)
-        {
+        if (progress >= total) {
             tr_trace("]\r\n");
-        }
-        else
-        {
+        } else {
             tr_trace("]");
 
             /* explicitly flush debug channel, usually this is triggered by \n */

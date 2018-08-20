@@ -22,8 +22,8 @@
 #define MAX_COPY_RETRIES 1
 #endif
 
-extern uint64_t* heapVersion;
-extern uint8_t* bootCounter;
+extern uint64_t *heapVersion;
+extern uint8_t *bootCounter;
 
 /**
  * Find suitable update candidate and copy firmware into active region

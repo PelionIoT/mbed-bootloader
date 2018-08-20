@@ -29,7 +29,7 @@ void activeStorageDeinit(void);
  *             Caller-allocated header structure.
  * @return true if the read succeeds.
  */
-bool readActiveFirmwareHeader(arm_uc_firmware_details_t* details);
+bool readActiveFirmwareHeader(arm_uc_firmware_details_t *details);
 
 /**
  * Verify the integrity of the Active application
@@ -43,6 +43,6 @@ bool readActiveFirmwareHeader(arm_uc_firmware_details_t* details);
  *         EMPTY   if no active application is present
  *         ERROR   if the validation fails
  */
-int checkActiveApplication(arm_uc_firmware_details_t* details);
+int checkActiveApplication(arm_uc_firmware_details_t *details);
 
-bool copyStoredApplication(uint32_t index, arm_uc_firmware_details_t* details);
+bool copyStoredApplication(uint32_t index, arm_uc_firmware_details_t *details);
