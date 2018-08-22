@@ -23,7 +23,7 @@
 
 #include "bootloader_power_cut_test.h"
 
-DigitalOut JigTrigger(D2,0);
+DigitalOut JigTrigger(D2, 0);
 
 Timeout JigTimeout;
 
@@ -54,8 +54,7 @@ void power_cut_test_end()
     greentea_send_kv("power_cut_test_end", 0);
 
     /* test end block forever */
-    for (;;)
-    {
+    for (;;) {
         __WFI();
     }
 }

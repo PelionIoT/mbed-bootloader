@@ -27,7 +27,7 @@
 
 #if !defined(MAX_FIRMWARE_LOCATIONS) || MAX_FIRMWARE_LOCATIONS <= 0
 #error "configure update-client.storage-locations or MAX_FIRMWARE_LOCATIONS in mbed_app.json\n" \
-       "To use pre configured profiles: mbed compile --app-config configs/<config>.json"
+"To use pre configured profiles: mbed compile --app-config configs/<config>.json"
 #endif
 
 /* FIRMWARE_METADATA_HEADER_ADDRESS */
@@ -37,20 +37,7 @@
 
 #if !defined(FIRMWARE_METADATA_HEADER_ADDRESS)
 #error "configure update-client.application-details or FIRMWARE_METADATA_HEADER_ADDRESS in mbed_app.json\n" \
-       "To use pre configured profiles: mbed compile --app-config configs/<config>.json"
-#endif
-
-/* FIRMWARE_METADATA_HEADER_SIZE */
-#if defined(MBED_CONF_APP_APPLICATION_START_ADDRESS) && \
-    defined(FIRMWARE_METADATA_HEADER_ADDRESS)
-#define FIRMWARE_METADATA_HEADER_SIZE \
-            (MBED_CONF_APP_APPLICATION_START_ADDRESS - \
-             FIRMWARE_METADATA_HEADER_ADDRESS)
-#endif
-
-#if !defined(FIRMWARE_METADATA_HEADER_SIZE)
-#error "configure application_start_address in mbed_app.json\n" \
-       "To use pre configured profiles: mbed compile --app-config configs/<config>.json"
+"To use pre configured profiles: mbed compile --app-config configs/<config>.json"
 #endif
 
 #endif // BOOTLOADER_CONFIG_H

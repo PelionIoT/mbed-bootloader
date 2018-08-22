@@ -16,7 +16,7 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------
 
-#if !defined(ARM_UC_USE_SOTP) || ARM_UC_USE_SOTP == 0
+#if !defined(ARM_BOOTLOADER_USE_NVSTORE_ROT) || ARM_BOOTLOADER_USE_NVSTORE_ROT == 0
 
 #include <inttypes.h>
 #include <stddef.h>
@@ -41,17 +41,15 @@ int8_t mbed_cloud_client_get_rot_128bit(uint8_t *key_buf, uint32_t length)
 {
 #warning "You are using insecure Root Of Trust implementation, DO NOT USE IN PRODUCTION ENVIRONMENTS. REPLACE WITH A PROPER IMPLEMENTATION BEFORE USE"
 
-    if (length < DEVICE_KEY_SIZE_IN_BYTES || key_buf == NULL)
-    {
+    if (length < DEVICE_KEY_SIZE_IN_BYTES || key_buf == NULL) {
         return -1;
     }
 
-    for (uint8_t i = 0; i < DEVICE_KEY_SIZE_IN_BYTES; i++)
-    {
+    for (uint8_t i = 0; i < DEVICE_KEY_SIZE_IN_BYTES; i++) {
         key_buf[i] = i;
     }
 
     return 0;
 }
 
-#endif // #if !defined(ARM_UC_USE_SOTP) || ARM_UC_USE_SOTP == 0
+#endif // #if !defined(ARM_BOOTLOADER_USE_NVSTORE_ROT) || ARM_BOOTLOADER_USE_NVSTORE_ROT == 0

@@ -36,8 +36,8 @@ void copyAppToSDCard(uint32_t firmware_size)
     arm_uc_firmware_details_t details = { 0 };
 
     tr_info("calculate firmware SHA256\r\n");
-    const uint8_t* appStart =
-        (const uint8_t*) (MBED_CONF_APP_APPLICATION_START_ADDRESS);
+    const uint8_t *appStart =
+        (const uint8_t *)(MBED_CONF_APP_APPLICATION_START_ADDRESS);
     mbedtls_sha256(appStart, firmware_size, details.hash, 0);
 
     details.version = UINT32_MAX - 1;
@@ -58,15 +58,11 @@ void copyAppToSDCard(uint32_t firmware_size)
     arm_uc_error_t ucp_status = ARM_UCP_Prepare(0, &details, &temp_buffer);
 
     /* wait for event if call was accepted */
-    if (ucp_status.error == ERR_NONE)
-    {
-        while (event_callback == CLEAR_EVENT)
-        {
+    if (ucp_status.error == ERR_NONE) {
+        while (event_callback == CLEAR_EVENT) {
             __WFI();
         }
-    }
-    else
-    {
+    } else {
         tr_error("ARM_UCP_Prepare failed\r\n");
     }
 
@@ -77,7 +73,7 @@ void copyAppToSDCard(uint32_t firmware_size)
     arm_uc_buffer_t write_buffer = {
         .size_max = firmware_size,
         .size     = firmware_size,
-        .ptr      = (uint8_t*) appStart
+        .ptr      = (uint8_t *) appStart
     };
 
     /* clear most recent event */
@@ -87,15 +83,11 @@ void copyAppToSDCard(uint32_t firmware_size)
     ucp_status = ARM_UCP_Write(0, 0, &write_buffer);
 
     /* wait for event if call was accepted */
-    if (ucp_status.error == ERR_NONE)
-    {
-        while (event_callback == CLEAR_EVENT)
-        {
+    if (ucp_status.error == ERR_NONE) {
+        while (event_callback == CLEAR_EVENT) {
             __WFI();
         }
-    }
-    else
-    {
+    } else {
         tr_error("ARM_UCP_Write failed\r\n");
     }
 
@@ -110,15 +102,11 @@ void copyAppToSDCard(uint32_t firmware_size)
     ucp_status = ARM_UCP_Finalize(0);
 
     /* wait for event if call was accepted */
-    if (ucp_status.error == ERR_NONE)
-    {
-        while (event_callback == CLEAR_EVENT)
-        {
+    if (ucp_status.error == ERR_NONE) {
+        while (event_callback == CLEAR_EVENT) {
             __WFI();
         }
-    }
-    else
-    {
+    } else {
         tr_error("ARM_UCP_Finalize failed\r\n");
     }
 }
@@ -138,18 +126,14 @@ void firmware_update_test_validate()
 
 void firmware_update_test_end()
 {
-    if (firmware_update_test_valid_flag)
-    {
+    if (firmware_update_test_valid_flag) {
         GREENTEA_TESTSUITE_RESULT(true);
-    }
-    else
-    {
+    } else {
         GREENTEA_TESTSUITE_RESULT(false);
     }
 
     /* test end block forever */
-    for (;;)
-    {
+    for (;;) {
         __WFI();
     }
 }

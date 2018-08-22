@@ -51,14 +51,13 @@ void activeStorageDeinit(void)
  *             Caller-allocated header structure.
  * @return true if the read succeeds.
  */
-bool readActiveFirmwareHeader(arm_uc_firmware_details_t* details)
+bool readActiveFirmwareHeader(arm_uc_firmware_details_t *details)
 {
     tr_debug("readActiveFirmwareHeader");
 
     bool result = false;
 
-    if (details)
-    {
+    if (details) {
         /* clear most recent UCP event */
         event_callback = CLEAR_EVENT;
 
@@ -68,17 +67,14 @@ bool readActiveFirmwareHeader(arm_uc_firmware_details_t* details)
         /* if the call was accepted,
            the event will indicate if the call succeeded
         */
-        if (status.error == ERR_NONE)
-        {
+        if (status.error == ERR_NONE) {
             /* wait until the event has been set */
-            while (event_callback == CLEAR_EVENT)
-            {
+            while (event_callback == CLEAR_EVENT) {
                 __WFI();
             }
 
             /* mark the firmware details as valid if so indicated by the event */
-            if (event_callback == ARM_UC_PAAL_EVENT_GET_ACTIVE_FIRMWARE_DETAILS_DONE)
-            {
+            if (event_callback == ARM_UC_PAAL_EVENT_GET_ACTIVE_FIRMWARE_DETAILS_DONE) {
                 result = true;
             }
         }
@@ -99,20 +95,18 @@ bool readActiveFirmwareHeader(arm_uc_firmware_details_t* details)
  *         EMPTY   if no active application is present
  *         ERROR   if the validation fails
  */
-int checkActiveApplication(arm_uc_firmware_details_t* details)
+int checkActiveApplication(arm_uc_firmware_details_t *details)
 {
     tr_debug("checkActiveApplication");
 
     int result = RESULT_ERROR;
 
-    if (details)
-    {
+    if (details) {
         /* Read header and verify that it is valid */
         bool headerValid = readActiveFirmwareHeader(details);
 
         /* calculate hash if header is valid and slot is not empty */
-        if ((headerValid) && (details->size > 0))
-        {
+        if ((headerValid) && (details->size > 0)) {
             uint32_t appStart = MBED_CONF_APP_APPLICATION_START_ADDRESS;
 
             tr_debug("header start: 0x%08" PRIX32,
@@ -130,8 +124,7 @@ int checkActiveApplication(arm_uc_firmware_details_t* details)
             int32_t status = 0;
 
             /* read full image */
-            while ((remaining > 0) && (status == 0))
-            {
+            while ((remaining > 0) && (status == 0)) {
                 /* read full buffer or what is remaining */
                 uint32_t readSize = (remaining > BUFFER_SIZE) ?
                                     BUFFER_SIZE : remaining;
@@ -160,24 +153,61 @@ int checkActiveApplication(arm_uc_firmware_details_t* details)
             /* compare calculated hash with hash from header */
             int diff = memcmp(details->hash, SHA, SIZEOF_SHA256);
 
-            if (diff == 0)
-            {
+            if (diff == 0) {
                 result = RESULT_SUCCESS;
-            }
-            else
-            {
+            } else {
                 printSHA256(details->hash);
                 printSHA256(SHA);
             }
-        }
-        else if ((headerValid) && (details->size == 0))
-        {
+        } else if ((headerValid) && (details->size == 0)) {
             /* header is valid but application size is 0 */
             result = RESULT_EMPTY;
         }
     }
 
     return result;
+}
+
+int eraseSectorBySector(uint32_t addr, uint32_t size)
+{
+    tr_debug("Erasing from 0x%08" PRIX32 " to 0x%08" PRIX32,
+             (uint32_t) addr, (uint32_t) addr + size);
+
+    int result = -1;
+    uint32_t erase_address = addr;
+
+    /* Erase flash to make place for new application. Erasing sector by sector as some
+       platforms have varible sector sizes and mbed-os cannot deal with erasing multiple
+       sectors successfully in that case. https://github.com/ARMmbed/mbed-os/issues/6077 */
+    while (erase_address < (addr + size)) {
+        uint32_t sector_size = flash.get_sector_size(erase_address);
+        result = flash.erase(erase_address,
+                             sector_size);
+        if (result != 0) {
+            tr_debug("Erasing from 0x%08" PRIX32 " to 0x%08" PRIX32 " failed with retval %i",
+                     erase_address, erase_address + sector_size, result);
+            break;
+        } else {
+            erase_address += sector_size;
+        }
+    }
+
+    return result;
+}
+
+uint32_t getSectorAlignedSize(uint32_t addr, uint32_t size)
+{
+    tr_debug("getSectorAlignedSize at 0x%08" PRIX32 " of size 0x%08" PRIX32,
+             (uint32_t) addr, (uint32_t) size);
+
+    /* Find the exact end sector boundary. Some platforms have different sector
+       sizes from sector to sector. Hence we count the sizes 1 sector at a time here */
+    uint32_t erase_address = addr;
+    while (erase_address < (addr + size)) {
+        erase_address += flash.get_sector_size(erase_address);
+    }
+
+    return erase_address - addr;
 }
 
 /**
@@ -187,78 +217,75 @@ bool eraseActiveFirmware(uint32_t firmwareSize)
 {
     tr_debug("eraseActiveFirmware");
 
-    /* Find the exact end sector boundary. Some platforms have different sector
-       sizes from sector to sector. Hence we count the sizes 1 sector at a time here */
-    uint32_t erase_address = FIRMWARE_METADATA_HEADER_ADDRESS;
-    uint32_t size_needed = FIRMWARE_METADATA_HEADER_SIZE + firmwareSize;
-    while (erase_address < (FIRMWARE_METADATA_HEADER_ADDRESS + size_needed))
-    {
-        erase_address += flash.get_sector_size(erase_address);
+    uint32_t fw_metadata_hdr_size = getSectorAlignedSize(FIRMWARE_METADATA_HEADER_ADDRESS,
+                                                         ARM_UC_INTERNAL_HEADER_SIZE_V2);
+    uint32_t size_needed = 0;
+    uint32_t erase_start_addr = 0;
+    int result = 0;
+
+    if (((FIRMWARE_METADATA_HEADER_ADDRESS + fw_metadata_hdr_size) < \
+            (MBED_CONF_APP_APPLICATION_START_ADDRESS)) || \
+            (FIRMWARE_METADATA_HEADER_ADDRESS > MBED_CONF_APP_APPLICATION_START_ADDRESS)) {
+        /* header separate from app */
+        tr_debug("Erasing header separately from active application");
+
+        /* erase header section first */
+        result = eraseSectorBySector(FIRMWARE_METADATA_HEADER_ADDRESS, fw_metadata_hdr_size);
+
+        /* setup erase of the application region */
+        size_needed = firmwareSize;
+        erase_start_addr = MBED_CONF_APP_APPLICATION_START_ADDRESS;
+    } else { /* header contiguous with app */
+        /* setup erase of the header + application region */
+        size_needed = (MBED_CONF_APP_APPLICATION_START_ADDRESS - FIRMWARE_METADATA_HEADER_ADDRESS) + firmwareSize;
+        erase_start_addr = FIRMWARE_METADATA_HEADER_ADDRESS;
     }
 
-    /* check that the erase will not exceed MBED_CONF_APP_MAX_APPLICATION_SIZE */
-    int result = -1;
-    if (erase_address < (MBED_CONF_APP_MAX_APPLICATION_SIZE + \
-                         MBED_CONF_APP_APPLICATION_START_ADDRESS))
-    {
-        tr_debug("Erasing from 0x%08" PRIX32 " to 0x%08" PRIX32,
-                 (uint32_t) FIRMWARE_METADATA_HEADER_ADDRESS,
-                 (uint32_t) erase_address);
-
-        /* Erase flash to make place for new application. Erasing sector by sector as some
-           platforms have varible sector sizes and mbed-os cannot deal with erasing multiple
-           sectors successfully in that case. https://github.com/ARMmbed/mbed-os/issues/6077 */
-        erase_address = FIRMWARE_METADATA_HEADER_ADDRESS;
-        while (erase_address < (FIRMWARE_METADATA_HEADER_ADDRESS + size_needed))
-        {
-            uint32_t sector_size = flash.get_sector_size(erase_address);
-            result = flash.erase(erase_address,
-                                 sector_size);
-            if (result != 0)
-            {
-                tr_debug("Erasing from 0x%08" PRIX32 " to 0x%08" PRIX32 " failed with retval %i",
-                         erase_address, erase_address + sector_size, result);
-                break;
-            }
-            else
-            {
-                erase_address += sector_size;
-            }
+    if (result == 0) {
+        uint32_t erase_end_addr = erase_start_addr + \
+                                  getSectorAlignedSize(erase_start_addr,
+                                                       size_needed);
+        uint32_t max_end_addr = MBED_CONF_APP_MAX_APPLICATION_SIZE + \
+                                MBED_CONF_APP_APPLICATION_START_ADDRESS;
+        /* check that the erase will not exceed MBED_CONF_APP_MAX_APPLICATION_SIZE */
+        if (erase_end_addr <= max_end_addr) {
+            result = eraseSectorBySector(erase_start_addr, size_needed);
+        } else {
+            result = -1;
+            tr_error("Firmware size 0x%" PRIX32 " rounded up to the nearest sector boundary 0x%" \
+                     PRIX32 " is larger than the maximum application size 0x%" PRIX32,
+                     firmwareSize, erase_end_addr - MBED_CONF_APP_APPLICATION_START_ADDRESS,
+                     MBED_CONF_APP_MAX_APPLICATION_SIZE);
         }
-    }
-    else
-    {
-        tr_error("Firmware size 0x%" PRIX32 " rounded up to the nearest sector boundary 0x%" \
-                 PRIX32 " is larger than the maximum application size 0x%" PRIX32,
-                 firmwareSize, erase_address - MBED_CONF_APP_APPLICATION_START_ADDRESS,
-                 MBED_CONF_APP_MAX_APPLICATION_SIZE);
     }
 
     return (result == 0);
 }
 
-bool writeActiveFirmwareHeader(arm_uc_firmware_details_t* details)
+bool writeActiveFirmwareHeader(arm_uc_firmware_details_t *details)
 {
     tr_debug("writeActiveFirmwareHeader");
 
     bool result = false;
 
-    if (details)
-    {
+    if (details) {
         /* round up program size to nearest page size */
         const uint32_t pageSize = flash.get_page_size();
         const uint32_t programSize = (ARM_UC_INTERNAL_HEADER_SIZE_V2 + pageSize - 1)
                                      / pageSize * pageSize;
+        const uint32_t fw_metadata_hdr_size = \
+                                              getSectorAlignedSize(FIRMWARE_METADATA_HEADER_ADDRESS,
+                                                                   ARM_UC_INTERNAL_HEADER_SIZE_V2);
 
         /* coverity[no_escape] */
         MBED_BOOTLOADER_ASSERT((programSize <= BUFFER_SIZE),
-               "Header program size %" PRIu32 " bigger than buffer %d\r\n",
-               programSize, BUFFER_SIZE);
+                               "Header program size %" PRIu32 " bigger than buffer %d\r\n",
+                               programSize, BUFFER_SIZE);
 
         /* coverity[no_escape] */
-        MBED_BOOTLOADER_ASSERT((programSize <= FIRMWARE_METADATA_HEADER_SIZE),
-               "Header program size %" PRIu32 " bigger than expected header %d\r\n",
-               programSize, FIRMWARE_METADATA_HEADER_SIZE);
+        MBED_BOOTLOADER_ASSERT((programSize <= fw_metadata_hdr_size),
+                               "Header program size %" PRIu32 " bigger than expected header %d\r\n",
+                               programSize, fw_metadata_hdr_size);
 
         /* pad buffer to 0xFF */
         memset(buffer_array, 0xFF, programSize);
@@ -274,8 +301,7 @@ bool writeActiveFirmwareHeader(arm_uc_firmware_details_t* details)
                                                                  &output_buffer);
 
         if ((status.error == ERR_NONE) &&
-            (output_buffer.size == ARM_UC_INTERNAL_HEADER_SIZE_V2))
-        {
+                (output_buffer.size == ARM_UC_INTERNAL_HEADER_SIZE_V2)) {
             /* write header using FlashIAP API */
             int ret = flash.program(buffer_array,
                                     FIRMWARE_METADATA_HEADER_ADDRESS,
@@ -288,14 +314,13 @@ bool writeActiveFirmwareHeader(arm_uc_firmware_details_t* details)
     return result;
 }
 
-bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t* details)
+bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t *details)
 {
     tr_debug("writeActiveFirmware");
 
     bool result = false;
 
-    if (details)
-    {
+    if (details) {
         const uint32_t pageSize = flash.get_page_size();
 
         /* we require app_start_addr fall on a page size boundary */
@@ -303,10 +328,10 @@ bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t* details)
 
         /* coverity[no_escape] */
         MBED_BOOTLOADER_ASSERT((app_start_addr % pageSize) == 0,
-               "Application (0x%" PRIX32 ") does not start on a "
-               "page size (0x%" PRIX32 ") aligned address\r\n",
-               app_start_addr,
-               pageSize);
+                               "Application (0x%" PRIX32 ") does not start on a "
+                               "page size (0x%" PRIX32 ") aligned address\r\n",
+                               app_start_addr,
+                               pageSize);
 
         /* round down the read size to a multiple of the page size
            that still fits inside the main buffer.
@@ -324,31 +349,27 @@ bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t* details)
 
         /* write firmware */
         while ((offset < details->size) &&
-               (retval == 0))
-        {
+                (retval == 0)) {
             /* clear most recent UCP event */
             event_callback = CLEAR_EVENT;
 
             /* set the number of bytes expected */
             buffer.size = (details->size - offset) > buffer.size_max ?
-                            buffer.size_max : (details->size - offset);
+                          buffer.size_max : (details->size - offset);
 
             /* fill buffer using UCP */
             arm_uc_error_t ucp_status = ARM_UCP_Read(index, offset, &buffer);
 
             /* wait for event if the call is accepted */
-            if (ucp_status.error == ERR_NONE)
-            {
-                while (event_callback == CLEAR_EVENT)
-                {
+            if (ucp_status.error == ERR_NONE) {
+                while (event_callback == CLEAR_EVENT) {
                     __WFI();
                 }
             }
 
             /* check status and actual read size */
             if ((event_callback == ARM_UC_PAAL_EVENT_READ_DONE) &&
-                (buffer.size > 0))
-            {
+                    (buffer.size > 0)) {
                 /* the last page, in the last buffer might not be completely
                    filled, round up the program size to include the last page
                 */
@@ -358,8 +379,7 @@ bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t* details)
 
                 /* write one page at a time */
                 while ((programOffset < programSize) &&
-                       (retval == 0))
-                {
+                        (retval == 0)) {
                     retval = flash.program(&(buffer.ptr[programOffset]),
                                            app_start_addr + offset + programOffset,
                                            pageSize);
@@ -375,9 +395,7 @@ bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t* details)
                          offset, (uint32_t) details->size, programSize, app_start_addr + offset);
 
                 offset += programSize;
-            }
-            else
-            {
+            } else {
                 tr_error("ARM_UCP_Read returned 0 bytes");
 
                 /* set error and break out of loop */
@@ -396,7 +414,7 @@ bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t* details)
  * Copy loop to update the application
  */
 bool copyStoredApplication(uint32_t index,
-                           arm_uc_firmware_details_t* details)
+                           arm_uc_firmware_details_t *details)
 {
     tr_debug("copyStoredApplication");
 
@@ -412,8 +430,7 @@ bool copyStoredApplication(uint32_t index,
     /* Step 2. Write header                                                  */
     /*************************************************************************/
 
-    if (result)
-    {
+    if (result) {
         result = writeActiveFirmwareHeader(details);
     }
 
@@ -421,8 +438,7 @@ bool copyStoredApplication(uint32_t index,
     /* Step 3. Copy application                                              */
     /*************************************************************************/
 
-    if (result)
-    {
+    if (result) {
         result = writeActiveFirmware(index, details);
     }
 
@@ -430,8 +446,7 @@ bool copyStoredApplication(uint32_t index,
     /* Step 4. Verify application                                            */
     /*************************************************************************/
 
-    if (result)
-    {
+    if (result) {
         tr_info("Verify new active firmware:");
 
         int recheck = checkActiveApplication(details);
