@@ -6,6 +6,9 @@
         "SHOW_PROGRESS_BAR=1",
         "MAX_BOOT_RETRIES=3",
         "ARM_UC_USE_PAL_CRYPTO=0",
+        "ARM_UC_PROFILE_MBED_CLIENT_LITE=1",
+        "ARM_UC_FEATURE_CRYPTO_PAL=0",
+        "ARM_UC_FEATURE_CRYPTO_MBEDTLS=1",
         "ARM_BOOTLOADER_USE_NVSTORE_ROT=0",
         "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP",
         "Mutex=PlatformMutex"
@@ -22,8 +25,7 @@
     },
     "target_overrides": {
         "*": {
-            "target.features_remove": ["LWIP"],
-            "target.features_add": ["COMMON_PAL"],
+            "target.features_remove": ["LWIP", "STORAGE"],
             "platform.stdio-baud-rate": 115200,
             "platform.stdio-flush-at-exit": false,
             "update-client.firmware-header-version": "2"

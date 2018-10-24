@@ -6,6 +6,9 @@
         "SHOW_PROGRESS_BAR=1",
         "MAX_BOOT_RETRIES=3",
         "ARM_UC_USE_PAL_CRYPTO=0",
+        "ARM_UC_PROFILE_MBED_CLOUD_CLIENT=1",
+        "ARM_UC_FEATURE_CRYPTO_PAL=0",
+        "ARM_UC_FEATURE_CRYPTO_MBEDTLS=1",
         "ARM_BOOTLOADER_USE_NVSTORE_ROT=0",
         "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP",
         "Mutex=PlatformMutex"
@@ -22,8 +25,7 @@
     },
     "target_overrides": {
         "*": {
-            "target.features_remove": ["LWIP"],
-            "target.features_add": ["COMMON_PAL"],
+            "target.features_remove": ["LWIP", "STORAGE"],
             "platform.stdio-baud-rate": 115200,
             "platform.stdio-flush-at-exit": false,
             "update-client.firmware-header-version": "2"
@@ -45,6 +47,15 @@
             "update-client.storage-size"       : "(512*1024)",
             "update-client.storage-locations"  : 1,
             "update-client.storage-page"       : 1
+        },
+        "NUCLEO_F303RE": {
+            "update-client.application-details": "(0x08000000+36*1024)",
+            "application-start-address"        : "(0x08000000+37*1024)",
+            "max-application-size"             : "(MBED_CONF_UPDATE_CLIENT_STORAGE_ADDRESS-MBED_CONF_APP_APPLICATION_START_ADDRESS)",
+            "update-client.storage-address"    : "(0x08000000+(256+18)*1024)",
+            "update-client.storage-size"       : "((256-18)*1024)",
+            "update-client.storage-locations"  : 1,
+            "update-client.storage-page"       : 4
         }
     }
 }
