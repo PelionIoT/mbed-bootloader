@@ -177,6 +177,34 @@
             "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+64*1024)",
             "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+65*1024)",
             "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+        },
+        "NRF52840_DK": {
+            "flash-start-address"              : "0x0",
+            "flash-size"                       : "(1024*1024)",
+            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+1024*1016)",
+            "nvstore.area_1_size"              : "(4*1024)",
+            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+1024*1020)",
+            "nvstore.area_2_size"              : "(4*1024)",
+            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+236*1024)",
+            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+237*1024)",
+            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE",
+            "target.OUTPUT_EXT"                : "hex",
+            "update-client.storage-address"    : "(1024*1024*1)",
+            "update-client.storage-size"       : "(1024*1024*1)",
+            "update-client.storage-locations"  : 1,
+            "update-client.storage-page"       : 1,
+            "target.features_remove": [
+              "CRYPTOCELL310"
+            ],
+            "target.macros_remove": [
+              "MBEDTLS_CONFIG_HW_SUPPORT"
+            ],
+            "target.macros_add": [
+              "PAL_USE_INTERNAL_FLASH=1",
+              "PAL_USE_HW_ROT=0",
+              "PAL_USE_HW_RTC=0",
+              "PAL_INT_FLASH_NUM_SECTIONS=2"
+            ]
         }
     }
 }
