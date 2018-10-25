@@ -49,7 +49,7 @@ You may choose to use NVSTORE to store the device RoT. During first boot mbed cl
 1. "nvstore.area_1_address", "nvstore.area_1_size", "nvstore.area_2_address", "nvstore.area_2_size". The addresses **Must align to flash erase boundary**. The sizes must be full sector sized and at least 1k.
 1. NVSTORE and SOTP are binary compatible hence the bootloader works with any software that uses SOTP as long as the offsets are set the same.
 
-Alternatively you can choose to use a custom device specific RoT by implementing the function `mbed_cloud_client_get_rot_128bit`. An example can be found [here](https://github.com/ARMmbed/mbed-bootloader-internal/blob/master/source/example_insecure_rot.c#L40).
+Alternatively you can choose to use a custom device specific RoT by implementing the function `mbed_cloud_client_get_rot_128bit`. An example can be found [here](https://github.com/ARMmbed/mbed-bootloader/blob/master/source/example_insecure_rot.c#L40).
 
 ### MISC
 
