@@ -205,6 +205,69 @@
               "PAL_USE_HW_RTC=0",
               "PAL_INT_FLASH_NUM_SECTIONS=2"
             ]
+        },
+        "NUMAKER_PFM_NUC472": {
+            "flash-start-address"               : "0x0",
+            "flash-size"                        : "(512*1024)",
+            "nvstore.area_1_address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS+0x11000)",
+            "nvstore.area_1_size"               : "0x1000",
+            "nvstore.area_2_address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS+0x12000)",
+            "nvstore.area_2_size"               : "0x1000",
+            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS+0x13000)",
+            "application-start-address"         : "(MBED_CONF_APP_FLASH_START_ADDRESS+0x14000)",
+            "max-application-size"              : "DEFAULT_MAX_APPLICATION_SIZE",
+
+            "update-client.storage-address"     : "(1024*1024*480)",
+            "update-client.storage-size"        : "(1024*1024*2)",
+
+            "target.macros_add": [
+                "PAL_INT_FLASH_NUM_SECTIONS=2",
+                "PAL_USE_INTERNAL_FLASH=1",
+                "PAL_USE_HW_ROT=0",
+                "PAL_USE_HW_RTC=1"
+            ]
+        },
+        "NUMAKER_PFM_M487": {
+            "flash-start-address"               : "0x0",
+            "flash-size"                        : "(512*1024)",
+            "nvstore.area_1_address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS+0x11000)",
+            "nvstore.area_1_size"               : "0x1000",
+            "nvstore.area_2_address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS+0x12000)",
+            "nvstore.area_2_size"               : "0x1000",
+            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS+0x13000)",
+            "application-start-address"         : "(MBED_CONF_APP_FLASH_START_ADDRESS+0x14000)",
+            "max-application-size"              : "DEFAULT_MAX_APPLICATION_SIZE",
+
+            "update-client.storage-address"     : "(1024*1024*480)",
+            "update-client.storage-size"        : "(1024*1024*2)",
+
+            "target.macros_add": [
+                "PAL_INT_FLASH_NUM_SECTIONS=2",
+                "PAL_USE_INTERNAL_FLASH=1",
+                "PAL_USE_HW_ROT=0",
+                "PAL_USE_HW_RTC=1"
+            ]
+        },
+        "NUMAKER_IOT_M487": {
+            "flash-start-address"               : "0x0",
+            "flash-size"                        : "(512*1024)",
+            "nvstore.area_1_address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS+0x11000)",
+            "nvstore.area_1_size"               : "0x1000",
+            "nvstore.area_2_address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS+0x12000)",
+            "nvstore.area_2_size"               : "0x1000",
+            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS+0x13000)",
+            "application-start-address"         : "(MBED_CONF_APP_FLASH_START_ADDRESS+0x14000)",
+            "max-application-size"              : "DEFAULT_MAX_APPLICATION_SIZE",
+
+            "update-client.storage-address"     : "(1024*1024*480)",
+            "update-client.storage-size"        : "(1024*1024*2)",
+
+            "target.macros_add": [
+                "PAL_INT_FLASH_NUM_SECTIONS=2",
+                "PAL_USE_INTERNAL_FLASH=1",
+                "PAL_USE_HW_ROT=0",
+                "PAL_USE_HW_RTC=1"
+            ]
         }
     }
 }

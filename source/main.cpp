@@ -63,6 +63,12 @@ extern ARM_UC_PAAL_UPDATE MBED_CLOUD_CLIENT_UPDATE_STORAGE;
 #endif
 
 #if defined(ARM_UC_USE_PAL_BLOCKDEVICE) && (ARM_UC_USE_PAL_BLOCKDEVICE==1)
+#if defined(TARGET_NUVOTON)
+/* initialise sd card blockdevice */
+#include "NuSDBlockDevice.h"
+
+NuSDBlockDevice sd;
+#else
 #include "SDBlockDevice.h"
 
 /* initialise sd card blockdevice */
@@ -73,6 +79,7 @@ SDBlockDevice sd(MBED_CONF_APP_SPI_MOSI, MBED_CONF_APP_SPI_MISO,
 #else
 SDBlockDevice sd(MBED_CONF_SD_SPI_MOSI, MBED_CONF_SD_SPI_MISO,
                  MBED_CONF_SD_SPI_CLK,  MBED_CONF_SD_SPI_CS);
+#endif
 #endif
 
 BlockDevice *arm_uc_blockdevice = &sd;
