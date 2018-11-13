@@ -32,8 +32,8 @@ If `application-jump-address` is not set, the `application-start-address` will b
 
 ### Firmware Candidate Storage
 
-1. `MBED_CLOUD_CLIENT_UPDATE_STORAGE`, This need to be set in the "macros" section of `mbed_app.json`. Choices are ARM_UCP_FLASHIAP_BLOCKDEVICE and ARM_UCP_FLASHIAP. This determines whether the firmware is stored on a blockdevice or internal flash. If blockdevice is used `ARM_UC_USE_PAL_BLOCKDEVICE=1` must also be set. 
-1. `update-client.storage-address`, The address in sd block device or internal flash where the firmware candidates are stored. **Must align to flash erase boundary**
+1. `MBED_CLOUD_CLIENT_UPDATE_STORAGE`, This need to be set in the "macros" section of `mbed_app.json`. Choices are ARM_UCP_FLASHIAP_BLOCKDEVICE and ARM_UCP_FLASHIAP. This determines whether the firmware is stored on a blockdevice or internal flash. If blockdevice is used `ARM_UC_USE_PAL_BLOCKDEVICE=1` must also be set. If SPI Flash is used for update client storage, please define the macro MBED_CONF_UPDATE_CLIENT_STORAGE_SPIF. If SD card is used for update client storage, please define thhe macro MBED_CONF_UPDATE_CLIENT_STORAGE_SD. If both of the macros are not defined, the bootloader will choose SD card by default.
+1. `update-client.storage-address`, The address in SD block device, SPI flash or internal flash where the firmware candidates are stored. Please note that if the storage is SPI flash, the storage address indexing starts from 0x0. For example, if you would like to let Update Client access the SPI flash starting from its 2MB position, please specify "(1024*1024*2)". **Must align to flash erase boundary**
 1. `update-client.storage-size`, total size on the block device or internal flash reserved for firmware storage. It will be rounded up to align with flash erase sector size automatically.
 1. `update-client.storage-locations`, The number of slots in the firmware storage.
 1. `update-client.storage-page`, The write page size of the underlying storage.

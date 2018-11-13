@@ -41,13 +41,13 @@
     },
     "target_overrides": {
         "*": {
-            "target.features_remove"           : ["LWIP", "STORAGE"],
-            "platform.stdio-baud-rate"         : 115200,
-            "platform.stdio-flush-at-exit"     : false,
-            "update-client.storage-address"    : "(1024*1024*64)",
-            "update-client.storage-size"       : "(1024*1024*2)",
-            "update-client.storage-locations"  : 1,
-            "update-client.firmware-header-version": "2"
+            "target.features_remove": ["LWIP","STORAGE"],
+            "platform.stdio-baud-rate"    : 115200,
+            "platform.stdio-flush-at-exit": false,
+            "update-client.storage-address"  : "(1024*1024*64)",
+            "update-client.storage-size"     : "(1024*1024*2)",
+            "update-client.firmware-header-version": "2",
+            "update-client.storage-locations"   : 1
         },
         "K64F": {
             "flash-start-address"              : "0x0",
@@ -168,8 +168,6 @@
             "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+64*1024)",
             "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+65*1024)",
             "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE",
-            "update-client.storage-address"    : "(1024*1024*2)",
-            "update-client.storage-size"       : "(1024*1024*4)",
             "spif-driver.SPI_MOSI": "PE_14",
             "spif-driver.SPI_MISO": "PE_13",
             "spif-driver.SPI_CLK":  "PE_12",
