@@ -41,13 +41,13 @@
     },
     "target_overrides": {
         "*": {
-            "target.features_remove": ["LWIP","STORAGE"],
-            "platform.stdio-baud-rate"    : 115200,
-            "platform.stdio-flush-at-exit": false,
-            "update-client.storage-address"  : "(1024*1024*64)",
-            "update-client.storage-size"     : "(1024*1024*2)",
-            "update-client.firmware-header-version": "2",
-            "update-client.storage-locations"   : 1
+            "target.features_remove"           : ["LWIP", "STORAGE"],
+            "platform.stdio-baud-rate"         : 115200,
+            "platform.stdio-flush-at-exit"     : false,
+            "update-client.storage-address"    : "(1024*1024*64)",
+            "update-client.storage-size"       : "(1024*1024*2)",
+            "update-client.storage-locations"  : 1,
+            "update-client.firmware-header-version": "2"
         },
         "K64F": {
             "flash-start-address"              : "0x0",
