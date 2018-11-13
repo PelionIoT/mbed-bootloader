@@ -63,16 +63,31 @@ extern ARM_UC_PAAL_UPDATE MBED_CLOUD_CLIENT_UPDATE_STORAGE;
 #endif
 
 #if defined(ARM_UC_USE_PAL_BLOCKDEVICE) && (ARM_UC_USE_PAL_BLOCKDEVICE==1)
+
+#if defined(MBED_CONF_UPDATE_CLIENT_STORAGE_SD) || (!defined(MBED_CONF_UPDATE_CLIENT_STORAGE_SPIF) && !defined(MBED_CONF_UPDATE_CLIENT_STORAGE_SD))
 #include "SDBlockDevice.h"
+#elif defined(MBED_CONF_UPDATE_CLIENT_STORAGE_SPIF)
+#include "SPIFBlockDevice.h"
+#endif
 
 /* initialise sd card blockdevice */
-#if defined(MBED_CONF_APP_SPI_MOSI) && defined(MBED_CONF_APP_SPI_MISO) && \
-    defined(MBED_CONF_APP_SPI_CLK)  && defined(MBED_CONF_APP_SPI_CS)
-SDBlockDevice sd(MBED_CONF_APP_SPI_MOSI, MBED_CONF_APP_SPI_MISO,
-                 MBED_CONF_APP_SPI_CLK,  MBED_CONF_APP_SPI_CS);
-#else
-SDBlockDevice sd(MBED_CONF_SD_SPI_MOSI, MBED_CONF_SD_SPI_MISO,
-                 MBED_CONF_SD_SPI_CLK,  MBED_CONF_SD_SPI_CS);
+#if defined(MBED_CONF_UPDATE_CLIENT_STORAGE_SD) || (!defined(MBED_CONF_UPDATE_CLIENT_STORAGE_SPIF) && !defined(MBED_CONF_UPDATE_CLIENT_STORAGE_SD))
+
+  #if defined(MBED_CONF_APP_SPI_MOSI) && defined(MBED_CONF_APP_SPI_MISO) && \
+      defined(MBED_CONF_APP_SPI_CLK)  && defined(MBED_CONF_APP_SPI_CS)
+  SPIFBlockDevice sd(MBED_CONF_APP_SPI_MOSI, MBED_CONF_APP_SPI_MISO,
+                   MBED_CONF_APP_SPI_CLK,  MBED_CONF_APP_SPI_CS);
+  
+  #else
+  SDBlockDevice sd(MBED_CONF_SD_SPI_MOSI, MBED_CONF_SD_SPI_MISO,
+                   MBED_CONF_SD_SPI_CLK,  MBED_CONF_SD_SPI_CS);
+  #endif
+
+#elif defined(MBED_CONF_UPDATE_CLIENT_STORAGE_SPIF)
+
+  SPIFBlockDevice sd(MBED_CONF_SPIF_DRIVER_SPI_MOSI, MBED_CONF_SPIF_DRIVER_SPI_MISO,
+                   MBED_CONF_SPIF_DRIVER_SPI_CLK,  MBED_CONF_SPIF_DRIVER_SPI_CS);  
+
 #endif
 
 BlockDevice *arm_uc_blockdevice = &sd;

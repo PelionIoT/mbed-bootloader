@@ -21,7 +21,6 @@ mbed-os/features/filesystem/littlefs/*
 mbed-os/features/filesystem/fat/*
 mbed-os/features/device_key/*
 mbed-os/components/wifi/*
-mbed-os/components/storage/*
 mbed-os/features/frameworks/mbed-client-cli/*
 mbed-os/features/lwipstack/*
 mbed-os/features/nfc/*
@@ -33,8 +32,6 @@ mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F439xI/TARGET_MODULE_UBLOX
 mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F439xI/TARGET_MODULE_UBLOX_ODIN_W2/sdk/ublox-odin-w2-drivers/OdinWiFiInterface.cpp
 mbed-os/features/frameworks/mbed-client-randlib/*
 mbed-os/features/frameworks/mbed-coap/*
-mbed-os/features/frameworks/mbed-trace/*
-mbed-os/features/frameworks/nanostack-libservice/*
 mbed-cloud-client/update-client-hub/source/*
 mbed-cloud-client/update-client-hub/modules/atomic-queue/*
 mbed-cloud-client/update-client-hub/modules/control-center/*
