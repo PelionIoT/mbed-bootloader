@@ -37,7 +37,7 @@ void copyAppToSDCard(uint32_t firmware_size)
 
     tr_info("calculate firmware SHA256\r\n");
     const uint8_t *appStart =
-        (const uint8_t *)(MBED_CONF_APP_APPLICATION_START_ADDRESS);
+        (const uint8_t *)(MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS);
     mbedtls_sha256(appStart, firmware_size, details.hash, 0);
 
     details.version = UINT32_MAX - 1;

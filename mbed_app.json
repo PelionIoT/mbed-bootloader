@@ -1,210 +1,116 @@
 {
     "macros": [
-        "MBEDTLS_USER_CONFIG_FILE=\"bootloader_mbedtls_user_config.h\"",
-        "MAX_COPY_RETRIES=1",
-        "SHOW_PROGRESS_BAR=1",
-        "MAX_BOOT_RETRIES=3",
-        "ARM_UC_USE_PAL_CRYPTO=0",
-        "ARM_BOOTLOADER_USE_NVSTORE_ROT=1",
         "ARM_UC_USE_PAL_BLOCKDEVICE=1",
-        "ARM_UC_PAAL_TRACE_ENABLE=0",
-        "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP_BLOCKDEVICE",
-        "DEFAULT_MAX_APPLICATION_SIZE=(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - MBED_CONF_APP_APPLICATION_START_ADDRESS)",
-        "DISABLE_ERROR_DESCRIPTION=1",
-        "ARM_UC_PROFILE_MBED_CLOUD_CLIENT=1",
-        "ARM_UC_FEATURE_CRYPTO_PAL=0",
-        "ARM_UC_FEATURE_CRYPTO_MBEDTLS=1",
-        "Mutex=PlatformMutex"
+        "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP_BLOCKDEVICE"
     ],
-    "config": {
-        "application-start-address": {
-            "help": "Address to the beginning of the active application firmware in flash",
-            "value": null
-        },
-        "application-jump-address": {
-            "help": "Jump address for running the active application firmware",
-            "value": null
-        },
-        "max-application-size": {
-            "help": "Maximum size of the active application",
-            "value": null
-        },
-        "flash-start-address": {
-            "help": "Start address of internal flash. Only used in this config to help the definition of other macros.",
-            "value": null
-        },
-        "flash-size": {
-            "help": "Total size of internal flash. Only used in this config to help the definition of other macros.",
-            "value": null
-        }
-    },
     "target_overrides": {
         "*": {
-            "target.features_remove": ["LWIP", "STORAGE"],
+            "platform.use-mpu"            : false,
             "platform.stdio-baud-rate"    : 115200,
             "platform.stdio-flush-at-exit": false,
             "update-client.storage-address"  : "(1024*1024*64)",
             "update-client.storage-size"     : "(1024*1024*2)",
             "update-client.storage-locations": 1,
-            "update-client.firmware-header-version": "2"
+            "update-client.firmware-header-version": "2",
+            "target.components_add": ["SD"],
+            "sd.CRC_ENABLED": 0,
+            "storage.storage_type": "FILESYSTEM"
         },
         "K64F": {
-            "flash-start-address"              : "0x0",
-            "flash-size"                       : "(1024*1024)",
-            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
-            "nvstore.area_1_size"              : "(4*1024)",
-            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+36*1024)",
-            "nvstore.area_2_size"              : "(4*1024)",
-            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+40*1024)",
-            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+41*1024)",
-            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+            "storage_filesystem.internal_base_address" : "(FLASH_START_ADDRESS+32*1024)",
+            "storage_filesystem.rbp_internal_size"     : "(2*4*1024)",
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+40*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+41*1024)"
         },
         "K66F": {
-            "flash-start-address"              : "0x0",
-            "flash-size"                       : "(2048*1024)",
-            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
-            "nvstore.area_1_size"              : "(4*1024)",
-            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+36*1024)",
-            "nvstore.area_2_size"              : "(4*1024)",
-            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+40*1024)",
-            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+41*1024)",
-            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+            "storage_filesystem.internal_base_address" : "(FLASH_START_ADDRESS+32*1024)",
+            "storage_filesystem.rbp_internal_size"     : "(2*4*1024)",
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+40*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+41*1024)"
         },
         "KW24D": {
-            "flash-start-address"              : "0x0",
-            "flash-size"                       : "(512*1024)",
-            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
-            "nvstore.area_1_size"              : "(2*1024)",
-            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+34*1024)",
-            "nvstore.area_2_size"              : "(2*1024)",
-            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+36*1024)",
-            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+37*1024)",
-            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+            "storage_filesystem.internal_base_address" : "(FLASH_START_ADDRESS+32*1024)",
+            "storage_filesystem.rbp_internal_size"     : "(2*2*1024)",
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+36*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+37*1024)",
+            "sd.SPI_CS"                                : "PTC4",
+            "sd.SPI_MOSI"                              : "PTC6",
+            "sd.SPI_MISO"                              : "PTC7",
+            "sd.SPI_CLK"                               : "PTC5"
         },
         "NUCLEO_L476RG": {
-            "flash-start-address"              : "0x08000000",
-            "flash-size"                       : "(1024*1024)",
-            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
-            "nvstore.area_1_size"              : "(2*1024)",
-            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+34*1024)",
-            "nvstore.area_2_size"              : "(2*1024)",
-            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+36*1024)",
-            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+38*1024)",
-            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+            "storage_filesystem.internal_base_address" : "(FLASH_START_ADDRESS+32*1024)",
+            "storage_filesystem.rbp_internal_size"     : "(2*2*1024)",
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+36*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+38*1024)"
         },
         "DISCO_L476VG": {
-            "flash-start-address"              : "0x08000000",
-            "flash-size"                       : "(1024*1024)",
-            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
-            "nvstore.area_1_size"              : "(2*1024)",
-            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+34*1024)",
-            "nvstore.area_2_size"              : "(2*1024)",
-            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+36*1024)",
-            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+38*1024)",
-            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+            "storage_filesystem.internal_base_address" : "(FLASH_START_ADDRESS+32*1024)",
+            "storage_filesystem.rbp_internal_size"     : "(2*2*1024)",
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+36*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+38*1024)"
         },
         "DISCO_L475VG_IOT01A": {
-            "flash-start-address"              : "0x08000000",
-            "flash-size"                       : "(1024*1024)",
-            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
-            "nvstore.area_1_size"              : "(2*1024)",
-            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+34*1024)",
-            "nvstore.area_2_size"              : "(2*1024)",
-            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+36*1024)",
-            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+38*1024)",
-            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+            "storage_filesystem.internal_base_address" : "(FLASH_START_ADDRESS+32*1024)",
+            "storage_filesystem.rbp_internal_size"     : "(2*2*1024)",
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+36*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+38*1024)"
         },
         "NUCLEO_F411RE": {
-            "flash-start-address"              : "0x08000000",
-            "flash-size"                       : "(512*1024)",
-            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
-            "nvstore.area_1_size"              : "(16*1024)",
-            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+48*1024)",
-            "nvstore.area_2_size"              : "(16*1024)",
-            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+64*1024)",
-            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+65*1024)",
-            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE",
-            "sd.SPI_CS"                        : "PB_9",
-            "sd.SPI_MOSI"                      : "PC_3",
-            "sd.SPI_MISO"                      : "PC_2",
-            "sd.SPI_CLK"                       : "PC_7"
+            "storage_filesystem.internal_base_address" : "(FLASH_START_ADDRESS+32*1024)",
+            "storage_filesystem.rbp_internal_size"     : "(2*16*1024)",
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+64*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+65*1024)",
+            "sd.SPI_CS"                                : "PB_9",
+            "sd.SPI_MOSI"                              : "PC_3",
+            "sd.SPI_MISO"                              : "PC_2",
+            "sd.SPI_CLK"                               : "PC_7"
         },
         "NUCLEO_F429ZI": {
-            "flash-start-address"              : "0x08000000",
-            "flash-size"                       : "(2048*1024)",
-            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
-            "nvstore.area_1_size"              : "(16*1024)",
-            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+48*1024)",
-            "nvstore.area_2_size"              : "(16*1024)",
-            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+64*1024)",
-            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+65*1024)",
-            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+            "storage_filesystem.internal_base_address" : "(FLASH_START_ADDRESS+32*1024)",
+            "storage_filesystem.rbp_internal_size"     : "(2*16*1024)",
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+64*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+65*1024)"
         },
         "NUCLEO_F207ZG": {
-            "flash-start-address"              : "0x08000000",
-            "flash-size"                       : "(1024*1024)",
-            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
-            "nvstore.area_1_size"              : "(16*1024)",
-            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+48*1024)",
-            "nvstore.area_2_size"              : "(16*1024)",
-            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+64*1024)",
-            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+65*1024)",
-            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE",
-            "sd.SPI_MOSI": "PC_12",
-            "sd.SPI_MISO": "PC_11",
-            "sd.SPI_CLK":  "PC_10",
-            "sd.SPI_CS":   "PA_15"
+            "storage_filesystem.internal_base_address" : "(FLASH_START_ADDRESS+32*1024)",
+            "storage_filesystem.rbp_internal_size"     : "(2*16*1024)",
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+64*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+65*1024)",
+            "sd.SPI_MOSI"                              : "PC_12",
+            "sd.SPI_MISO"                              : "PC_11",
+            "sd.SPI_CLK"                               : "PC_10",
+            "sd.SPI_CS"                                : "PA_15"
         },
         "UBLOX_EVK_ODIN_W2": {
             "target.device_has_remove": ["EMAC"],
-            "flash-start-address"              : "0x08000000",
-            "flash-size"                       : "(2048*1024)",
-            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
-            "nvstore.area_1_size"              : "(16*1024)",
-            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+48*1024)",
-            "nvstore.area_2_size"              : "(16*1024)",
-            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+64*1024)",
-            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+65*1024)",
-            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+            "storage_filesystem.internal_base_address" : "(FLASH_START_ADDRESS+32*1024)",
+            "storage_filesystem.rbp_internal_size"     : "(2*16*1024)",
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+64*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+65*1024)"
         },
         "UBLOX_C030_U201": {
-            "flash-start-address"              : "0x08000000",
-            "flash-size"                       : "(1024*1024)",
-            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+32*1024)",
-            "nvstore.area_1_size"              : "(16*1024)",
-            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+48*1024)",
-            "nvstore.area_2_size"              : "(16*1024)",
-            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+64*1024)",
-            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+65*1024)",
-            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+            "storage_filesystem.internal_base_address" : "(FLASH_START_ADDRESS+32*1024)",
+            "storage_filesystem.rbp_internal_size"     : "(2*16*1024)",
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+64*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+65*1024)"
         },
         "NRF52840_DK": {
-            "flash-start-address"              : "0x0",
-            "flash-size"                       : "(1024*1024)",
-            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+1024*1016)",
-            "nvstore.area_1_size"              : "(4*1024)",
-            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS+1024*1020)",
-            "nvstore.area_2_size"              : "(4*1024)",
-            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+236*1024)",
-            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+237*1024)",
-            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE",
-            "target.OUTPUT_EXT"                : "hex",
-            "update-client.storage-address"    : "(1024*1024*1)",
-            "update-client.storage-size"       : "(1024*1024*1)",
-            "update-client.storage-locations"  : 1,
-            "update-client.storage-page"       : 1,
-            "target.features_remove": [
-              "CRYPTOCELL310"
-            ],
-            "target.macros_remove": [
-              "MBEDTLS_CONFIG_HW_SUPPORT"
-            ],
-            "target.macros_add": [
-              "PAL_USE_INTERNAL_FLASH=1",
-              "PAL_USE_HW_ROT=0",
-              "PAL_USE_HW_RTC=0",
-              "PAL_INT_FLASH_NUM_SECTIONS=2"
-            ]
+            "storage_filesystem.internal_base_address" : "(FLASH_START_ADDRESS+1024*1016)",
+            "storage_filesystem.rbp_internal_size"     : "(2*4*1024)",
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+236*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+237*1024)",
+            "target.OUTPUT_EXT"                        : "hex",
+            "update-client.storage-address"            : "(1024*1024*1)",
+            "update-client.storage-size"               : "(1024*1024*1)",
+            "update-client.storage-locations"          : 1,
+            "update-client.storage-page"               : 1,
+            "sd.SPI_CS"                                : "A0",
+            "sd.SPI_MOSI"                              : "A1",
+            "sd.SPI_MISO"                              : "A2",
+            "sd.SPI_CLK"                               : "A3",
+            "target.features_remove": ["CRYPTOCELL310"],
+            "target.macros_remove": ["MBEDTLS_CONFIG_HW_SUPPORT"]
         }
     }
 }

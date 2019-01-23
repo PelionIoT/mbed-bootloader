@@ -319,7 +319,7 @@ bool upgradeApplicationFromStorage(void)
                     tr_info("Version: %" PRIu64, imageDetails.version);
 
                     /* check firmware size fits */
-                    if (imageDetails.size <= MBED_CONF_APP_MAX_APPLICATION_SIZE) {
+                    if (imageDetails.size <= MBED_CONF_MBED_BOOTLOADER_MAX_APPLICATION_SIZE) {
                         /* Update best candidate information */
                         bestStoredFirmwareIndex = index;
                         bestStoredFirmwareImageDetails.version = imageDetails.version;
@@ -335,7 +335,7 @@ bool upgradeApplicationFromStorage(void)
                         tr_error("Slot %" PRIu32 " firmware size too large %"
                                  PRIu32 " > %" PRIu32, index,
                                  (uint32_t) imageDetails.size,
-                                 (uint32_t) MBED_CONF_APP_MAX_APPLICATION_SIZE);
+                                 (uint32_t) MBED_CONF_MBED_BOOTLOADER_MAX_APPLICATION_SIZE);
                     }
                 } else {
                     /* Integrity check failed */

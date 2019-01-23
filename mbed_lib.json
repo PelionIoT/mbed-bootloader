@@ -1,0 +1,113 @@
+{
+    "name": "mbed-bootloader",
+    "config": {
+        "application-start-address": {
+            "help": "Address to the beginning of the active application firmware in flash",
+            "required": true
+        },
+        "application-jump-address": {
+            "help": "Jump address for running the active application firmware (if different from application-start-address)"
+        },
+        "max-application-size": {
+            "help": "Maximum size of the active application",
+            "value": "DEFAULT_MAX_APPLICATION_SIZE"
+        },
+        "flash-start-address": {
+            "help": "Start address of internal flash. Only used in this config to help the definition of other macros.",
+            "value": "0x0",
+            "macro_name": "FLASH_START_ADDRESS"
+        },
+        "flash-size": {
+            "help": "Total size of internal flash. Only used in this config to help the definition of other macros.",
+            "value": null,
+            "required": true,
+            "macro_name": "FLASH_SIZE"
+        },
+        "max-copy-retries": {
+            "help": "number of retries for copying candidate image onto the active image area",
+            "value": 1,
+            "macro_name": "MAX_COPY_RETRIES"
+        },
+        "max-boot-retries": {
+            "help": "number of retries for booting into the active image",
+            "value": 3,
+            "macro_name": "MAX_BOOT_RETRIES"
+        },
+        "show-progress-bar": {
+            "help": "show a progress bar during various stages of bootloader operation",
+            "value": 1,
+            "macro_name": "SHOW_PROGRESS_BAR"
+        },
+        "use-kvstore-rot": {
+            "help": "use nvstore implementation of the ROT to authenticate firmware headers",
+            "value": 1,
+            "macro_name": "ARM_BOOTLOADER_USE_KVSTORE_ROT"
+        }
+    },
+    "macros": [
+        "MBED_FAULT_HANDLER_DISABLED",
+        "MBEDTLS_USER_CONFIG_FILE=\"bootloader_mbedtls_user_config.h\"",
+        "DEFAULT_MAX_APPLICATION_SIZE=(FLASH_START_ADDRESS + FLASH_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS)",
+        "ARM_UC_PROFILE_MBED_CLOUD_CLIENT=1",
+        "ARM_UC_FEATURE_CRYPTO_PAL=0",
+        "ARM_UC_FEATURE_CRYPTO_MBEDTLS=1",
+        "Mutex=PlatformMutex",
+        "ARM_UC_PAAL_TRACE_ENABLE=0"
+    ],
+    "target_overrides": {
+        "*": {
+            "target.features_remove": ["LWIP", "STORAGE"]
+        },
+        "K64F": {
+            "flash-size": "(1*1024*1024)"
+        },
+        "K66F": {
+            "flash-size": "(2*1024*1024)"
+        },
+        "KW24D": {
+            "flash-size": "(512*1024)"
+        },
+        "NUCLEO_L476RG": {
+            "flash-start-address": "0x08000000",
+            "flash-size": "(1*1024*1024)"
+        },
+        "DISCO_L476VG": {
+            "flash-start-address": "0x08000000",
+            "flash-size": "(1*1024*1024)"
+        },
+        "DISCO_L475VG_IOT01A": {
+            "flash-start-address": "0x08000000",
+            "flash-size": "(1*1024*1024)"
+        },
+        "NUCLEO_F411RE": {
+            "flash-start-address": "0x08000000",
+            "flash-size": "(512*1024)"
+        },
+        "NUCLEO_F429ZI": {
+            "flash-start-address": "0x08000000",
+            "flash-size": "(2*1024*1024)"
+        },
+        "NUCLEO_F207ZG": {
+            "flash-start-address": "0x08000000",
+            "flash-size": "(1*1024*1024)"
+        },
+        "UBLOX_EVK_ODIN_W2": {
+            "flash-start-address": "0x08000000",
+            "flash-size": "(2*1024*1024)"
+        },
+        "UBLOX_C030_U201": {
+            "flash-start-address": "0x08000000",
+            "flash-size": "(1*1024*1024)"
+        },
+        "NRF52840_DK": {
+            "flash-size": "(1*1024*1024)"
+        },
+        "NRF52_DK": {
+            "flash-size": "(512*1024)"
+        },
+        "NUCLEO_F303RE": {
+            "flash-start-address": "0x08000000",
+            "flash-size": "(512*1024)"
+        }
+    }
+}

@@ -1,0 +1,66 @@
+{
+    "macros": [
+        "ARM_UC_USE_PAL_BLOCKDEVICE=1",
+        "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP_BLOCKDEVICE"
+    ],
+    "target_overrides": {
+        "*": {
+            "platform.stdio-baud-rate"             : 115200,
+            "platform.stdio-flush-at-exit"         : false,
+            "update-client.firmware-header-version": "2",
+            "target.components_add"                : ["SD"],
+            "sd.CRC_ENABLED"                       : 0,
+            "mbed-bootloader.use-kvstore-rot"      : 0,
+            "update-client.storage-address"        : "(1024*1024*64)",
+            "update-client.storage-size"           : "(1024*1024*2)",
+            "update-client.storage-locations"      : 1
+        },
+        "NRF52_DK": {
+            "sd.SPI_CS"                                : "SPI_PSELSS0",
+            "sd.SPI_MOSI"                              : "SPI_PSELMOSI0",
+            "sd.SPI_MISO"                              : "SPI_PSELMISO0",
+            "sd.SPI_CLK"                               : "SPI_PSELSCK0",
+            "minimal-printf.console-output"            : "SWO",
+            "target.app_offset"                        : "0x74000",
+            "update-client.application-details"        : "(508*1024)",
+            "mbed-bootloader.application-start-address": "(152*1024)",
+            "mbed-bootloader.max-application-size"     : "((456-152)*1024)",
+            "update-client.storage-page"               : 512,
+            "target.extra_labels_remove"               : ["SOFTDEVICE_S132_FULL", "SOFTDEVICE_COMMON"],
+            "target.extra_labels_add"                  : ["SOFTDEVICE_S132_MBR"]
+        },
+        "K64F": {
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+40*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+41*1024)"
+        },
+        "K66F": {
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+40*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+41*1024)"
+        },
+        "KW24D": {
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+36*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+37*1024)"
+        },
+        "NUCLEO_L476RG": {
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+36*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+38*1024)"
+        },
+        "DISCO_L476VG": {
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+36*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+38*1024)"
+        },
+        "NUCLEO_F429ZI": {
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+64*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+65*1024)"
+        },
+        "UBLOX_EVK_ODIN_W2": {
+            "target.device_has_remove": ["EMAC"],
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+64*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+65*1024)"
+        },
+        "UBLOX_C030_U201": {
+            "update-client.application-details"        : "(FLASH_START_ADDRESS+64*1024)",
+            "mbed-bootloader.application-start-address": "(FLASH_START_ADDRESS+65*1024)"
+        }
+    }
+}
