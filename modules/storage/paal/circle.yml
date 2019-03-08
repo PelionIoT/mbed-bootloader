@@ -1,0 +1,18 @@
+dependencies:
+  pre:
+    - sudo apt-get update
+    - sudo apt-get install python-setuptools cmake build-essential ninja-build python-dev libffi-dev libssl-dev lcov gcc-4.8-multilib g++-4.8-multilib
+    - pip install yotta
+    - mkdir ~/.yotta/ && echo $yotta_config > ~/.yotta/config.json
+    - sudo ln -s /usr/include/asm-generic /usr/include/asm
+    - sudo chmod 777 -R /usr/local/lib/
+    - cd ../ && git clone https://github.com/ARMmbed/run_tests_linux.git --depth 1
+    - pip install -r ../run_tests_linux/requirements.txt
+    - mv TESTS test
+
+test:
+  override:
+    - yt target mcc-linux-x86
+    - yt install
+    - yt ls -a
+    - MCC_LINUX_X86_EXTRA_DEFS="-DTARGET_IS_PC_LINUX -DMBEDTLS_X509_CSR_WRITE_C=1 -DMBEDTLS_X509_CREATE_C=1 -DMBEDTLS_CIPHER_MODE_CTR=1 -DMBEDTLS_PEM_WRITE_C -DMBEDTLS_PLATFORM_TIME_ALT -DMBEDTLS_CMAC_C -DMBEDTLS_AES_ROM_TABLES=1 -DARM_UC_BUFFER_SIZE=10240 -DARM_UC_USE_PAL_CRYPTO=0 -DPAL_USE_FATFS_SD=1 -D__LINUX__" MCC_LINUX_X86_EXTRA_C_FLAGS="-m32" MCC_LINUX_X86_EXTRA_CXX_FLAGS="-m32 -std=gnu++11" MCC_LINUX_X86_EXTRA_LIBS="pthread;rt" yt test

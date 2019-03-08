@@ -5,8 +5,7 @@
 
 extern arm_uc_error_t ARM_UCP_FashIAP_BlockDevice_Initialize(ARM_UC_PAAL_UPDATE_SignalEvent_t callback);
 
-ARM_UC_PAAL_UPDATE ARM_UCP_FLASHIAP_BLOCKDEVICE_READ_ONLY =
-{
+ARM_UC_PAAL_UPDATE ARM_UCP_FLASHIAP_BLOCKDEVICE_READ_ONLY = {
     .Initialize                 = ARM_UCP_FashIAP_BlockDevice_Initialize,
     .GetCapabilities            = 0,
     .GetMaxID                   = 0,

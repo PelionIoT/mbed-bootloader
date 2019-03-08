@@ -16,7 +16,7 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------
 
-#if !defined(ARM_BOOTLOADER_USE_NVSTORE_ROT) || ARM_BOOTLOADER_USE_NVSTORE_ROT == 0
+#if !defined(ARM_BOOTLOADER_USE_KVSTORE_ROT) || ARM_BOOTLOADER_USE_KVSTORE_ROT == 0
 
 #include <inttypes.h>
 #include <stddef.h>
@@ -52,4 +52,4 @@ int8_t mbed_cloud_client_get_rot_128bit(uint8_t *key_buf, uint32_t length)
     return 0;
 }
 
-#endif // #if !defined(ARM_BOOTLOADER_USE_NVSTORE_ROT) || ARM_BOOTLOADER_USE_NVSTORE_ROT == 0
+#endif // #if !defined(ARM_BOOTLOADER_USE_KVSTORE_ROT) || ARM_BOOTLOADER_USE_KVSTORE_ROT == 0

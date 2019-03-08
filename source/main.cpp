@@ -53,6 +53,7 @@ const arm_uc_installer_details_t bootloader = {
    binary size if ARM_UC_USE_PAL_BLOCKDEVICE is set and not running tests */
 #if defined(ARM_UC_USE_PAL_BLOCKDEVICE) && (ARM_UC_USE_PAL_BLOCKDEVICE==1) && \
     (!defined(BOOTLOADER_POWER_CUT_TEST) || (BOOTLOADER_POWER_CUT_TEST != 1))
+#undef  MBED_CLOUD_CLIENT_UPDATE_STORAGE
 #define MBED_CLOUD_CLIENT_UPDATE_STORAGE ARM_UCP_FLASHIAP_BLOCKDEVICE_READ_ONLY
 #endif
 
@@ -62,29 +63,13 @@ extern ARM_UC_PAAL_UPDATE MBED_CLOUD_CLIENT_UPDATE_STORAGE;
 #error Update client storage must be defined in user configuration file
 #endif
 
-#if defined(ARM_UC_USE_PAL_BLOCKDEVICE) && (ARM_UC_USE_PAL_BLOCKDEVICE==1)
-#include "SDBlockDevice.h"
-
-/* initialise sd card blockdevice */
-#if defined(MBED_CONF_APP_SPI_MOSI) && defined(MBED_CONF_APP_SPI_MISO) && \
-    defined(MBED_CONF_APP_SPI_CLK)  && defined(MBED_CONF_APP_SPI_CS)
-SDBlockDevice sd(MBED_CONF_APP_SPI_MOSI, MBED_CONF_APP_SPI_MISO,
-                 MBED_CONF_APP_SPI_CLK,  MBED_CONF_APP_SPI_CS);
-#else
-SDBlockDevice sd(MBED_CONF_SD_SPI_MOSI, MBED_CONF_SD_SPI_MISO,
-                 MBED_CONF_SD_SPI_CLK,  MBED_CONF_SD_SPI_CS);
-#endif
-
-BlockDevice *arm_uc_blockdevice = &sd;
-#endif
-
-#ifndef MBED_CONF_APP_APPLICATION_START_ADDRESS
+#ifndef MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS
 #error Application start address must be defined
 #endif
 
 /* If jump address is not set then default to start address. */
 #ifndef MBED_CONF_APP_APPLICATION_JUMP_ADDRESS
-#define MBED_CONF_APP_APPLICATION_JUMP_ADDRESS MBED_CONF_APP_APPLICATION_START_ADDRESS
+#define MBED_CONF_APP_APPLICATION_JUMP_ADDRESS MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS
 #endif
 
 int main(void)
@@ -176,7 +161,7 @@ int main(void)
 #elif defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1)
         firmware_update_test_end();
 #endif
-        uint32_t app_start_addr = MBED_CONF_APP_APPLICATION_START_ADDRESS;
+        uint32_t app_start_addr = MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS;
         uint32_t app_stack_ptr = *((uint32_t *)(MBED_CONF_APP_APPLICATION_JUMP_ADDRESS + 0));
         uint32_t app_jump_addr = *((uint32_t *)(MBED_CONF_APP_APPLICATION_JUMP_ADDRESS + 4));
 

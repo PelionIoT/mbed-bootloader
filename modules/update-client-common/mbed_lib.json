@@ -1,0 +1,63 @@
+{
+    "name": "update-client",
+    "config": {
+        "application-details": {
+            "help": "Location in memory where the application information can be read.",
+            "value": "0"
+        },
+        "bootloader-details": {
+            "help": "Location in memory where the bootloader information can be read.",
+            "value": "0"
+        },
+        "storage-address": {
+            "help": "When using address based storage (FlashIAP, Block Device), this is the starting address.",
+            "value": "0"
+        },
+        "storage-size": {
+            "help": "Total storage allocated.",
+            "value": "0"
+        },
+        "storage-locations": {
+            "help": "Number of equally sized locations the storage space should be split into.",
+            "value": "1"
+        },
+        "storage-page": {
+            "help": "Smallest write unit on storage device. Used for compile time check of download/write buffers.",
+            "value": "512"
+        },
+        "firmware-header-version": {
+            "help": "Version of the firmware metadata header.",
+            "value": "0"
+        },
+        "http-resume-attempt-test-messages-enable": {
+            "help": "Print messages indicating HTTP-resume actions for QA/test purposes.",
+            "macro_name": "ARM_UC_HTTP_RESUME_TEST_MESSAGES_ENABLE",
+            "value": "0"
+        },
+        "http-resume-fragments-per-burst": {
+            "help": "Number of fragments to be requested per HTTP GET from server.",
+            "macro_name": "ARM_UC_MULTI_FRAGS_PER_HTTP_BURST",
+            "value": "64"
+        },
+        "http-resume-exponentiation-factor": {
+            "help": "Multiplier for consecutive resume-attempt delay periods.",
+            "macro_name": "ARM_UC_HTTP_RESUME_EXPONENTIATION_FACTOR",
+            "value": "2"
+        },
+        "http-resume-initial-delay-secs": {
+            "help": "Initial delay for HTTP-resume actions after which period resume goes active.",
+            "macro_name": "ARM_UC_HTTP_RESUME_INITIAL_DELAY_SECS",
+            "value": "5"
+        },
+        "http-resume-maximum-delay-secs": {
+            "help": "Maximum delay for HTTP-resume actions after which period resume goes active.",
+            "macro_name": "ARM_UC_HTTP_RESUME_MAXIMUM_DELAY_SECS",
+            "value": "(60*60)"
+        },
+        "http-resume-maximum-download-time-secs": {
+            "help": "Period for HTTP-resume actions after which resume gives up and terminates.",
+            "macro_name": "ARM_UC_HTTP_RESUME_MAXIMUM_DOWNLOAD_TIME_SECS",
+            "value": "(7*24*60*60)"
+        }
+    }
+}

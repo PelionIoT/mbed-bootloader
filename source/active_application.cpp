@@ -23,8 +23,7 @@
 #include "active_application.h"
 #include "bootloader_common.h"
 
-#include "update-client-common/arm_uc_metadata_header_v2.h"
-#include "update-client-common/arm_uc_utilities.h"
+#include "update-client-metadata-header/arm_uc_metadata_header_v2.h"
 #include "update-client-paal/arm_uc_paal_update.h"
 #include "mbedtls/sha256.h"
 #include "mbed.h"
@@ -107,7 +106,7 @@ int checkActiveApplication(arm_uc_firmware_details_t *details)
 
         /* calculate hash if header is valid and slot is not empty */
         if ((headerValid) && (details->size > 0)) {
-            uint32_t appStart = MBED_CONF_APP_APPLICATION_START_ADDRESS;
+            uint32_t appStart = MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS;
 
             tr_debug("header start: 0x%08" PRIX32,
                      (uint32_t) FIRMWARE_METADATA_HEADER_ADDRESS);
@@ -224,8 +223,8 @@ bool eraseActiveFirmware(uint32_t firmwareSize)
     int result = 0;
 
     if (((FIRMWARE_METADATA_HEADER_ADDRESS + fw_metadata_hdr_size) < \
-            (MBED_CONF_APP_APPLICATION_START_ADDRESS)) || \
-            (FIRMWARE_METADATA_HEADER_ADDRESS > MBED_CONF_APP_APPLICATION_START_ADDRESS)) {
+            (MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS)) || \
+            (FIRMWARE_METADATA_HEADER_ADDRESS > MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS)) {
         /* header separate from app */
         tr_debug("Erasing header separately from active application");
 
@@ -234,10 +233,10 @@ bool eraseActiveFirmware(uint32_t firmwareSize)
 
         /* setup erase of the application region */
         size_needed = firmwareSize;
-        erase_start_addr = MBED_CONF_APP_APPLICATION_START_ADDRESS;
+        erase_start_addr = MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS;
     } else { /* header contiguous with app */
         /* setup erase of the header + application region */
-        size_needed = (MBED_CONF_APP_APPLICATION_START_ADDRESS - FIRMWARE_METADATA_HEADER_ADDRESS) + firmwareSize;
+        size_needed = (MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS - FIRMWARE_METADATA_HEADER_ADDRESS) + firmwareSize;
         erase_start_addr = FIRMWARE_METADATA_HEADER_ADDRESS;
     }
 
@@ -245,17 +244,17 @@ bool eraseActiveFirmware(uint32_t firmwareSize)
         uint32_t erase_end_addr = erase_start_addr + \
                                   getSectorAlignedSize(erase_start_addr,
                                                        size_needed);
-        uint32_t max_end_addr = MBED_CONF_APP_MAX_APPLICATION_SIZE + \
-                                MBED_CONF_APP_APPLICATION_START_ADDRESS;
-        /* check that the erase will not exceed MBED_CONF_APP_MAX_APPLICATION_SIZE */
+        uint32_t max_end_addr = MBED_CONF_MBED_BOOTLOADER_MAX_APPLICATION_SIZE + \
+                                MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS;
+        /* check that the erase will not exceed MBED_CONF_MBED_BOOTLOADER_MAX_APPLICATION_SIZE */
         if (erase_end_addr <= max_end_addr) {
             result = eraseSectorBySector(erase_start_addr, size_needed);
         } else {
             result = -1;
             tr_error("Firmware size 0x%" PRIX32 " rounded up to the nearest sector boundary 0x%" \
                      PRIX32 " is larger than the maximum application size 0x%" PRIX32,
-                     firmwareSize, erase_end_addr - MBED_CONF_APP_APPLICATION_START_ADDRESS,
-                     MBED_CONF_APP_MAX_APPLICATION_SIZE);
+                     firmwareSize, erase_end_addr - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS,
+                     (uint32_t) MBED_CONF_MBED_BOOTLOADER_MAX_APPLICATION_SIZE);
         }
     }
 
@@ -284,7 +283,7 @@ bool writeActiveFirmwareHeader(arm_uc_firmware_details_t *details)
 
         /* coverity[no_escape] */
         MBED_BOOTLOADER_ASSERT((programSize <= fw_metadata_hdr_size),
-                               "Header program size %" PRIu32 " bigger than expected header %d\r\n",
+                               "Header program size %" PRIu32 " bigger than expected header %" PRIu32 "\r\n",
                                programSize, fw_metadata_hdr_size);
 
         /* pad buffer to 0xFF */
@@ -324,7 +323,7 @@ bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t *details)
         const uint32_t pageSize = flash.get_page_size();
 
         /* we require app_start_addr fall on a page size boundary */
-        uint32_t app_start_addr = MBED_CONF_APP_APPLICATION_START_ADDRESS;
+        uint32_t app_start_addr = MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS;
 
         /* coverity[no_escape] */
         MBED_BOOTLOADER_ASSERT((app_start_addr % pageSize) == 0,

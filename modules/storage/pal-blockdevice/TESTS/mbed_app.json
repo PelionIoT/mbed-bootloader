@@ -1,0 +1,13 @@
+{
+    "target_overrides": {
+        "macros": [
+            "ARM_UC_FEATURE_PAL_BLOCKDEVICE=1",
+            "ARM_UC_FEATURE_PAL_FLASHIAP=1",
+            "ARM_UC_PROFILE_MBED_CLOUD_CLIENT=1"
+        ],
+        "*": {
+            "mbed-trace.enable": 1,
+            "platform.stdio-baud-rate": 115200
+        }
+    }
+}
