@@ -86,62 +86,6 @@ static void arm_uc_pal_flashiap_signal_internal(uint32_t event)
 }
 
 /**
- * @brief Align address up/down to sector boundary
- *
- * @param addr The address that need to be rounded up
- * @param round_down if the value is 1, will align down to sector
-                     boundary otherwise align up.
- * @return Returns the address aligned to sector boundary
- */
-static uint32_t arm_uc_pal_flashiap_align_to_sector(uint32_t addr, int8_t round_down)
-{
-    uint32_t sector_start_addr = arm_uc_flashiap_get_flash_start();
-
-    /* check the address is pointing to internal flash */
-    if ((addr > sector_start_addr + arm_uc_flashiap_get_flash_size()) ||
-            (addr < sector_start_addr)) {
-        return ARM_UC_FLASH_INVALID_SIZE;
-    }
-
-    /* add sectors from start of flash until exeeced the required address
-       we cannot assume uniform sector size as in some mcu sectors have
-       drastically different sizes */
-    uint32_t sector_size = ARM_UC_FLASH_INVALID_SIZE;
-    while (sector_start_addr < addr) {
-        sector_size = arm_uc_flashiap_get_sector_size(sector_start_addr);
-        if (sector_size != ARM_UC_FLASH_INVALID_SIZE) {
-            sector_start_addr += sector_size;
-        } else {
-            return ARM_UC_FLASH_INVALID_SIZE;
-        }
-    }
-
-    /* if round down to nearest section, remove the last sector from addr */
-    if (round_down != 0 && sector_start_addr > addr) {
-        sector_start_addr -= sector_size;
-    }
-
-    return sector_start_addr;
-}
-
-/**
- * @brief Round size up to nearest page
- *
- * @param size The size that need to be rounded up
- * @return Returns the size rounded up to the nearest page
- */
-static uint32_t arm_uc_pal_flashiap_round_up_to_page_size(uint32_t size)
-{
-    uint32_t page_size = arm_uc_flashiap_get_page_size();
-
-    if (size != 0) {
-        size = ((size - 1) / page_size + 1) * page_size;
-    }
-
-    return size;
-}
-
-/**
  * @brief Get the physicl slot address and size given slot_id
  *
  * @param slot_id Storage location ID.
@@ -158,12 +102,12 @@ static arm_uc_error_t arm_uc_pal_flashiap_get_slot_addr_size(uint32_t slot_id,
     /* find the start address of the whole storage area. It needs to be aligned to
        sector boundary and we cannot go outside user defined storage area, hence
        rounding up to sector boundary */
-    uint32_t storage_start_addr = arm_uc_pal_flashiap_align_to_sector(
+    uint32_t storage_start_addr = arm_uc_flashiap_align_to_sector(
                                       MBED_CONF_UPDATE_CLIENT_STORAGE_ADDRESS, 0);
     /* find the end address of the whole storage area. It needs to be aligned to
        sector boundary and we cannot go outside user defined storage area, hence
        rounding down to sector boundary */
-    uint32_t storage_end_addr = arm_uc_pal_flashiap_align_to_sector(
+    uint32_t storage_end_addr = arm_uc_flashiap_align_to_sector(
                                     MBED_CONF_UPDATE_CLIENT_STORAGE_ADDRESS + \
                                     MBED_CONF_UPDATE_CLIENT_STORAGE_SIZE, 1);
     /* find the maximum size each slot can have given the start and end, without
@@ -172,12 +116,12 @@ static arm_uc_error_t arm_uc_pal_flashiap_get_slot_addr_size(uint32_t slot_id,
                              MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS;
     /* find the start address of slot. It needs to align to sector boundary. We
        choose here to round down at each slot boundary */
-    uint32_t slot_start_addr = arm_uc_pal_flashiap_align_to_sector(
+    uint32_t slot_start_addr = arm_uc_flashiap_align_to_sector(
                                    storage_start_addr + \
                                    slot_id * max_slot_size, 1);
     /* find the end address of the slot, rounding down to sector boundary same as
        the slot start address so that we make sure two slot don't overlap */
-    uint32_t slot_end_addr = arm_uc_pal_flashiap_align_to_sector(
+    uint32_t slot_end_addr = arm_uc_flashiap_align_to_sector(
                                  slot_start_addr + \
                                  max_slot_size, 1);
 
@@ -274,10 +218,10 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t slot_id,
         result = arm_uc_pal_flashiap_get_slot_addr_size(slot_id, &slot_addr, &slot_size);
 
         /* find the amount of space that need to be erased */
-        erase_size = arm_uc_pal_flashiap_align_to_sector(
+        erase_size = arm_uc_flashiap_align_to_sector(
                          slot_addr + \
-                         arm_uc_pal_flashiap_round_up_to_page_size(details->size) + \
-                         arm_uc_pal_flashiap_round_up_to_page_size(ARM_UC_PAL_HEADER_SIZE),
+                         arm_uc_flashiap_round_up_to_page_size(details->size) + \
+                         arm_uc_flashiap_round_up_to_page_size(ARM_UC_PAL_HEADER_SIZE),
                          0) - slot_addr;
 
         if ((result.error == ERR_NONE) && (erase_size > slot_size)) {
@@ -289,25 +233,12 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t slot_id,
 
     /* erase space for new firmware */
     if (result.error == ERR_NONE) {
-        uint32_t erase_addr = slot_addr;
-        while (erase_addr < slot_addr + erase_size) {
-            uint32_t sector_size = arm_uc_flashiap_get_sector_size(erase_addr);
-            UC_PAAL_TRACE("erase: addr %" PRIX32 " size %" PRIX32,
-                          erase_addr, sector_size);
-            if (sector_size != ARM_UC_FLASH_INVALID_SIZE) {
-                int32_t status = arm_uc_flashiap_erase(erase_addr, sector_size);
-                if (status == ARM_UC_FLASHIAP_SUCCESS) {
-                    erase_addr += sector_size;
-                } else {
-                    UC_PAAL_ERR_MSG("Flash erase failed with status %" PRIi32, status);
-                    result.code = ERR_INVALID_PARAMETER;
-                    break;
-                }
-            } else {
-                UC_PAAL_ERR_MSG("Get sector size for addr %" PRIX32 " failed", erase_addr);
-                result.code = ERR_INVALID_PARAMETER;
-                break;
-            }
+
+        int32_t status = arm_uc_flashiap_erase(slot_addr, erase_size);
+
+        if (status != ARM_UC_FLASHIAP_SUCCESS) {
+            UC_PAAL_ERR_MSG("Flash erase failed with status %" PRIi32, status);
+            result.code = ERR_INVALID_PARAMETER;
         }
     }
 
@@ -321,7 +252,7 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t slot_id,
 
     /* write header blob */
     if (result.error == ERR_NONE) {
-        uint32_t hdr_size = arm_uc_pal_flashiap_round_up_to_page_size(ARM_UC_PAL_HEADER_SIZE);
+        uint32_t hdr_size = arm_uc_flashiap_round_up_to_page_size(ARM_UC_PAL_HEADER_SIZE);
         UC_PAAL_TRACE("program: %" PRIX32 " %" PRIX32,
                       slot_addr, hdr_size);
 
@@ -379,15 +310,15 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Write(uint32_t slot_id,
 
         /* find physical address of the write */
         uint32_t page_size = arm_uc_flashiap_get_page_size();
-        uint32_t hdr_size = arm_uc_pal_flashiap_round_up_to_page_size(ARM_UC_PAL_HEADER_SIZE);
+        uint32_t hdr_size = arm_uc_flashiap_round_up_to_page_size(ARM_UC_PAL_HEADER_SIZE);
         uint32_t physical_address = slot_addr + hdr_size + offset;
         uint32_t write_size = buffer->size;
 
         /* if last chunk, pad out to page_size aligned size */
         if ((buffer->size % page_size != 0) &&
                 ((offset + buffer->size) >= arm_uc_pal_flashiap_firmware_size) &&
-                (arm_uc_pal_flashiap_round_up_to_page_size(buffer->size) <= buffer->size_max)) {
-            write_size = arm_uc_pal_flashiap_round_up_to_page_size(buffer->size);
+                (arm_uc_flashiap_round_up_to_page_size(buffer->size) <= buffer->size_max)) {
+            write_size = arm_uc_flashiap_round_up_to_page_size(buffer->size);
         }
 
         /* check page alignment of the program address and size */
@@ -466,7 +397,7 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Read(uint32_t slot_id,
 
         /* find physical address of the read */
         uint32_t read_size = buffer->size;
-        uint32_t hdr_size = arm_uc_pal_flashiap_round_up_to_page_size(ARM_UC_PAL_HEADER_SIZE);
+        uint32_t hdr_size = arm_uc_flashiap_round_up_to_page_size(ARM_UC_PAL_HEADER_SIZE);
         uint32_t physical_address = slot_addr + hdr_size + offset;
 
         UC_PAAL_TRACE("reading addr %" PRIX32 " size %" PRIX32,

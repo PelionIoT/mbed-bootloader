@@ -90,12 +90,43 @@ In order for the cloud client to recognise this struct and obtain the informatio
 User **may** set in `mbed_app.json`:
 1. `mbed-bootloader.max-copy-retries`, The number of retries after a failed copy attempt.
 1. `mbed-bootloader.max-boot-retries`, The number of retries after a failed forward to application.
+1. `mbed-bootloader.show-serial-output`, Set to 0 to disable all serial output. Useful for reducing size on headless devices.
 1. `mbed-bootloader.show-progress-bar`, Set to 1 to print a progress bar for various processes.
 1. `mbed-bootloader.max-application-size`, Maximum size of the active application. The default value is `FLASH_START_ADDRESS + FLASH_SIZE - APPLICATION_START_ADDRESS`. Bootloader uses this value to reject candidate image that are too large.
 
 ## Flash Layout
 
-### The flash layout for K64F with KVStore and firmware storage on internal flash
+### Default configuration using flash layout with KVStore and firmware storage on external storage
+
+```
+    +--------------------------+
+    |                          |
+    |                          |
+    |                          |
+    |        Active App        |
+    |                          |
+    |                          |
+    |                          |
+    +--------------------------+ <-+ mbed-bootloader.application-start-address
+    |Active App Metadata Header|
+    +--------------------------+ <-+ update-client.application-details
+    |                          |
+    |         KVSTORE          |
+    |                          |
+    +--------------------------+ <-+ storage_tdb_internal.internal_base_address
+    |                          |
+    |        Bootloader        |
+    |                          |
+    +--------------------------+ <-+ 0
+```
+
+### Notes on Flash Layout of non PSA tagets with external storage 
+
+- This is the default implementation at the default mbed_app.json
+- The default flash layout is tested with GCC_ARM compiler and tiny.json compiler profile only. If a different compiler is used, the bootloader binary size will be larger and the offsets needs to be adjusted.
+- The KVSTORE regions require even number of flash erase sectors.
+
+### The flash layout for non PSA targets with KVStore and firmware storage on internal flash
 
 ```
     +--------------------------+
@@ -127,12 +158,47 @@ User **may** set in `mbed_app.json`:
     +--------------------------+ <-+ 0
 ```
 
-### Notes on Flash Layout
+### Notes on Flash Layout of non PSA targets 
 
 - Internal Flash Only layout can be enabled by compiling the bootloader with the configuration file `--app-config configs/internal_flash_no_rot.json`. By default the firmware storage region and filesystem is on [external sd card](#external-storage).
 - The default flash layout is tested with GCC_ARM compiler and tiny.json compiler profile only. If a different compiler is used, the bootloader binary size will be larger and the offsets needs to be adjusted.
 - The KVSTORE regions require even number of flash erase sectors. If the firmware candidate is stored on internal flash, the bootloader does not access the KVStore. But it still needs to be there for the benefit of the Pelion Device Management Client.
 - Some micro-controller chips are designed with 2 banks of flash that can be read from and written to independently from each other. Hence it is a good idea to put your bootloader and active application on bank 1, your kvstore and firmware candidate storage on bank 2. This way when the application writes data to flash, it doesn't need to halt the processor execution to do it.
+
+
+### PSA configuration using flash layout with KVStore and firmware storage on external storage
+
+```
+    +--------------------------+
+    |                          |
+    |         KVSTORE          |
+    |                          |
+    +--------------------------+ <-+ storage_tdb_internal.internal_base_address
+    |                          |
+    |        Free space        |
+    |                          |
+    +--------------------------+
+    |                          |
+    |                          |
+    |                          |
+    |        Active App        |
+    |                          |
+    |                          |
+    |                          |
+    +--------------------------+ <-+ mbed-bootloader.application-start-address
+    |Active App Metadata Header|
+    +--------------------------+ <-+ update-client.application-details
+    |                          |
+    |        Bootloader        |
+    |                          |
+    +--------------------------+ <-+ 0
+```
+
+### Notes on Flash Layout of PSA targets
+
+- This is the PSA default implementation using the default mbed_app.json
+- The default flash layout is tested with GCC_ARM compiler and tiny.json compiler profile only. If a different compiler is used, the bootloader binary size will be larger and the offsets needs to be adjusted.
+- The KVSTORE regions require even number of flash erase sectors. For PSA targets the KVStore is located at the ends of the flash.
 
 ### Alignment
 

@@ -47,9 +47,9 @@ extern const char hexTable[16];
 
 void arm_ucp_event_handler(uint32_t event);
 
-void printSHA256(const uint8_t SHA[SIZEOF_SHA256]);
+void print_sha256_function(const uint8_t SHA[SIZEOF_SHA256]);
 
-void printProgress(uint32_t progress, uint32_t total);
+void print_progress_function(uint32_t progress, uint32_t total);
 
 #define MBED_BOOTLOADER_ASSERT(condition, ...) { \
     if (!(condition)) {                          \
@@ -59,6 +59,16 @@ void printProgress(uint32_t progress, uint32_t total);
     }                                            \
 }
 
+
+#if SHOW_SERIAL_OUTPUT
+#define printSHA256 print_sha256_function
+#define printProgress print_progress_function
+#else
+#define printSHA256
+#define printProgress
+#endif
+
+#if SHOW_SERIAL_OUTPUT
 /* if the global trace flag is not enabled, use printf directly */
 #if !defined(MBED_CONF_MBED_TRACE_ENABLE) || MBED_CONF_MBED_TRACE_ENABLE == 0
 
@@ -104,6 +114,39 @@ void printProgress(uint32_t progress, uint32_t total);
 #else
 #define tr_flush(x)          fflush(stdout)
 #endif
+
+#endif
+#else
+
+#ifdef tr_debug
+#undef tr_debug
+#endif
+#define tr_debug(...)
+
+#ifdef tr_info
+#undef tr_info
+#endif
+#define tr_info(...)
+
+#ifdef tr_warning
+#undef tr_warning
+#endif
+#define tr_warning(...)
+
+#ifdef tr_error
+#undef tr_error
+#endif
+#define tr_error(...)
+
+#ifdef tr_trace
+#undef tr_trace
+#endif
+#define tr_trace(...)
+
+#ifdef tr_flush
+#undef tr_flush
+#endif
+#define tr_flush(x)
 
 #endif
 

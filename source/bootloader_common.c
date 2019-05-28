@@ -45,7 +45,7 @@ void arm_ucp_event_handler(uint32_t event)
  * Helper function to print a SHA-256 in a nice format.
  * @param [in]  SHA  The array of PAL_SHA256_SIZE containing the SHA256
  */
-void printSHA256(const uint8_t SHA[SIZEOF_SHA256])
+void print_sha256_function(const uint8_t SHA[SIZEOF_SHA256])
 {
     /* allocate space for string */
     char buffer[2 * SIZEOF_SHA256 + 1] = { 0 };
@@ -60,7 +60,7 @@ void printSHA256(const uint8_t SHA[SIZEOF_SHA256])
     tr_info("SHA256: %s", buffer);
 }
 
-void printProgress(uint32_t progress, uint32_t total)
+void print_progress_function(uint32_t progress, uint32_t total)
 {
     static uint8_t last_percent = 0;
 

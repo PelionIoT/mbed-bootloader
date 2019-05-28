@@ -27,16 +27,30 @@
             "value": 1,
             "macro_name": "SHOW_PROGRESS_BAR"
         },
+        "show-serial-output": {
+            "help": "Show boot status and progress on serial output. Disable output to save space on headless devices.",
+            "value": 1,
+            "macro_name": "SHOW_SERIAL_OUTPUT"
+        },
         "use-kvstore-rot": {
             "help": "use nvstore implementation of the ROT to authenticate firmware headers",
             "value": 1,
             "macro_name": "ARM_BOOTLOADER_USE_KVSTORE_ROT"
+        },
+        "default-max-application-size":{
+            "help": "The max application size",
+            "value": "(MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS)",
+            "macro_name": "DEFAULT_MAX_APPLICATION_SIZE"
+        },
+        "bootloader-size":{
+            "help": "bootloader size",
+            "value": "(32*1024)",
+            "macro_name": "MBED_BOOTLOADER_SIZE"
         }
     },
     "macros": [
         "MBED_FAULT_HANDLER_DISABLED",
         "MBEDTLS_USER_CONFIG_FILE=\"bootloader_mbedtls_user_config.h\"",
-        "DEFAULT_MAX_APPLICATION_SIZE=(MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS)",
         "ARM_UC_PROFILE_MBED_CLOUD_CLIENT=1",
         "ARM_UC_FEATURE_CRYPTO_PAL=0",
         "ARM_UC_FEATURE_CRYPTO_MBEDTLS=1",

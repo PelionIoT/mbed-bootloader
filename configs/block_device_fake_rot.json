@@ -53,7 +53,8 @@
             "mbed-bootloader.use-kvstore-rot"      : 0,
             "update-client.storage-address"        : "(1024*1024*64)",
             "update-client.storage-size"           : "((MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS) * MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS)",
-            "update-client.storage-locations"      : 1
+            "update-client.storage-locations"      : 1,
+            "target.extra_labels_remove"           : [ "WICED", "CORDIO", "PSA", "MBED_SPM" ]
         },
         "NRF52_DK": {
             "sd.SPI_CS"                                : "SPI_PSELSS0",

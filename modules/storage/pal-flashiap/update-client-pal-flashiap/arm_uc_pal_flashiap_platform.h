@@ -20,6 +20,7 @@
 #define ARM_UC_PAL_FLASHIAP_PLATFORM_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,44 +33,67 @@ enum {
 
 #define ARM_UC_FLASH_INVALID_SIZE 0xFFFFFFFF
 
-/** Initialize a flash IAP device
+/** Initialize flash device
  *
- *  Should be called once per lifetime of the object.
- *  @return 0 on success or a negative error code on failure
+ *  @return ARM_UC_FLASHIAP_SUCCESS on success
+ *          ARM_UC_FLASHIAP_FAIL on failure
  */
 int32_t arm_uc_flashiap_init(void);
 
+/** Free flash device
+ *
+ *  @return ARM_UC_FLASHIAP_SUCCESS on success
+ *          ARM_UC_FLASHIAP_FAIL on failure
+ */
+int32_t arm_uc_flashiap_free(void);
+
 /** Erase sectors
  *
- *  The state of an erased sector is undefined until it has been programmed
+ *  Erase all sectors starting at the provided address until the
+ *  size has been reached.
  *
- *  @param address  Address of a sector to begin erasing, must be a multiple of the sector size
- *  @param size     Size to erase in bytes, must be a multiple of the sector size
- *  @return         0 on success, negative error code on failure
+ *  If the erase size is not sector aligned the sector containing
+ *  the end of the erase request will be erased as well. This ensures
+ *  the same result and user experience without the extra step of
+ *  calculating a sector aligned erase size.
+ *
+ *  @param address  Address of a sector to begin erasing,
+ *                  must be aligned to an erase sector
+ *  @param size     Size to erase in bytes
+ *  @return         ARM_UC_FLASHIAP_SUCCESS on success
+ *                  ARM_UC_FLASHIAP_FAIL on failure
  */
 int32_t arm_uc_flashiap_erase(uint32_t address, uint32_t size);
 
-/** Program data to pages
+/** Program data
  *
- *  The sectors must have been erased prior to being programmed
+ *  Write the number of size bytes from the buffer to the address
+ *  in flash.
+ *
+ *  Address and size must be aligned to the page address. The data
+ *  being written can span multiple pages and even sectors, but
+ *  the sectors being written to musth have been erased prior
+ *  to being programmed.
  *
  *  @param buffer   Buffer of data to be written
- *  @param address  Address of a page to begin writing to, must be a multiple of program and sector sizes
- *  @param size     Size to write in bytes, must be a multiple of program and sector sizes
- *  @return         0 on success, negative error code on failure
+ *  @param address  Address of a page to begin writing to,
+ *                  must be a multiple of program page size
+ *  @param size     Size to write in bytes, must be a multiple
+ *                  program page size
+ *  @return         ARM_UC_FLASHIAP_SUCCESS on success
+ *                  ARM_UC_FLASHIAP_FAIL on failure
  */
 int32_t arm_uc_flashiap_program(const uint8_t *buffer,
                                 uint32_t address,
                                 uint32_t size);
 
-/** Read data from a flash device.
- *
- *  This method invokes memcpy - reads number of bytes from the address
+/** Read data from flash device.
  *
  *  @param buffer   Buffer to write to
  *  @param address  Flash address to begin reading from
  *  @param size     Size to read in bytes
- *  @return         0 on success, negative error code on failure
+ *  @return         ARM_UC_FLASHIAP_SUCCESS on success
+ *                  ARM_UC_FLASHIAP_FAIL on failure
  */
 int32_t arm_uc_flashiap_read(uint8_t *buffer,
                              uint32_t address,
@@ -77,7 +101,7 @@ int32_t arm_uc_flashiap_read(uint8_t *buffer,
 
 /** Get the program page size
  *
- *  @return Size of a program page in bytes
+ *  @return         Size of a program page in bytes
  */
 uint32_t arm_uc_flashiap_get_page_size(void);
 
@@ -103,6 +127,34 @@ uint32_t arm_uc_flashiap_get_flash_size(void);
  *  @return         Start address of the flash
  */
 uint32_t arm_uc_flashiap_get_flash_start(void);
+
+/** Get the flash erase value
+ *
+ * @return          The flash erase value
+ */
+uint8_t arm_uc_flashiap_get_erase_value(void);
+
+/** Align address up/down to sector boundary
+ *
+ *  Addresses outside flash will be pinned to either the start
+ *  or the end of flash.
+ *
+ *  Addresses on boundaries will not be rounded up/down.
+ *
+ * @param address   The address that need to be rounded up/down
+ * @param round_down If the value is true, will align down to sector
+                    boundary otherwise align up.
+ * @return Returns the address aligned to sector boundary
+ */
+uint32_t arm_uc_flashiap_align_to_sector(uint32_t address, bool round_down);
+
+/** Round size up to nearest page
+ *
+ * @param size      The size that need to be rounded up
+ * @return          Returns the size rounded up to the nearest page
+ */
+uint32_t arm_uc_flashiap_round_up_to_page_size(uint32_t size);
+
 #ifdef __cplusplus
 }
 #endif

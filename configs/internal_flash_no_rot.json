@@ -51,9 +51,8 @@
     },
     "macros": [
         "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP",
-        "MBED_BOOTLOADER_SIZE=APPLICATION_SIZE",
         "MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE=1024",
-        "FLASH_BANK_SIZE=MBED_ROM_SIZE/2"
+        "MBED_BOOTLOADER_FLASH_BANK_SIZE=MBED_ROM_SIZE/2"
     ],
     "target_overrides": {
         "*": {
@@ -61,13 +60,15 @@
             "platform.stdio-flush-at-exit": false,
             "update-client.firmware-header-version": "2",
             "mbed-bootloader.use-kvstore-rot": 0,
+            "mbed-bootloader.bootloader-size": "APPLICATION_SIZE",
             "target.restrict_size": "0x8000",
             "update-client.application-details"        : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE)",
             "mbed-bootloader.application-start-address": "(MBED_CONF_UPDATE_CLIENT_APPLICATION_DETAILS + MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE)",
-            "mbed-bootloader.max-application-size"     : "(MBED_ROM_START + FLASH_BANK_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS)",
-            "update-client.storage-address"            : "(MBED_ROM_START + FLASH_BANK_SIZE + KVSTORE_SIZE)",
-            "update-client.storage-size"               : "(FLASH_BANK_SIZE - KVSTORE_SIZE)",
-            "update-client.storage-locations"          : 1
+            "mbed-bootloader.max-application-size"     : "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS)",
+            "update-client.storage-address"            : "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE + KVSTORE_SIZE)",
+            "update-client.storage-size"               : "(MBED_BOOTLOADER_FLASH_BANK_SIZE - KVSTORE_SIZE)",
+            "update-client.storage-locations"          : 1,
+            "target.extra_labels_remove"               : [ "WICED", "CORDIO", "PSA", "MBED_SPM" ]
         },
         "K64F": {
             "kvstore-size": "2*24*1024",
@@ -83,6 +84,10 @@
         },
         "NUCLEO_F303RE": {
             "kvstore-size": "2*24*1024",
+            "update-client.storage-page": 1
+        },
+        "DISCO_L475VG_IOT01A": {
+            "kvstore-size": "2*8*1024",
             "update-client.storage-page": 1
         }
     }

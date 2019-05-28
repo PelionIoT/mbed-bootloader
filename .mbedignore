@@ -27,3 +27,13 @@ mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F439xI/TARGET_MODULE_UBLOX
 mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F439xI/TARGET_MODULE_UBLOX_ODIN_W2/sdk/ublox-odin-w2-drivers/OdinWiFiInterface.cpp
 mbed-os/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_SDK_11/libraries/fds/*
 mbed-os/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_SDK_14_2/libraries/fds/*
+mbed-os/targets/TARGET_Cypress/TARGET_PSOC6/port_api.c
+mbed-os/targets/TARGET_Cypress/TARGET_PSOC6/i2c_api.c 
+mbed-os/targets/TARGET_Cypress/TARGET_PSOC6/pwmout_api.c                  
+mbed-os/platform/mbed_alloc_wrappers.c                                                                         
+mbed-os/platform/mbed_retarget.c  
+mbed-os/usb/device/USBAudio/*
+mbed-os/usb/*
+mbed-os/targets/TARGET_Cypress/TARGET_PSOC6/TARGET_CY8CKIT_062_WIFI_BT_PSA/spm_init_api.c
+mbed-os/drivers/I2CSlave.cpp
+mbed-os/targets/TARGET_NXP/TARGET_MCUXpresso_MCUS/TARGET_LPC55S69/TARGET_M33_NS/device/cmsis_nvic_virtual.c                                                                        
