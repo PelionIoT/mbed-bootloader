@@ -71,7 +71,7 @@ int32_t arm_uc_flashiap_erase(uint32_t address, uint32_t size)
     return result;
 }
 
-int32_t arm_uc_flashiap_program(const uint8_t* buffer, uint32_t address, uint32_t size)
+int32_t arm_uc_flashiap_program(const uint8_t *buffer, uint32_t address, uint32_t size)
 {
     int result = ARM_UC_FLASHIAP_FAIL;
 
@@ -84,8 +84,8 @@ int32_t arm_uc_flashiap_program(const uint8_t* buffer, uint32_t address, uint32_
 
         /* check addresses are within bounds */
         if ((flash_start_address <= address) &&
-            ((address + size) <= flash_end_address) &&
-            (size <= flash_size)) {
+                ((address + size) <= flash_end_address) &&
+                (size <= flash_size)) {
 
             uint32_t page_size = flash_get_page_size(&arm_uc_flash_obj);
 
@@ -149,7 +149,7 @@ uint32_t arm_uc_flashiap_align_to_sector(uint32_t address, bool round_down)
 
         sector_aligned_address = flash_end_address;
 
-    /* for addresses within bounds step through the sector map */
+        /* for addresses within bounds step through the sector map */
     } else if (address > sector_aligned_address) {
 
         uint32_t sector_size = 0;

@@ -1,0 +1,84 @@
+{
+    "config": {
+        "documentation": {
+            "options": [
+                    "The configuration for boards is:",
+                    "- Firmware storage is on an external SPI Flash(SPIF) block device",
+                    "- Internal KVStore only",
+                    "The flash regions are as follows:",
+                    "1. Bootloader - 32KiB from the beginning of flash",
+                    "2. KVSTORE - 2 flash sectors immediately following the bootloader",
+                    "3. Active App Metadata Header - (1KiB/2KiB) from the end of KVSTORE",
+                    "4. Active App - From end of header to the end of flash",
+                    "+--------------------------+",
+                    "|                          |",
+                    "|                          |",
+                    "|                          |",
+                    "|        Active App        |",
+                    "|                          |",
+                    "|                          |",
+                    "|                          |",
+                    "+--------------------------+ <-+ mbed-bootloader.application-start-address",
+                    "|Active App Metadata Header|",
+                    "+--------------------------+ <-+ update-client.application-details",
+                    "|                          |",
+                    "|         KVSTORE          |",
+                    "|                          |",
+                    "+--------------------------+ <-+ storage_tdb_internal.internal_base_address",
+                    "|                          |",
+                    "|        Bootloader        |",
+                    "|                          |",
+                    "+--------------------------+ <-+ 0",
+                    "Firmware Candidate Storage is on external SPIF device at an offset of 0 MiB.",
+                    "The storage size is the size of the maximum application size (i.e. Active",
+                    "Application region size) multiplied by the number of storage-locations.",
+                    "(storage-locations is set to 1 in this configuration)",
+                    "+--------------------------+<-+ End of SPIF block device",
+                    "|                          |",
+                    "+--------------------------+<-+ update-client.storage-size + update-client.storage-address",
+                    "|                          |",
+                    "+--------------------------+",
+                    "|                          |",
+                    "|   Firmware Candidate 0   |",
+                    "|                          |",
+                    "+--------------------------+",
+                    "|   Firmware Candidate 0   |",
+                    "|     Metadata Header      |",
+                    "+--------------------------+ <-+ Start of SPIF block device (i.e. 0x0); update-client.storage-address"
+            ]
+        }
+    },
+    "macros": [
+        "ARM_UC_USE_PAL_BLOCKDEVICE=1",
+        "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP_BLOCKDEVICE",
+        "MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE=1024"
+    ],
+    "target_overrides": {
+        "*": {
+            "platform.use-mpu"                          : false,
+            "platform.stdio-baud-rate"                  : 115200,
+            "platform.stdio-flush-at-exit"              : false,
+            "update-client.firmware-header-version"     : "2",
+            "target.restrict_size"                      : "0x8000",
+            "storage.storage_type"                      : "TDB_INTERNAL",
+            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START+MBED_BOOTLOADER_SIZE)",
+            "storage_tdb_internal.internal_size"        : "(16*1024)",
+            "update-client.application-details"         : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE+MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)",
+            "mbed-bootloader.application-start-address" : "(MBED_CONF_UPDATE_CLIENT_APPLICATION_DETAILS + MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE)",
+            "target.components_add"                     : ["SPIF"],
+            "update-client.storage-address"             : "0",
+            "update-client.storage-size"                : "((MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS) * MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS)",
+            "update-client.storage-locations"           : 1,
+            "target.device_has_remove"                  : [ "LPTICKER" ]
+        },
+        "NUCLEO_F303RE": {
+            "target.restrict_size"           : "0x9000",
+            "mbed-bootloader.bootloader-size": "(36*1024)",
+            "spif-driver.SPI_MOSI"           : "PC_12",
+            "spif-driver.SPI_MISO"           : "PC_11",
+            "spif-driver.SPI_CLK"            : "PC_10",
+            "spif-driver.SPI_CS"             : "PA_15",
+            "update-client.storage-page"     : 2
+        }
+    }
+}

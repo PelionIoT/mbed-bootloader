@@ -68,7 +68,8 @@
             "update-client.storage-address"            : "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE + KVSTORE_SIZE)",
             "update-client.storage-size"               : "(MBED_BOOTLOADER_FLASH_BANK_SIZE - KVSTORE_SIZE)",
             "update-client.storage-locations"          : 1,
-            "target.extra_labels_remove"               : [ "WICED", "CORDIO", "PSA", "MBED_SPM" ]
+            "target.extra_labels_remove"               : [ "WICED", "CORDIO", "PSA", "MBED_SPM" ],
+            "target.device_has_remove"                 : [ "LPTICKER" ]
         },
         "K64F": {
             "kvstore-size": "2*24*1024",

@@ -108,7 +108,6 @@
             "target.secure_image_filename"                 : null,
             "platform.stdio-baud-rate"                     : 115200,
             "target.device_has_remove"                     : [
-                                                              "USTICKER",
                                                               "SERIAL_ASYNCH",
                                                               "SERIAL_FC",
                                                               "PORTOUT",
@@ -144,7 +143,6 @@
             "platform.stdio-baud-rate"                     : 115200,
             "target.hex_filename"                          : null,
             "target.device_has_remove"                     : [
-                                                              "USTICKER",
                                                               "SERIAL_ASYNCH",
                                                               "SERIAL_FC",
                                                               "PORTOUT",
@@ -178,7 +176,6 @@
             "target.hex_filename"                          : null,
             "platform.stdio-baud-rate"                     : 115200,
             "target.device_has_remove"                     : [
-                                                              "USTICKER",
                                                               "SERIAL_ASYNCH",
                                                               "SERIAL_FC",
                                                               "PORTOUT",
@@ -197,53 +194,58 @@
                                                              ]
         },
         "K64F": {
-            "storage_filesystem.rbp_internal_size"     : "(2*4*1024)"
+            "storage_filesystem.rbp_internal_size"     : "(2*4*1024)",
+            "target.device_has_remove"                 : [ "LPTICKER" ]
         },
         "K66F": {
-            "storage_filesystem.rbp_internal_size"     : "(2*4*1024)"
+            "storage_filesystem.rbp_internal_size"     : "(2*4*1024)",
+            "target.device_has_remove"                 : [ "LPTICKER" ]
         },
         "KW24D": {
             "storage_filesystem.rbp_internal_size"     : "(2*2*1024)",
             "sd.SPI_CS"                                : "PTC4",
             "sd.SPI_MOSI"                              : "PTC6",
             "sd.SPI_MISO"                              : "PTC7",
-            "sd.SPI_CLK"                               : "PTC5"
+            "sd.SPI_CLK"                               : "PTC5",
+            "target.device_has_remove"                 : [ "LPTICKER" ]
         },
         "NUCLEO_L476RG": {
             "storage_filesystem.rbp_internal_size"     : "(2*2*1024)",
-            "mbed-bootloader.application-start-address": "(MBED_ROM_START+38*1024)"
+            "mbed-bootloader.application-start-address": "(MBED_ROM_START+38*1024)",
+            "target.device_has_remove"                 : [ "LPTICKER" ]
         },
         "DISCO_L476VG": {
             "storage_filesystem.rbp_internal_size"     : "(2*2*1024)",
-            "mbed-bootloader.application-start-address": "(MBED_ROM_START+38*1024)"
-        },
-        "DISCO_L475VG_IOT01A": {
-            "storage_filesystem.rbp_internal_size"     : "(2*2*1024)",
-            "mbed-bootloader.application-start-address": "(MBED_ROM_START+38*1024)"
+            "mbed-bootloader.application-start-address": "(MBED_ROM_START+38*1024)",
+            "target.device_has_remove"                 : [ "LPTICKER" ]
         },
         "NUCLEO_F411RE": {
             "storage_filesystem.rbp_internal_size"     : "(2*16*1024)",
             "sd.SPI_CS"                                : "PB_9",
             "sd.SPI_MOSI"                              : "PC_3",
             "sd.SPI_MISO"                              : "PC_2",
-            "sd.SPI_CLK"                               : "PC_7"
+            "sd.SPI_CLK"                               : "PC_7",
+            "target.device_has_remove"                 : [ "LPTICKER" ]
         },
         "NUCLEO_F429ZI": {
-            "storage_filesystem.rbp_internal_size"     : "(2*16*1024)"
+            "storage_filesystem.rbp_internal_size"     : "(2*16*1024)",
+            "target.device_has_remove"                 : [ "LPTICKER" ]
         },
         "NUCLEO_F207ZG": {
             "storage_filesystem.rbp_internal_size"     : "(2*16*1024)",
             "sd.SPI_MOSI"                              : "PC_12",
             "sd.SPI_MISO"                              : "PC_11",
             "sd.SPI_CLK"                               : "PC_10",
-            "sd.SPI_CS"                                : "PA_15"
+            "sd.SPI_CS"                                : "PA_15",
+            "target.device_has_remove"                 : [ "LPTICKER" ]
         },
         "UBLOX_EVK_ODIN_W2": {
-            "target.device_has_remove": ["EMAC"],
-            "storage_filesystem.rbp_internal_size"     : "(2*16*1024)"
+            "storage_filesystem.rbp_internal_size"     : "(2*16*1024)",
+            "target.device_has_remove"                 : [ "LPTICKER" ]
         },
         "UBLOX_C030_U201": {
-            "storage_filesystem.rbp_internal_size"     : "(2*16*1024)"
+            "storage_filesystem.rbp_internal_size"     : "(2*16*1024)",
+            "target.device_has_remove"                 : [ "LPTICKER" ]
         },
         "NRF52840_DK": {
             "storage_filesystem.internal_base_address" : "(1016*1024)",

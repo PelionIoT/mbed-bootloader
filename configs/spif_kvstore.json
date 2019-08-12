@@ -1,0 +1,81 @@
+{
+    "config": {
+        "documentation": {
+            "options": [
+                    "Usage:",
+                    "- mbed compile -t <TOOLCHAIN> -m <TARGET> --profile=tiny.json --app-config configs/spif_kvstore.json",
+                    "In this configuration:",
+                    "- Firmware storage is on a SPIF block device",
+                    "- Root of Trust is obtain from internal flash in kvstore",
+                    "The flash regions are as follows:",
+                    "1. Bootloader - from the beginning of flash",
+                    "2. KVSTORE - immediately following the bootloader",
+                    "3. Active App Metadata Header - from the end of KVSTORE",
+                    "4. Active App - from end of Header to the end of internal flash",
+                    "+--------------------------+",
+                    "|                          |",
+                    "|                          |",
+                    "|                          |",
+                    "|        Active App        |",
+                    "|                          |",
+                    "|                          |",
+                    "|                          |",
+                    "+--------------------------+ <-+ mbed-bootloader.application-start-address",
+                    "|Active App Metadata Header|",
+                    "+--------------------------+ <-+ update-client.application-details",
+                    "|                          |",
+                    "|     KVSTORE INTERNAL     |",
+                    "|                          |",
+                    "+--------------------------+ <-+ storage_tdb_internal.internal_base_address",
+                    "|                          |",
+                    "|        Bootloader        |",
+                    "|                          |",
+                    "+--------------------------+ <-+ 0",
+
+                    "4. KVStore external part is on SPIF at an offset of 0 MiB.",
+                    "5. Firmware Candidate Storage is on SPIF at an offset of 1 MiB.",
+                    "+--------------------------+ <-+ update-client.storage-size * update-client.storage-locations",
+                    "|                          |",
+                    "|      UPDATE STORAGE      |",
+                    "|                          |",
+                    "+--------------------------+ <-+ update-client.storage-address",
+                    "|                          |",
+                    "|     KVSTORE EXTERNAL     |",
+                    "|                          |",
+                    "+--------------------------+ <-+ 0",
+                    "The storage size is the size of the maximum application size (i.e. Active",
+                    "Application region size) multiplied by the number of storage-locations.",
+                    "(storage-locations is set to 1 in this configuration)"
+            ]
+        }
+    },
+    "macros": [
+        "ARM_UC_USE_PAL_BLOCKDEVICE=1",
+        "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP_BLOCKDEVICE",
+        "MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE=1024"
+    ],
+    "target_overrides": {
+        "*": {
+            "platform.use-mpu"                         : false,
+            "platform.stdio-baud-rate"                 : 115200,
+            "platform.stdio-flush-at-exit"             : false,
+
+            "target.components_add"                    : ["SPIF"],
+            "storage.storage_type"                     : "FILESYSTEM",
+            "storage_filesystem.filesystem"            : "LITTLE",
+            "storage_filesystem.blockdevice"           : "SPIF",
+
+            "storage_filesystem.internal_base_address" : "(MBED_ROM_START + 0xa000)",
+            "storage_filesystem.rbp_internal_size"     : "(2*4*1024)",
+            "update-client.application-details"        : "(MBED_CONF_STORAGE_FILESYSTEM_INTERNAL_BASE_ADDRESS + MBED_CONF_STORAGE_FILESYSTEM_RBP_INTERNAL_SIZE)",
+            "mbed-bootloader.application-start-address": "(MBED_CONF_UPDATE_CLIENT_APPLICATION_DETAILS + MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE)",
+
+            "storage_filesystem.external_base_address" : "(0*1024*1024)",
+            "storage_filesystem.external_size"         : "(1*1024*1024)",
+            "update-client.storage-address"            : "(MBED_CONF_STORAGE_FILESYSTEM_EXTERNAL_BASE_ADDRESS + MBED_CONF_STORAGE_FILESYSTEM_EXTERNAL_SIZE)",
+            "update-client.storage-locations"          : 1,
+            "update-client.storage-size"               : "((MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS) * MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS)",
+            "update-client.firmware-header-version"    : "2"
+        }
+    }
+}

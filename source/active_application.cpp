@@ -275,8 +275,8 @@ bool writeActiveFirmwareHeader(arm_uc_firmware_details_t *details)
                 (output_buffer.size == ARM_UC_INTERNAL_HEADER_SIZE_V2)) {
             /* write header using FlashIAP API */
             result = arm_uc_flashiap_program(buffer_array,
-                                              FIRMWARE_METADATA_HEADER_ADDRESS,
-                                              programSize);
+                                             FIRMWARE_METADATA_HEADER_ADDRESS,
+                                             programSize);
         }
     }
 
@@ -318,7 +318,7 @@ bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t *details)
 
         /* write firmware */
         while ((offset < details->size) &&
-               (result == true)) {
+                (result == true)) {
             /* clear most recent UCP event */
             event_callback = CLEAR_EVENT;
 

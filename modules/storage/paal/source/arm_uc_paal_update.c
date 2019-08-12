@@ -37,7 +37,9 @@ arm_uc_error_t ARM_UCP_SetPAALUpdate(const ARM_UC_PAAL_UPDATE *implementation)
 
     paal_update_implementation = implementation;
 
-    return (arm_uc_error_t) { ERR_NONE };
+    return (arm_uc_error_t) {
+        ERR_NONE
+    };
 }
 
 /**

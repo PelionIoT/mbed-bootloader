@@ -104,7 +104,9 @@ void test_unit()
     event_received = 0;
     arm_uc_error_t err = ARM_UCP_FLASHIAP_BLOCKDEVICE.Initialize(callback);
     TEST_ASSERT_EQUAL_HEX(ERR_NONE, err.code);
-    while (!event_received) { __WFI(); }
+    while (!event_received) {
+        __WFI();
+    }
 
     /* firmware details struct */
     arm_uc_firmware_details_t details = { 0 };
@@ -122,7 +124,9 @@ void test_unit()
     event_received = 0;
     err = ARM_UCP_FLASHIAP_BLOCKDEVICE.Prepare(storage_location, &details, &buffer);
     TEST_ASSERT_EQUAL_HEX(ERR_NONE, err.code);
-    while (!event_received) { __WFI(); }
+    while (!event_received) {
+        __WFI();
+    }
 
     /* prepare hash context */
     unsigned char write_hash[SIZEOF_SHA256];
@@ -147,7 +151,9 @@ void test_unit()
         event_received = 0;
         err = ARM_UCP_FLASHIAP_BLOCKDEVICE.Write(storage_location, offset, &buffer);
         TEST_ASSERT_EQUAL_HEX(ERR_NONE, err.code);
-        while (!event_received) { __WFI(); }
+        while (!event_received) {
+            __WFI();
+        }
         offset += buffer.size;
 
         mbedtls_sha256_update(&ctx, buffer.ptr, buffer.size);
@@ -158,7 +164,9 @@ void test_unit()
     event_received = 0;
     err = ARM_UCP_FLASHIAP_BLOCKDEVICE.Finalize(storage_location);
     TEST_ASSERT_EQUAL_HEX(ERR_NONE, err.code);
-    while (!event_received) { __WFI(); }
+    while (!event_received) {
+        __WFI();
+    }
 
     /* read firmware back */
     offset = 0;
@@ -171,7 +179,9 @@ void test_unit()
         event_received = 0;
         err = ARM_UCP_FLASHIAP_BLOCKDEVICE.Read(storage_location, offset, &buffer);
         TEST_ASSERT_EQUAL_HEX(ERR_NONE, err.code);
-        while (!event_received) { __WFI(); }
+        while (!event_received) {
+            __WFI();
+        }
         offset += buffer.size;
 
         mbedtls_sha256_update(&ctx, buffer.ptr, buffer.size);

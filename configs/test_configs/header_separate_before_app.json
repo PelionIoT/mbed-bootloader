@@ -1,0 +1,23 @@
+{
+    "macros": [
+        "ARM_UC_USE_PAL_BLOCKDEVICE=1",
+        "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP_BLOCKDEVICE"
+    ],
+    "target_overrides": {
+        "*": {
+            "platform.stdio-baud-rate"    : 115200,
+            "platform.stdio-flush-at-exit": false,
+            "update-client.storage-address"  : "(1024*1024*64)",
+            "update-client.storage-size"     : "((MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS) * MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS)",
+            "update-client.storage-locations": 1,
+            "update-client.firmware-header-version": "2",
+            "sd.CRC_ENABLED": 0,
+            "mbed-bootloader.use-kvstore-rot": 0,
+            "target.extra_labels_remove": [ "WICED", "CORDIO", "PSA", "MBED_SPM" ]
+        },
+        "K64F": {
+            "update-client.application-details"        : "(MBED_ROM_START+32*1024)",
+            "mbed-bootloader.application-start-address": "(MBED_ROM_START+40*1024)"
+        }
+    }
+}

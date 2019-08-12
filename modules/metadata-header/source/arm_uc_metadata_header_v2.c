@@ -24,7 +24,9 @@ extern arm_uc_error_t ARM_UC_cryptoHMACSHA256(arm_uc_buffer_t *key, arm_uc_buffe
 
 arm_uc_error_t ARM_UC_getDeviceKey256Bit(arm_uc_buffer_t *output)
 {
-    arm_uc_error_t result = (arm_uc_error_t) { ARM_UC_CU_ERR_INVALID_PARAMETER };
+    arm_uc_error_t result = (arm_uc_error_t) {
+        ARM_UC_CU_ERR_INVALID_PARAMETER
+    };
 
     if (output->size_max >= ARM_UC_DEVICE_KEY_SIZE) {
         int8_t rv = mbed_cloud_client_get_rot_128bit(output->ptr, output->size_max);

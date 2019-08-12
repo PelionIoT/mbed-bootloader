@@ -67,13 +67,15 @@ arm_uc_error_t ARM_UC_cryptoHMACSHA256(arm_uc_buffer_t *key,
                                        arm_uc_buffer_t *input,
                                        arm_uc_buffer_t *output)
 {
-    arm_uc_error_t result = (arm_uc_error_t) { ARM_UC_CU_ERR_INVALID_PARAMETER };
+    arm_uc_error_t result = (arm_uc_error_t) {
+        ARM_UC_CU_ERR_INVALID_PARAMETER
+    };
 
     if (key && key->ptr &&
-        (key->size <= ARM_UC_SHA256_INTERNAL_BLOCK_SIZE) &&
-        input && input->ptr &&
-        output && output->ptr &&
-        (output->size_max >= ARM_UC_SHA256_SIZE)) {
+            (key->size <= ARM_UC_SHA256_INTERNAL_BLOCK_SIZE) &&
+            input && input->ptr &&
+            output && output->ptr &&
+            (output->size_max >= ARM_UC_SHA256_SIZE)) {
 
         int retval = ARM_UC_MBEDTLS_FAILURE;
 
@@ -90,8 +92,7 @@ arm_uc_error_t ARM_UC_cryptoHMACSHA256(arm_uc_buffer_t *key,
 
         /* Inner/outer pad is the key XOR'ed with 0x36/0x5C.
         */
-        for (size_t index = 0; index < key->size; index++)
-        {
+        for (size_t index = 0; index < key->size; index++) {
             inner_pad[index] = inner_pad[index] ^ key->ptr[index];
             outer_pad[index] = outer_pad[index] ^ key->ptr[index];
         }
@@ -150,7 +151,9 @@ arm_uc_error_t ARM_UC_cryptoHMACSHA256(arm_uc_buffer_t *key,
 
                             output->size = ARM_UC_SHA256_SIZE;
 
-                            result = (arm_uc_error_t) { ERR_NONE };
+                            result = (arm_uc_error_t) {
+                                ERR_NONE
+                            };
                         }
                     }
                 }

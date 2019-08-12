@@ -1,2 +1,7 @@
+.astyleignore
+.astylerc
+.git
 BUILD
 scripts
+mbed-os
+
