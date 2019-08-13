@@ -233,12 +233,6 @@
             "mbed-bootloader.application-start-address": "(MBED_ROM_START+38*1024)",
             "target.device_has_remove"                 : [ "LPTICKER" ]
         },
-        "DISCO_L475VG_IOT01A": {
-            "target.components_add"                    : ["SD"],
-            "sd.CRC_ENABLED"                           : 0,
-            "storage_filesystem.rbp_internal_size"     : "(2*2*1024)",
-            "mbed-bootloader.application-start-address": "(MBED_ROM_START+38*1024)"
-        },
         "NUCLEO_F411RE": {
             "target.components_add"                    : ["SD"],
             "sd.CRC_ENABLED"                           : 0,
