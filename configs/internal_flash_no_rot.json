@@ -90,6 +90,16 @@
         "DISCO_L475VG_IOT01A": {
             "kvstore-size": "2*8*1024",
             "update-client.storage-page": 1
+        },
+        "RZ_A1H": {
+            "target.restrict_size": "0x10000",
+            "kvstore-size": "2*24*1024",
+            "update-client.storage-page": 1
+        },
+        "GR_LYCHEE": {
+            "target.restrict_size": "0x10000",
+            "kvstore-size": "2*24*1024",
+            "update-client.storage-page": 1
         }
     }
 }

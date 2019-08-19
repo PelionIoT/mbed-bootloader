@@ -162,12 +162,17 @@ int main(void)
         firmware_update_test_end();
 #endif
         uint32_t app_start_addr = MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS;
+#if defined(__CORTEX_A9)
+
+        tr_info("Application's start address: 0x%" PRIX32, app_start_addr);
+#else
         uint32_t app_stack_ptr = *((uint32_t *)(MBED_CONF_APP_APPLICATION_JUMP_ADDRESS + 0));
         uint32_t app_jump_addr = *((uint32_t *)(MBED_CONF_APP_APPLICATION_JUMP_ADDRESS + 4));
 
         tr_info("Application's start address: 0x%" PRIX32, app_start_addr);
         tr_info("Application's jump address: 0x%" PRIX32, app_jump_addr);
         tr_info("Application's stack address: 0x%" PRIX32, app_stack_ptr);
+#endif
         tr_info("Forwarding to application...\r\n");
 
         mbed_start_application(MBED_CONF_APP_APPLICATION_JUMP_ADDRESS);
