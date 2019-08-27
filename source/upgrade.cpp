@@ -66,8 +66,6 @@ uint8_t *bootCounter = NULL;
 bool checkStoredApplication(uint32_t source,
                             arm_uc_firmware_details_t *details)
 {
-    tr_debug("checkStoredApplication");
-
     bool result = false;
 
     if (details) {
@@ -117,8 +115,7 @@ bool checkStoredApplication(uint32_t source,
 
                 offset += buffer.size;
             } else {
-                tr_trace("\r\n");
-                tr_debug("ARM_UCP_Read returned 0 bytes");
+                boot_debug("[DBG ] ARM_UCP_Read returned 0 bytes\r\n");
                 break;
             }
 
@@ -193,7 +190,7 @@ bool upgradeApplicationFromStorage(void)
     /* Step 1. Validate the active application.                              */
     /*************************************************************************/
 
-    tr_info("Active firmware integrity check:");
+    boot_debug("[DBG ] Active firmware integrity check:\r\n");
 
     int activeApplicationStatus = checkActiveApplication(&imageDetails);
 
@@ -222,16 +219,11 @@ bool upgradeApplicationFromStorage(void)
 
             /* reset boot counter */
             *bootCounter = 0;
-
-            tr_debug("heapVersion: %" PRIu64, *heapVersion);
-            tr_debug("bootCounter: %" PRIu8, *bootCounter);
         }
         /* reboot */
         else {
             /* increment boot counter*/
             *bootCounter += 1;
-
-            tr_debug("bootCounter: %" PRIu8, *bootCounter);
         }
 
         /* transfer value */
@@ -242,7 +234,6 @@ bool upgradeApplicationFromStorage(void)
     if ((activeApplicationStatus == RESULT_SUCCESS) &&
             (localCounter < MAX_BOOT_RETRIES)) {
         printSHA256(imageDetails.hash);
-        tr_info("Version: %" PRIu64, imageDetails.version);
 
         /* mark active firmware as usable */
         activeFirmwareValid = true;
@@ -252,15 +243,15 @@ bool upgradeApplicationFromStorage(void)
     }
     /* active image is empty */
     else if (activeApplicationStatus == RESULT_EMPTY) {
-        tr_info("Active firmware slot is empty");
+        boot_debug("[DBG ] Active firmware slot is empty\r\n");
     }
     /* active image cannot be run */
     else if (localCounter >= MAX_BOOT_RETRIES) {
-        tr_error("Failed to boot active application %d times", MAX_BOOT_RETRIES);
+        boot_debug("[DBG ] Failed to boot active application\r\n");
     }
     /* active image failed integrity check */
     else {
-        tr_error("Active firmware integrity check failed");
+        boot_debug("[DBG ] Active firmware integrity check failed\r\n");
     }
 
     /*************************************************************************/
@@ -306,8 +297,6 @@ bool upgradeApplicationFromStorage(void)
             if ((imageDetails.version > bestStoredFirmwareImageDetails.version) &&
                     (imageDetails.size > 0) &&
                     (firmwareDifferentFromActive || !activeFirmwareValid)) {
-                tr_info("Slot %" PRIu32 " firmware integrity check:",
-                        index);
 
                 /* Validate candidate firmware body. */
                 bool firmwareValid = checkStoredApplication(index,
@@ -316,7 +305,6 @@ bool upgradeApplicationFromStorage(void)
                 if (firmwareValid) {
                     /* Integrity check passed */
                     printSHA256(imageDetails.hash);
-                    tr_info("Version: %" PRIu64, imageDetails.version);
 
                     /* check firmware size fits */
                     if (imageDetails.size <= MBED_CONF_MBED_BOOTLOADER_MAX_APPLICATION_SIZE) {
@@ -332,26 +320,20 @@ bool upgradeApplicationFromStorage(void)
                                ARM_UC_GUID_SIZE);
                     } else {
                         /* Firmware candidate size too large */
-                        tr_error("Slot %" PRIu32 " firmware size too large %"
-                                 PRIu32 " > %" PRIu32, index,
-                                 (uint32_t) imageDetails.size,
-                                 (uint32_t) MBED_CONF_MBED_BOOTLOADER_MAX_APPLICATION_SIZE);
+                        boot_debug("[DBG ] Slot firmware size too large\r\n");
                     }
                 } else {
                     /* Integrity check failed */
-                    tr_error("Slot %" PRIu32 " firmware integrity check failed",
-                             index);
+                    boot_debug("[DBG ] Slot firmware integrity check failed\r\n");
                 }
             } else {
-                tr_info("Slot %" PRIu32 " firmware is of older date",
-                        index);
+                boot_debug("[DBG ] Firmware is of older date\r\n");
                 /* do not print HMAC version
                 printSHA256(imageDetails.hash);
                 */
-                tr_info("Version: %" PRIu64, imageDetails.version);
             }
         } else {
-            tr_info("Slot %" PRIu32 " is empty", index);
+            boot_debug("[DBG ] Slot is empty\r\n");
         }
     }
 
@@ -363,27 +345,26 @@ bool upgradeApplicationFromStorage(void)
     if (bestStoredFirmwareIndex != INVALID_IMAGE_INDEX) {
         /* if copy fails, retry up to MAX_COPY_RETRIES */
         for (uint32_t retries = 0; retries < MAX_COPY_RETRIES; retries++) {
-            tr_info("Update active firmware using slot %" PRIu32 ":",
-                    bestStoredFirmwareIndex);
+            boot_debug("[DBG ] Update active firmware\r\n");
 
             activeFirmwareValid = copyStoredApplication(bestStoredFirmwareIndex,
                                                         &bestStoredFirmwareImageDetails);
 
             /* if image is valid, break out from loop */
             if (activeFirmwareValid) {
-                tr_info("New active firmware is valid");
+                boot_debug("[DBG ] New active firmware is valid\r\n");
 #if defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1)
                 firmware_update_test_validate();
 #endif
                 break;
             } else {
-                tr_error("Firmware update failed");
+                boot_debug("[DBG ] Firmware update failed\r\n");
             }
         }
     } else if (activeFirmwareValid) {
-        tr_info("Active firmware up-to-date");
+        boot_debug("[DBG ] Active firmware up-to-date\r\n");
     } else {
-        tr_error("Active firmware invalid");
+        boot_debug("[ERR ] Active firmware invalid\r\n");
     }
 
     // return the integrity of the active image

@@ -51,8 +51,6 @@ void activeStorageDeinit(void)
  */
 bool readActiveFirmwareHeader(arm_uc_firmware_details_t *details)
 {
-    tr_debug("readActiveFirmwareHeader");
-
     bool result = false;
 
     if (details) {
@@ -95,8 +93,6 @@ bool readActiveFirmwareHeader(arm_uc_firmware_details_t *details)
  */
 int checkActiveApplication(arm_uc_firmware_details_t *details)
 {
-    tr_debug("checkActiveApplication");
-
     int result = RESULT_ERROR;
 
     if (details) {
@@ -106,11 +102,6 @@ int checkActiveApplication(arm_uc_firmware_details_t *details)
         /* calculate hash if header is valid and slot is not empty */
         if ((headerValid) && (details->size > 0)) {
             uint32_t appStart = MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS;
-
-            tr_debug("header start: 0x%08" PRIX32,
-                     (uint32_t) FIRMWARE_METADATA_HEADER_ADDRESS);
-            tr_debug("app start: 0x%08" PRIX32, appStart);
-            tr_debug("app size: %" PRIu64, details->size);
 
             /* initialize hashing facility */
             mbedtls_sha256_context mbedtls_ctx;
@@ -168,9 +159,6 @@ int checkActiveApplication(arm_uc_firmware_details_t *details)
 
 uint32_t getSectorAlignedSize(uint32_t addr, uint32_t size)
 {
-    tr_debug("getSectorAlignedSize at 0x%08" PRIX32 " of size 0x%08" PRIX32,
-             (uint32_t) addr, (uint32_t) size);
-
     /* Find the exact end sector boundary. Some platforms have different sector
        sizes from sector to sector. Hence we count the sizes 1 sector at a time here */
     uint32_t erase_address = addr;
@@ -186,10 +174,8 @@ uint32_t getSectorAlignedSize(uint32_t addr, uint32_t size)
  */
 bool eraseActiveFirmware(uint32_t firmwareSize)
 {
-    tr_debug("eraseActiveFirmware");
-
     uint32_t fw_metadata_hdr_size = getSectorAlignedSize(FIRMWARE_METADATA_HEADER_ADDRESS,
-                                                         ARM_UC_INTERNAL_HEADER_SIZE_V2);
+                                    ARM_UC_INTERNAL_HEADER_SIZE_V2);
     uint32_t size_needed = 0;
     uint32_t erase_start_addr = 0;
     int result = ARM_UC_FLASHIAP_SUCCESS;
@@ -198,7 +184,7 @@ bool eraseActiveFirmware(uint32_t firmwareSize)
             (MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS)) || \
             (FIRMWARE_METADATA_HEADER_ADDRESS > MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS)) {
         /* header separate from app */
-        tr_debug("Erasing header separately from active application");
+        boot_debug("[DBG ] Erasing header separately from active application\r\n");
 
         /* erase header section first */
         result = arm_uc_flashiap_erase(FIRMWARE_METADATA_HEADER_ADDRESS, fw_metadata_hdr_size);
@@ -216,17 +202,14 @@ bool eraseActiveFirmware(uint32_t firmwareSize)
         result = ARM_UC_FLASHIAP_FAIL;
         uint32_t erase_end_addr = erase_start_addr + \
                                   getSectorAlignedSize(erase_start_addr,
-                                                       size_needed);
+                                          size_needed);
         uint32_t max_end_addr = MBED_CONF_MBED_BOOTLOADER_MAX_APPLICATION_SIZE + \
                                 MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS;
         /* check that the erase will not exceed MBED_CONF_MBED_BOOTLOADER_MAX_APPLICATION_SIZE */
         if (erase_end_addr <= max_end_addr) {
             result = arm_uc_flashiap_erase(erase_start_addr, size_needed);
         } else {
-            tr_error("Firmware size 0x%" PRIX32 " rounded up to the nearest sector boundary 0x%" \
-                     PRIX32 " is larger than the maximum application size 0x%" PRIX32,
-                     firmwareSize, erase_end_addr - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS,
-                     (uint32_t) MBED_CONF_MBED_BOOTLOADER_MAX_APPLICATION_SIZE);
+            boot_debug("[DBG ] Firmware size rounded up to the nearest sector boundary is larger than the maximum application size\r\n");
         }
     }
 
@@ -235,8 +218,6 @@ bool eraseActiveFirmware(uint32_t firmwareSize)
 
 bool writeActiveFirmwareHeader(arm_uc_firmware_details_t *details)
 {
-    tr_debug("writeActiveFirmwareHeader");
-
     int result = ARM_UC_FLASHIAP_FAIL;
 
     if (details) {
@@ -246,7 +227,7 @@ bool writeActiveFirmwareHeader(arm_uc_firmware_details_t *details)
                                      / pageSize * pageSize;
         const uint32_t fw_metadata_hdr_size = \
                                               getSectorAlignedSize(FIRMWARE_METADATA_HEADER_ADDRESS,
-                                                                   ARM_UC_INTERNAL_HEADER_SIZE_V2);
+                                                      ARM_UC_INTERNAL_HEADER_SIZE_V2);
 
         /* coverity[no_escape] */
         MBED_BOOTLOADER_ASSERT((programSize <= BUFFER_SIZE),
@@ -269,7 +250,7 @@ bool writeActiveFirmwareHeader(arm_uc_firmware_details_t *details)
         };
 
         arm_uc_error_t status = arm_uc_create_internal_header_v2(details,
-                                                                 &output_buffer);
+                                &output_buffer);
 
         if ((status.error == ERR_NONE) &&
                 (output_buffer.size == ARM_UC_INTERNAL_HEADER_SIZE_V2)) {
@@ -285,8 +266,6 @@ bool writeActiveFirmwareHeader(arm_uc_firmware_details_t *details)
 
 bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t *details)
 {
-    tr_debug("writeActiveFirmware");
-
     bool result = false;
 
     if (details) {
@@ -355,12 +334,9 @@ bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t *details)
                 printProgress(offset, details->size);
 #endif
 
-                tr_debug("\r\n%" PRIu32 "/%" PRIu32 " writing %" PRIu32 " bytes to 0x%08" PRIX32,
-                         offset, (uint32_t) details->size, programSize, app_start_addr + offset);
-
                 offset += programSize;
             } else {
-                tr_error("ARM_UCP_Read returned 0 bytes");
+                boot_debug("[DBG ] ARM_UCP_Read returned 0 bytes\r\n");
 
                 /* set error and break out of loop */
                 result = false;
@@ -378,14 +354,13 @@ bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t *details)
 bool copyStoredApplication(uint32_t index,
                            arm_uc_firmware_details_t *details)
 {
-    tr_debug("copyStoredApplication");
-
     bool result = false;
 
     /*************************************************************************/
     /* Step 1. Erase active application                                      */
     /*************************************************************************/
 
+    boot_debug("[DBG ] Erase active application\r\n");
     result = eraseActiveFirmware(details->size);
 
     /*************************************************************************/
@@ -393,6 +368,7 @@ bool copyStoredApplication(uint32_t index,
     /*************************************************************************/
 
     if (result) {
+        boot_debug("[DBG ] Write header\r\n");
         result = writeActiveFirmwareHeader(details);
     }
 
@@ -401,6 +377,7 @@ bool copyStoredApplication(uint32_t index,
     /*************************************************************************/
 
     if (result) {
+        boot_debug("[DBG ] Copy application\r\n");
         result = writeActiveFirmware(index, details);
     }
 
@@ -409,8 +386,7 @@ bool copyStoredApplication(uint32_t index,
     /*************************************************************************/
 
     if (result) {
-        tr_info("Verify new active firmware:");
-
+        boot_debug("[DBG ] Verify application\r\n");
         int recheck = checkActiveApplication(details);
 
         result = (recheck == RESULT_SUCCESS);

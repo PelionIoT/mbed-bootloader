@@ -84,12 +84,6 @@ int main(void)
     /* Initialize PAL */
     arm_uc_error_t ucp_result = ARM_UCP_Initialize(arm_ucp_event_handler);
 
-    /* If a reboot message was left from last boot, print it here */
-    if (existsErrorMessageLeadingToReboot()) {
-        tr_info("error message leading to reboot: %s",
-                errorMessageLeadingToReboot());
-    }
-
 #if defined(BOOTLOADER_POWER_CUT_TEST) && (BOOTLOADER_POWER_CUT_TEST == 1)
     power_cut_test_setup();
     const uint32_t firmware_size = 1024;
@@ -105,31 +99,7 @@ int main(void)
     /* Print bootloader information                                          */
     /*************************************************************************/
 
-    tr_info("Mbed Bootloader");
-
-    /* although not referenced, arm_size is used indirectly in sizeof() below */
-    /* coverity[set_but_not_used] */
-    uint8_t arm_size[] = BOOTLOADER_ARM_SOURCE_HASH;
-
-    tr_trace("[BOOT] ARM: ");
-    for (uint32_t index = 0; index < sizeof(arm_size); index++) {
-        tr_trace("%02" PRIX8, bootloader.arm_hash[index]);
-    }
-    tr_trace("\r\n");
-
-    /* although not referenced, oem_size is used indirectly in sizeof() below */
-    /* coverity[set_but_not_used] */
-    uint8_t oem_size[] = BOOTLOADER_OEM_SOURCE_HASH;
-
-    tr_trace("[BOOT] OEM: ");
-    for (uint32_t index = 0; index < sizeof(oem_size); index++) {
-        tr_trace("%02" PRIX8, bootloader.oem_hash[index]);
-    }
-    tr_trace("\r\n");
-
-    tr_info("Layout: %" PRIu32 " %" PRIX32,
-            bootloader.layout,
-            (uint32_t) &bootloader);
+    boot_debug("[DBG ] Mbed Bootloader\r\n");
 
     /*************************************************************************/
     /* Update                                                                */
@@ -161,14 +131,6 @@ int main(void)
 #elif defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1)
         firmware_update_test_end();
 #endif
-        uint32_t app_start_addr = MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS;
-        uint32_t app_stack_ptr = *((uint32_t *)(MBED_CONF_APP_APPLICATION_JUMP_ADDRESS + 0));
-        uint32_t app_jump_addr = *((uint32_t *)(MBED_CONF_APP_APPLICATION_JUMP_ADDRESS + 4));
-
-        tr_info("Application's start address: 0x%" PRIX32, app_start_addr);
-        tr_info("Application's jump address: 0x%" PRIX32, app_jump_addr);
-        tr_info("Application's stack address: 0x%" PRIX32, app_stack_ptr);
-        tr_info("Forwarding to application...\r\n");
 
         mbed_start_application(MBED_CONF_APP_APPLICATION_JUMP_ADDRESS);
     }
