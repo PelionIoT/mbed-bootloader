@@ -27,7 +27,7 @@
         "documentation": {
             "options": [
                     "The configuration for boards is:",
-                    "- Firmware storage is on an external QSPI Flash(QSPIF) block device",
+                    "- Firmware storage is on an external SD block device",
                     "- Internal KVStore only",
                     "The flash regions are as follows:",
                     "1. Bootloader - 32KiB from the beginning of flash",
@@ -53,11 +53,11 @@
                     "|        Bootloader        |",
                     "|                          |",
                     "+--------------------------+ <-+ 0",
-                    "Firmware Candidate Storage is on external QSPIF device at an offset of 0 MiB.",
+                    "Firmware Candidate Storage is on external SD card at an offset of 0 MiB.",
                     "The storage size is the size of the maximum application size (i.e. Active",
                     "Application region size) multiplied by the number of storage-locations.",
                     "(storage-locations is set to 1 in this configuration)",
-                    "+--------------------------+<-+ End of QSPIF block device",
+                    "+--------------------------+<-+ End of SD block device",
                     "|                          |",
                     "+--------------------------+<-+ update-client.storage-size + update-client.storage-address",
                     "|                          |",
@@ -68,7 +68,7 @@
                     "+--------------------------+",
                     "|   Firmware Candidate 0   |",
                     "|     Metadata Header      |",
-                    "+--------------------------+ <-+ Start of QSPIF block device (i.e. 0x0); update-client.storage-address"
+                    "+--------------------------+ <-+ Start of SD block device (i.e. 0x0); update-client.storage-address"
             ]
         }
     },
@@ -88,16 +88,17 @@
             "storage.storage_type"                      : "TDB_INTERNAL",
             "storage_tdb_internal.internal_base_address": "(MBED_ROM_START+MBED_BOOTLOADER_SIZE)",
             "storage_tdb_internal.internal_size"        : "APP_KVSTORE_SIZE",
-            "update-client.application-details"         : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE+MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)",
+            "update-client.application-details"         : "(MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_BASE_ADDRESS+MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)",
             "mbed-bootloader.application-start-address" : "(MBED_CONF_UPDATE_CLIENT_APPLICATION_DETAILS + MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE)",
-            "target.components_add"                     : ["QSPIF"],
+            "target.components_add"                     : ["SD"],
+            "sd.CRC_ENABLED"                            : 0,
             "update-client.storage-address"             : "0",
             "update-client.storage-size"                : "((MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS) * MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS)",
-            "update-client.storage-locations"           : 1
+            "update-client.storage-locations"           : 1,
+            "target.device_has_remove"                 : [ "LPTICKER" ]
         },
-        "DISCO_L475VG_IOT01A": {
-            "target.restrict_size"           : "0x9000",
-            "mbed-bootloader.bootloader-size": "(36*1024)"
+        "K64F": {
+            "target.extra_labels_remove"                : [ "PSA" ]
         }
     }
 }

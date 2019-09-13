@@ -30,3 +30,10 @@ extern uint8_t *bootCounter;
  * @return true if the active firmware region is valid.
  */
 bool upgradeApplicationFromStorage(void);
+
+/**
+ * Gets reason of device reset
+ * @return true if the reason is caused by hw  eg power ON,  hw reset or brown_out .
+ * otherwise the reason is caused by sw  or exception.
+ */
+bool hwResetReason(void);

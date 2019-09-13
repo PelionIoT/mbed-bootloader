@@ -16,8 +16,7 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------
 
-#if (defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1)) || \
-    (defined(BOOTLOADER_POWER_CUT_TEST) && (BOOTLOADER_POWER_CUT_TEST == 1))
+#if (defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1))
 #include <greentea-client/test_env.h>
 #include "update-client-paal/arm_uc_paal_update.h"
 #include "bootloader_common.h"
@@ -31,19 +30,16 @@
 
 void copyAppToSDCard(uint32_t firmware_size)
 {
-    tr_info("Copy active firmware to slot 0\r\n");
+    boot_debug("[DBG ] Copy active firmware to slot 0\r\n");
 
     arm_uc_firmware_details_t details = { 0 };
 
-    tr_info("calculate firmware SHA256\r\n");
     const uint8_t *appStart =
         (const uint8_t *)(MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS);
     mbedtls_sha256(appStart, firmware_size, details.hash, 0);
 
     details.version = UINT32_MAX - 1;
     details.size = firmware_size;
-
-    tr_info("ARM_UCP_Prepare\r\n");
 
     /* clear most recent event */
     event_callback = CLEAR_EVENT;
@@ -63,12 +59,10 @@ void copyAppToSDCard(uint32_t firmware_size)
             __WFI();
         }
     } else {
-        tr_error("ARM_UCP_Prepare failed\r\n");
+        boot_debug("[DBG ] ARM_UCP_Prepare failed\r\n");
     }
 
     /*************************************************************************/
-
-    tr_info("ARM_UCP_Write\r\n");
 
     arm_uc_buffer_t write_buffer = {
         .size_max = firmware_size,
@@ -88,12 +82,10 @@ void copyAppToSDCard(uint32_t firmware_size)
             __WFI();
         }
     } else {
-        tr_error("ARM_UCP_Write failed\r\n");
+        boot_debug("[DBG ] ARM_UCP_Write failed\r\n");
     }
 
     /*************************************************************************/
-
-    tr_info("ARM_UCP_Finalize\r\n");
 
     /* clear most recent event */
     event_callback = CLEAR_EVENT;
@@ -107,7 +99,7 @@ void copyAppToSDCard(uint32_t firmware_size)
             __WFI();
         }
     } else {
-        tr_error("ARM_UCP_Finalize failed\r\n");
+        boot_debug("[DBG ] ARM_UCP_Finalize failed\r\n");
     }
 }
 

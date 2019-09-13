@@ -1,4 +1,28 @@
 {
+    "requires": ["bare-metal",
+                 "rtos-api",
+                 "update-client",
+                 "storage",
+                 "storage_filesystem",
+                 "SecureStore",
+                 "storage_tdb_internal",
+                 "mbed-bootloader",
+                 "mbedtls",
+                 "system-storage",
+                 "filesystem",
+                 "filesystemstore",
+                 "littlefs",
+                 "spif",
+                 "qspif",
+                 "sd",
+                 "flashiap-block-device",
+                 "direct-access-devicekey",
+                 "tdbstore",
+                 "kv-config",
+                 "kv-global-api",
+                 "kv-map",
+                 "device_key"
+    ],
     "config": {
         "documentation": {
             "options": [

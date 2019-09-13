@@ -29,6 +29,63 @@ const char hexTable[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
                            '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
                           };
 
+
+#if DEVICE_SERIAL && SHOW_SERIAL_OUTPUT
+
+#include "hal/serial_api.h"
+
+static serial_t stdio_uart = { 0 };
+
+/* module variable for keeping track of initialization */
+static bool not_initialized = true;
+
+/**
+ * @brief Initialization serial port if needed.
+ *.
+ */
+static void init_serial()
+{
+    if (not_initialized)
+    {
+        not_initialized = false;
+
+        serial_init(&stdio_uart, STDIO_UART_TX, STDIO_UART_RX);
+#if MBED_CONF_PLATFORM_STDIO_BAUD_RATE
+        serial_baud(&stdio_uart, MBED_CONF_PLATFORM_STDIO_BAUD_RATE);
+#endif
+    }
+
+}
+
+/**
+ * @brief Function that directly outputs to serial port in blocking mode.
+ *
+ * @param string outputed to serial port.
+ */
+void boot_debug(const char *s)
+{
+    init_serial();
+
+    while(*s) {
+        serial_putc(&stdio_uart, *s);
+        s++;
+    }
+}
+
+#else
+
+/**
+ * @brief Fake function for boot debug.
+ *
+ * @param unused.
+ */
+void boot_debug(const char *s)
+{
+    (void)s;
+}
+
+#endif // DEVICE_SERIAL && SHOW_SERIAL_OUTPUT
+
 /**
  * @brief Event handler for UCP callbacks.
  *
@@ -36,8 +93,6 @@ const char hexTable[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
  */
 void arm_ucp_event_handler(uint32_t event)
 {
-    tr_debug("event: %" PRIx32, event);
-
     event_callback = event;
 }
 
@@ -56,8 +111,6 @@ void print_sha256_function(const uint8_t SHA[SIZEOF_SHA256])
         buffer[2 * index]     = hexTable[value >> 4];
         buffer[2 * index + 1] = hexTable[value & 0x0F];
     }
-
-    tr_info("SHA256: %s", buffer);
 }
 
 void print_progress_function(uint32_t progress, uint32_t total)
@@ -69,22 +122,22 @@ void print_progress_function(uint32_t progress, uint32_t total)
 
     if (last_percent != percent) {
         last_percent = percent;
-        tr_trace("\r[BOOT] [");
+        boot_debug("\r[BOOT] [");
 
         /* print + for progress or a space otherwise */
         for (uint8_t index = 0; index < 70; index++) {
             if (index <= percent) {
-                tr_trace("+");
+                boot_debug("+");
             } else {
-                tr_trace(" ");
+                boot_debug(" ");
             }
         }
 
         /* finish progress bar with a newline once complete */
         if (progress >= total) {
-            tr_trace("]\r\n");
+            boot_debug("]\r\n");
         } else {
-            tr_trace("]");
+            boot_debug("]");
 
             /* explicitly flush debug channel, usually this is triggered by \n */
             tr_flush();

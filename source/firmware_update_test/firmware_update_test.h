@@ -16,8 +16,7 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------
 
-#if (defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1)) || \
-    (defined(BOOTLOADER_POWER_CUT_TEST) && (BOOTLOADER_POWER_CUT_TEST == 1))
+#if (defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1))
 
 void copyAppToSDCard(uint32_t firmware_size);
 

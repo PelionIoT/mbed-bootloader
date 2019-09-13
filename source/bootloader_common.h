@@ -51,9 +51,11 @@ void print_sha256_function(const uint8_t SHA[SIZEOF_SHA256]);
 
 void print_progress_function(uint32_t progress, uint32_t total);
 
+void boot_debug(const char *s);
+
 #define MBED_BOOTLOADER_ASSERT(condition, ...) { \
     if (!(condition)) {                          \
-        tr_error(__VA_ARGS__);                   \
+        boot_debug("[ERR ] ASSERT\r\n");                   \
         /* coverity[no_escape] */                \
         while (1) __WFI();                       \
     }                                            \
@@ -68,54 +70,12 @@ void print_progress_function(uint32_t progress, uint32_t total);
 #define printProgress
 #endif
 
-#if SHOW_SERIAL_OUTPUT
-/* if the global trace flag is not enabled, use printf directly */
-#if !defined(MBED_CONF_MBED_TRACE_ENABLE) || MBED_CONF_MBED_TRACE_ENABLE == 0
+#if MBED_CONF_MBED_TRACE_ENABLE
 
-#define __STDC_FORMAT_MACROS
-#include <inttypes.h>
-#include <stdio.h>
-
-#ifdef tr_debug
-#undef tr_debug
-#endif
-#if 0
-#define tr_debug(fmt, ...)   printf("[DBG ] " fmt "\r\n", ##__VA_ARGS__)
-#else
-#define tr_debug(...)
+#ifndef SHOW_SERIAL_OUTPUT
+#define SHOW_SERIAL_OUTPUT 1
 #endif
 
-#ifdef tr_info
-#undef tr_info
-#endif
-#define tr_info(fmt, ...)    printf("[BOOT] " fmt "\r\n", ##__VA_ARGS__)
-
-#ifdef tr_warning
-#undef tr_warning
-#endif
-#define tr_warning(fmt, ...) printf("[WARN] " fmt "\r\n", ##__VA_ARGS__)
-
-#ifdef tr_error
-#undef tr_error
-#endif
-#define tr_error(fmt, ...)   printf("[ERR ] " fmt "\r\n", ##__VA_ARGS__)
-
-#ifdef tr_trace
-#undef tr_trace
-#endif
-#define tr_trace(fmt, ...)   printf(fmt, ##__VA_ARGS__)
-
-#ifdef tr_flush
-#undef tr_flush
-#endif
-// Disable flushing if mbed-printf is used, since mbed-printf is not buffered
-#ifdef MBED_CONF_MINIMAL_PRINTF_ENABLE_FLOATING_POINT
-#define tr_flush(x)
-#else
-#define tr_flush(x)          fflush(stdout)
-#endif
-
-#endif
 #else
 
 #ifdef tr_debug

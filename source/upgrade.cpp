@@ -31,10 +31,6 @@
 
 #include <inttypes.h>
 
-#if defined(BOOTLOADER_POWER_CUT_TEST) && (BOOTLOADER_POWER_CUT_TEST == 1)
-#include "bootloader_power_cut_test.h"
-#endif
-
 #if defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1)
 #include "firmware_update_test.h"
 #endif
@@ -66,15 +62,9 @@ uint8_t *bootCounter = NULL;
 bool checkStoredApplication(uint32_t source,
                             arm_uc_firmware_details_t *details)
 {
-    tr_debug("checkStoredApplication");
-
     bool result = false;
 
     if (details) {
-#if defined(BOOTLOADER_POWER_CUT_TEST) && (BOOTLOADER_POWER_CUT_TEST == 1)
-        power_cut_test_assert_state(POWER_CUT_TEST_STATE_FIRMWARE_VALIDATION);
-#endif
-
         /* setup UCP buffer for reading firmware */
         arm_uc_buffer_t buffer = {
             .size_max = BUFFER_SIZE,
@@ -117,8 +107,7 @@ bool checkStoredApplication(uint32_t source,
 
                 offset += buffer.size;
             } else {
-                tr_trace("\r\n");
-                tr_debug("ARM_UCP_Read returned 0 bytes");
+                boot_debug("[DBG ] ARM_UCP_Read returned 0 bytes\r\n");
                 break;
             }
 
@@ -192,13 +181,9 @@ bool upgradeApplicationFromStorage(void)
     /*************************************************************************/
     /* Step 1. Validate the active application.                              */
     /*************************************************************************/
-
-    tr_info("Active firmware integrity check:");
-
     int activeApplicationStatus = checkActiveApplication(&imageDetails);
 
-#if (defined(BOOTLOADER_POWER_CUT_TEST) && (BOOTLOADER_POWER_CUT_TEST == 1)) ||\
-    (defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1))
+#if (defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1))
     /* for tests, always copy firmware from sd card
      * hence disable version check by setting the active version to 0.
      */
@@ -214,7 +199,7 @@ bool upgradeApplicationFromStorage(void)
     /* default to a fresh boot */
     uint8_t localCounter = 0;
 
-    if (heapVersion && bootCounter) {
+    if (!hwResetReason() && heapVersion && bootCounter) {
         /* fresh boot */
         if (*heapVersion != imageDetails.version) {
             /* copy version to heap */
@@ -222,16 +207,11 @@ bool upgradeApplicationFromStorage(void)
 
             /* reset boot counter */
             *bootCounter = 0;
-
-            tr_debug("heapVersion: %" PRIu64, *heapVersion);
-            tr_debug("bootCounter: %" PRIu8, *bootCounter);
         }
         /* reboot */
         else {
             /* increment boot counter*/
             *bootCounter += 1;
-
-            tr_debug("bootCounter: %" PRIu8, *bootCounter);
         }
 
         /* transfer value */
@@ -242,7 +222,6 @@ bool upgradeApplicationFromStorage(void)
     if ((activeApplicationStatus == RESULT_SUCCESS) &&
             (localCounter < MAX_BOOT_RETRIES)) {
         printSHA256(imageDetails.hash);
-        tr_info("Version: %" PRIu64, imageDetails.version);
 
         /* mark active firmware as usable */
         activeFirmwareValid = true;
@@ -252,15 +231,15 @@ bool upgradeApplicationFromStorage(void)
     }
     /* active image is empty */
     else if (activeApplicationStatus == RESULT_EMPTY) {
-        tr_info("Active firmware slot is empty");
+        boot_debug("[DBG ] Active firmware slot is empty\r\n");
     }
     /* active image cannot be run */
     else if (localCounter >= MAX_BOOT_RETRIES) {
-        tr_error("Failed to boot active application %d times", MAX_BOOT_RETRIES);
+        boot_debug("[DBG ] Failed to boot active application\r\n");
     }
     /* active image failed integrity check */
     else {
-        tr_error("Active firmware integrity check failed");
+        boot_debug("[DBG ] Active firmware integrity check failed\r\n");
     }
 
     /*************************************************************************/
@@ -306,8 +285,6 @@ bool upgradeApplicationFromStorage(void)
             if ((imageDetails.version > bestStoredFirmwareImageDetails.version) &&
                     (imageDetails.size > 0) &&
                     (firmwareDifferentFromActive || !activeFirmwareValid)) {
-                tr_info("Slot %" PRIu32 " firmware integrity check:",
-                        index);
 
                 /* Validate candidate firmware body. */
                 bool firmwareValid = checkStoredApplication(index,
@@ -316,7 +293,6 @@ bool upgradeApplicationFromStorage(void)
                 if (firmwareValid) {
                     /* Integrity check passed */
                     printSHA256(imageDetails.hash);
-                    tr_info("Version: %" PRIu64, imageDetails.version);
 
                     /* check firmware size fits */
                     if (imageDetails.size <= MBED_CONF_MBED_BOOTLOADER_MAX_APPLICATION_SIZE) {
@@ -332,26 +308,20 @@ bool upgradeApplicationFromStorage(void)
                                ARM_UC_GUID_SIZE);
                     } else {
                         /* Firmware candidate size too large */
-                        tr_error("Slot %" PRIu32 " firmware size too large %"
-                                 PRIu32 " > %" PRIu32, index,
-                                 (uint32_t) imageDetails.size,
-                                 (uint32_t) MBED_CONF_MBED_BOOTLOADER_MAX_APPLICATION_SIZE);
+                        boot_debug("Update image too large\r\n");
                     }
                 } else {
                     /* Integrity check failed */
-                    tr_error("Slot %" PRIu32 " firmware integrity check failed",
-                             index);
+                    boot_debug("Update image integrity check failed\r\n");
                 }
             } else {
-                tr_info("Slot %" PRIu32 " firmware is of older date",
-                        index);
+                boot_debug("Update image is older\r\n");
                 /* do not print HMAC version
                 printSHA256(imageDetails.hash);
                 */
-                tr_info("Version: %" PRIu64, imageDetails.version);
             }
         } else {
-            tr_info("Slot %" PRIu32 " is empty", index);
+            boot_debug("No Update image\r\n");
         }
     }
 
@@ -363,29 +333,47 @@ bool upgradeApplicationFromStorage(void)
     if (bestStoredFirmwareIndex != INVALID_IMAGE_INDEX) {
         /* if copy fails, retry up to MAX_COPY_RETRIES */
         for (uint32_t retries = 0; retries < MAX_COPY_RETRIES; retries++) {
-            tr_info("Update active firmware using slot %" PRIu32 ":",
-                    bestStoredFirmwareIndex);
+            boot_debug("[DBG ] Update active firmware\r\n");
 
             activeFirmwareValid = copyStoredApplication(bestStoredFirmwareIndex,
                                                         &bestStoredFirmwareImageDetails);
 
             /* if image is valid, break out from loop */
             if (activeFirmwareValid) {
-                tr_info("New active firmware is valid");
+                boot_debug("[DBG ] New active firmware is valid\r\n");
 #if defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1)
                 firmware_update_test_validate();
 #endif
                 break;
             } else {
-                tr_error("Firmware update failed");
+                boot_debug("[DBG ] Firmware update failed\r\n");
             }
         }
     } else if (activeFirmwareValid) {
-        tr_info("Active firmware up-to-date");
+        boot_debug("[DBG ] Active firmware up-to-date\r\n");
     } else {
-        tr_error("Active firmware invalid");
+        boot_debug("[ERR ] Active firmware invalid\r\n");
     }
 
     // return the integrity of the active image
     return activeFirmwareValid;
+}
+
+/**
+ * Gets reason of device reset
+ * @return true if the reason is caused by hw  eg power ON,  hw reset or brown_out .
+ * otherwise the reason is caused by sw  or exception.
+ */
+bool hwResetReason(void) {
+#if DEVICE_RESET_REASON
+    reset_reason_t  reason = hal_reset_reason_get();
+
+    if(reason < RESET_REASON_SOFTWARE) {
+        return true;
+    }
+    else {
+        return false;
+    }
+#endif
+    return false;
 }

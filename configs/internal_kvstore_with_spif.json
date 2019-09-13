@@ -1,4 +1,29 @@
 {
+    "requires": ["bare-metal",
+                 "rtos-api",
+                 "update-client",
+                 "storage",
+                 "storage_filesystem",
+                 "SecureStore",
+                 "storage_tdb_internal",
+                 "mbed-bootloader",
+                 "mbedtls",
+                 "system-storage",
+                 "filesystem",
+                 "filesystemstore",
+                 "littlefs",
+                 "spif",
+                 "spif-driver",
+                 "qspif",
+                 "sd",
+                 "flashiap-block-device",
+                 "direct-access-devicekey",
+                 "tdbstore",
+                 "kv-config",
+                 "kv-global-api",
+                 "kv-map",
+                 "device_key"
+    ],
     "config": {
         "documentation": {
             "options": [
@@ -51,7 +76,8 @@
     "macros": [
         "ARM_UC_USE_PAL_BLOCKDEVICE=1",
         "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP_BLOCKDEVICE",
-        "MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE=1024"
+        "MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE=1024",
+        "APP_KVSTORE_SIZE=(2*16*1024)"
     ],
     "target_overrides": {
         "*": {
@@ -62,7 +88,7 @@
             "target.restrict_size"                      : "0x8000",
             "storage.storage_type"                      : "TDB_INTERNAL",
             "storage_tdb_internal.internal_base_address": "(MBED_ROM_START+MBED_BOOTLOADER_SIZE)",
-            "storage_tdb_internal.internal_size"        : "(16*1024)",
+            "storage_tdb_internal.internal_size"        : "APP_KVSTORE_SIZE",
             "update-client.application-details"         : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE+MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)",
             "mbed-bootloader.application-start-address" : "(MBED_CONF_UPDATE_CLIENT_APPLICATION_DETAILS + MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE)",
             "target.components_add"                     : ["SPIF"],
