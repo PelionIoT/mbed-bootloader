@@ -68,6 +68,10 @@ extern ARM_UC_PAAL_UPDATE MBED_CLOUD_CLIENT_UPDATE_STORAGE;
 
 int main(void)
 {
+    // this forces the linker to keep bootloader object now that it's not
+    // printed anymore
+    *const_cast<volatile uint32_t *>(&bootloader.layout);
+
     /* Use malloc to allocate uint64_t version number on the heap */
     heapVersion = (uint64_t *) malloc(sizeof(uint64_t));
     bootCounter = (uint8_t *) malloc(1);

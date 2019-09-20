@@ -60,6 +60,8 @@
             "platform.stdio-baud-rate"                 : 115200,
             "platform.stdio-flush-at-exit"             : false,
 
+            "target.restrict_size"                     : "0x8000",
+
             "target.components_add"                    : ["SPIF"],
             "storage.storage_type"                     : "FILESYSTEM",
             "storage_filesystem.filesystem"            : "LITTLE",

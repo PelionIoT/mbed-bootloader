@@ -78,6 +78,7 @@
             "update-client.storage-size"               : "((MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS) * MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS)",
             "update-client.storage-locations"          : 1,
             "update-client.firmware-header-version"    : "2",
+            "target.restrict_size"                     : "0x8000",
             "target.components_add"                    : ["SD"],
             "sd.CRC_ENABLED"                           : 0,
             "storage.storage_type"                     : "FILESYSTEM",

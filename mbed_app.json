@@ -21,10 +21,7 @@
                  "kv-config",
                  "kv-global-api",
                  "kv-map",
-                 "device_key",
-                 "greentea-client",
-                 "unity",
-                 "utest"
+                 "device_key"
     ],
     "config": {
         "documentation": {
@@ -79,6 +76,7 @@
             "update-client.storage-size"               : "((MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS) * MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS)",
             "update-client.storage-locations"          : 1,
             "update-client.firmware-header-version"    : "2",
+            "target.restrict_size"                     : "0x8000",
             "target.components_add"                    : ["SD"],
             "sd.CRC_ENABLED"                           : 0,
             "storage.storage_type"                     : "FILESYSTEM",
@@ -134,6 +132,8 @@
             "target.device_has_remove"                 : [ "LPTICKER" ]
         },
         "NUCLEO_L073RZ": {
+            "mbed-bootloader.bootloader-size"          : "(34*1024)",
+            "target.restrict_size"                     : "0x8800",
             "target.boot-stack-size"                   : "1024"
         },
         "UBLOX_EVK_ODIN_W2": {

@@ -72,6 +72,7 @@
             "platform.stdio-baud-rate"             : 115200,
             "platform.stdio-flush-at-exit"         : false,
             "update-client.firmware-header-version": "2",
+            "target.restrict_size"                 : "0x8000",
             "target.components_add"                : ["SD"],
             "sd.CRC_ENABLED"                       : 0,
             "mbed-bootloader.use-kvstore-rot"      : 0,
