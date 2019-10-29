@@ -106,6 +106,17 @@
         },
         "NUCLEO_F429ZI": {
             "kvstore-size": "2*64*1024"
+        },
+        "DISCO_F746NG": {
+            "mbed-bootloader.bootloader-size"          : "(32*1024)",
+            "kvstore-size"                             : "(2*32*1024)",
+            "update-client.application-details"        : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE + KVSTORE_SIZE)",
+            "update-client.storage-address"            : "(MBED_ROM_START+512*1024)",
+            "update-client.storage-size"               : "(512*1024)",
+            "update-client.storage-locations"          : 1,
+            "update-client.storage-page"               : 1,
+            "mbed-bootloader.max-application-size"     : "((32+127+256)*1024)",
+            "target.device_has_remove"                 : [ "LPTICKER" ]
         }
     }
 }
