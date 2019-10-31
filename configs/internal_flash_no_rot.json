@@ -12,7 +12,6 @@
                  "filesystem",
                  "filesystemstore",
                  "littlefs",
-                 "fat_chan",
                  "spif",
                  "qspif",
                  "sd",
@@ -107,6 +106,15 @@
         },
         "NUCLEO_F429ZI": {
             "kvstore-size": "2*64*1024"
+        },
+        "NUCLEO_H743ZI2": {
+            "mbed-bootloader.bootloader-size"          : "(2 * 128 * 1024)",
+            "target.restrict_size"                     : "0x20000",
+            "update-client.application-details"        : "(MBED_ROM_START + (2 * 128 * 1024))",
+            "update-client.storage-address"            : "(MBED_ROM_START + (1024 * 1024) + KVSTORE_SIZE)",
+            "mbed-bootloader.max-application-size"     : "(6 * 128 * 1024)",
+            "kvstore-size"                             : "(2 * 128 * 1024)",
+            "target.device_has_remove"                 : [ "LPTICKER" ]
         },
         "DISCO_F746NG": {
             "mbed-bootloader.bootloader-size"          : "(32*1024)",

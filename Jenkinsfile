@@ -129,6 +129,7 @@ def build_test_config = [
   ["DISCO_L475VG_IOT01A", "configs/internal_kvstore_with_qspif.json",    "GCC_ARM"],
   ["LPC55S69_NS",         "configs/psa.json",                            "GCC_ARM"],
   ["NUCLEO_F303RE",       "configs/internal_kvstore_with_spif.json",     "GCC_ARM"],
+  ["NUCLEO_H743ZI2",      "configs/internal_flash_no_rot.json",          "GCC_ARM"]
 ]
 
 
