@@ -44,6 +44,9 @@ bootloader_configs = {
     ),
     "internal_kvstore_with_qspif": (
         "configs/internal_kvstore_with_qspif.json", "internal-kvstore", "qspif"
+    ),
+    "internal_kvstore_with_spif": (
+        "configs/internal_kvstore_with_spif.json", "internal-kvstore", "spif"
     )
 }
 # format: ("target", "config_name")
@@ -56,7 +59,8 @@ targets = [
     ("UBLOX_EVK_ODIN_W2", "internal_kvstore_with_sd"),  # cloud client
     ("NUCLEO_F411RE", "kvstore_and_fw_candidate_on_sd"),  # cloud client
     ("DISCO_L475VG_IOT01A", "internal_kvstore_with_qspif"),  # cloud client
-    ("LPC55S69_NS", "psa")  # cloud client
+    ("LPC55S69_NS", "psa"),  # cloud client
+    ("NUCLEO_F303RE", "internal_kvstore_with_spif")  # cloud client
 ]
 toolchain = "GCC_ARM"
 profile = "tiny.json"  # default value, changed via command line arg --profile

@@ -108,7 +108,6 @@ def build_test_config = [
   // Bootloaders for just testing the build
   ["NRF52840_DK",   "configs/kvstore_and_fw_candidate_on_sd.json", "GCC_ARM"],
   ["NUCLEO_L073RZ", "configs/kvstore_and_fw_candidate_on_sd.json", "GCC_ARM"],
-  ["NUCLEO_F303RE", "configs/internal_kvstore_with_spif.json",     "GCC_ARM"],
   ["DISCO_L475VG_IOT01A", "configs/external_kvstore_with_qspif.json", "GCC_ARM"],
 
   // Bootloaders for release.
@@ -122,6 +121,7 @@ def build_test_config = [
   ["NUCLEO_F411RE",       "configs/kvstore_and_fw_candidate_on_sd.json", "GCC_ARM"],
   ["DISCO_L475VG_IOT01A", "configs/internal_kvstore_with_qspif.json",    "GCC_ARM"],
   ["LPC55S69_NS",         "configs/psa.json",                            "GCC_ARM"],
+  ["NUCLEO_F303RE",       "configs/internal_kvstore_with_spif.json",     "GCC_ARM"],
 ]
 
 
