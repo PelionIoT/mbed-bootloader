@@ -34,7 +34,7 @@ const char hexTable[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
 
 #include "hal/serial_api.h"
 
-static serial_t stdio_uart = { 0 };
+static serial_t uart = { 0 };
 
 /* module variable for keeping track of initialization */
 static bool not_initialized = true;
@@ -49,12 +49,11 @@ static void init_serial()
     {
         not_initialized = false;
 
-        serial_init(&stdio_uart, STDIO_UART_TX, STDIO_UART_RX);
-#if MBED_CONF_PLATFORM_STDIO_BAUD_RATE
-        serial_baud(&stdio_uart, MBED_CONF_PLATFORM_STDIO_BAUD_RATE);
+        serial_init(&uart, STDIO_UART_TX, STDIO_UART_RX);
+#if MBED_CONF_PLATFORM_DEFAULT_SERIAL_BAUD_RATE
+        serial_baud(&uart, MBED_CONF_PLATFORM_DEFAULT_SERIAL_BAUD_RATE);
 #endif
     }
-
 }
 
 /**
@@ -67,7 +66,7 @@ void boot_debug(const char *s)
     init_serial();
 
     while(*s) {
-        serial_putc(&stdio_uart, *s);
+        serial_putc(&uart, *s);
         s++;
     }
 }

@@ -26,141 +26,73 @@
     "config": {
         "documentation": {
             "options": [
-                    "The configuration for boards is:",
-                    "- Firmware storage is on an external SD card block device",
-                    "- Root of Trust is obtain from internal flash in kvstore",
-                    "The flash regions are as follows:",
-                    "1. Bootloader - 32KiB from the beginning of flash",
-                    "2. KVSTORE - 2 flash sectors immediately following the bootloader",
-                    "3. Active App Metadata Header - (1KiB/2KiB) from the end of KVSTORE",
-                    "4. Active App - From end of header to the end of flash",
+                    "This configuration takes advantage of the fact that most MCUs have 2 banks of flash",
+                    "which can be read from and written to independently of each other. Hence we put all",
+                    "executables on the first bank, and all storage on the second bank such that reading",
+                    "and writing storage does not halt execution. The regions are as follows:",
+                    "1. Bootloader - 32kb from the beginning of flash",
+                    "2. Active App Metadata Header - 1kb from the end of Bootloader",
+                    "3. Active App - From end of header to the end of first bank of flash",
+                    "4. Firmware Candidate Storage - from the beginning of the second bank of flash",
                     "+--------------------------+",
                     "|                          |",
                     "|                          |",
                     "|                          |",
+                    "|Firmware Candidate Storage|",
+                    "|                          |",
+                    "|                          |",
+                    "|                          |",
+                    "+--------------------------+ <-+ update-client.storage-address",
+                    "|                          |",
                     "|        Active App        |",
-                    "|                          |",
-                    "|                          |",
                     "|                          |",
                     "+--------------------------+ <-+ mbed-bootloader.application-start-address",
                     "|Active App Metadata Header|",
                     "+--------------------------+ <-+ update-client.application-details",
                     "|                          |",
-                    "|         KVSTORE          |",
-                    "|                          |",
-                    "+--------------------------+ <-+ storage_tdb_internal.internal_base_address",
-                    "|                          |",
                     "|        Bootloader        |",
                     "|                          |",
                     "+--------------------------+ <-+ 0",
-                    "Firmware Candidate Storage is on external SD Card at an offset of 64 MiB.",
-                    "The storage size is the size of the maximum application size (i.e. Active",
-                    "Application region size) multiplied by the number of storage-locations.",
-                    "(storage-locations is set to 1 in this configuration)",
-                    "Please note the config for NRF52840_DK is different. The kvstore region is",
-                    "at the end of flash"
+                    "",
+                    "",
+                    "NRF52840_DK: setting `target.static_memory_defines` as `true` is an alternative for the workaround",
+                    "https://github.com/ARMmbed/mbed-os/pull/11510 . The PR in question is waiting for approval"
             ]
         }
     },
     "macros": [
-        "ARM_UC_USE_PAL_BLOCKDEVICE=1",
-        "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP_BLOCKDEVICE",
-        "MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE=1024"
+        "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP",
+        "MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE=1024",
+        "MBED_BOOTLOADER_FLASH_BANK_SIZE=MBED_ROM_SIZE/2"
     ],
     "target_overrides": {
         "*": {
             "platform.use-mpu"                         : false,
-            "platform.stdio-baud-rate"                 : 115200,
-            "platform.stdio-flush-at-exit"             : false,
-            "update-client.storage-address"            : "(1024*1024*64)",
-            "update-client.storage-size"               : "((MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS) * MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS)",
-            "update-client.storage-locations"          : 1,
+            "platform.default-serial-baud-rate"        : 115200,
             "update-client.firmware-header-version"    : "2",
+            "mbed-bootloader.use-kvstore-rot"          : 0,
             "target.restrict_size"                     : "0x8000",
-            "target.components_add"                    : ["SD"],
-            "sd.CRC_ENABLED"                           : 0,
-            "storage.storage_type"                     : "FILESYSTEM",
-            "storage_filesystem.internal_base_address" : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE)",
-            "update-client.application-details"        : "(MBED_CONF_STORAGE_FILESYSTEM_INTERNAL_BASE_ADDRESS + MBED_CONF_STORAGE_FILESYSTEM_RBP_INTERNAL_SIZE)",
             "mbed-bootloader.application-start-address": "(MBED_CONF_UPDATE_CLIENT_APPLICATION_DETAILS + MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE)",
-            "target.extra_labels_remove"               : [ "WICED", "CORDIO", "PSA", "MBED_SPM" ]
+            "update-client.application-details"        : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE)",
+            "update-client.storage-address"            : "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE)",
+            "update-client.storage-size"               : "(MBED_BOOTLOADER_FLASH_BANK_SIZE)",
+            "update-client.storage-locations"          : 1,
+            "update-client.storage-page"               : 1
         },
         "K64F": {
-            "storage_filesystem.rbp_internal_size"     : "(2*4*1024)",
-            "target.device_has_remove"                 : [ "LPTICKER" ]
-        },
-        "K66F": {
-            "storage_filesystem.rbp_internal_size"     : "(2*4*1024)",
-            "target.device_has_remove"                 : [ "LPTICKER" ]
-        },
-        "KW24D": {
-            "storage_filesystem.rbp_internal_size"     : "(2*2*1024)",
-            "sd.SPI_CS"                                : "PTC4",
-            "sd.SPI_MOSI"                              : "PTC6",
-            "sd.SPI_MISO"                              : "PTC7",
-            "sd.SPI_CLK"                               : "PTC5",
-            "target.device_has_remove"                 : [ "LPTICKER" ]
-        },
-        "NUCLEO_L476RG": {
-            "storage_filesystem.rbp_internal_size"     : "(2*2*1024)",
-            "mbed-bootloader.application-start-address": "(MBED_ROM_START+38*1024)",
-            "target.device_has_remove"                 : [ "LPTICKER" ]
-        },
-        "DISCO_L476VG": {
-            "storage_filesystem.rbp_internal_size"     : "(2*2*1024)",
-            "mbed-bootloader.application-start-address": "(MBED_ROM_START+38*1024)",
-            "target.device_has_remove"                 : [ "LPTICKER" ]
-        },
-        "NUCLEO_F411RE": {
-            "storage_filesystem.rbp_internal_size"     : "(2*16*1024)",
-            "sd.SPI_CS"                                : "PB_9",
-            "sd.SPI_MOSI"                              : "PC_3",
-            "sd.SPI_MISO"                              : "PC_2",
-            "sd.SPI_CLK"                               : "PC_7",
-            "target.device_has_remove"                 : [ "LPTICKER" ]
+            "target.extra_labels_remove": [ "PSA" ]
         },
         "NUCLEO_F429ZI": {
-            "storage_filesystem.rbp_internal_size"     : "(2*16*1024)",
-            "target.device_has_remove"                 : [ "LPTICKER" ]
-        },
-        "NUCLEO_F207ZG": {
-            "storage_filesystem.rbp_internal_size"     : "(2*16*1024)",
-            "sd.SPI_MOSI"                              : "PC_12",
-            "sd.SPI_MISO"                              : "PC_11",
-            "sd.SPI_CLK"                               : "PC_10",
-            "sd.SPI_CS"                                : "PA_15",
-            "target.device_has_remove"                 : [ "LPTICKER" ]
-        },
-        "NUCLEO_L073RZ": {
-            "mbed-bootloader.bootloader-size"          : "(34*1024)",
-            "target.restrict_size"                     : "0x8800",
-            "target.boot-stack-size"                   : "1024"
-        },
-        "UBLOX_EVK_ODIN_W2": {
-            "storage_filesystem.rbp_internal_size"     : "(2*16*1024)",
-            "target.device_has_remove"                 : [ "LPTICKER" ]
-        },
-        "UBLOX_C030_U201": {
-            "storage_filesystem.rbp_internal_size"     : "(2*16*1024)",
-            "target.device_has_remove"                 : [ "LPTICKER" ]
+            "target.extra_labels_remove": [ "PSA" ]
         },
         "NRF52840_DK": {
-            "storage_filesystem.internal_base_address" : "(1016*1024)",
-            "storage_filesystem.rbp_internal_size"     : "(2*4*1024)",
-            "update-client.application-details"        : "(236*1024)",
-            "mbed-bootloader.max-application-size"     : "MBED_CONF_STORAGE_FILESYSTEM_INTERNAL_BASE_ADDRESS - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS",
-            "target.OUTPUT_EXT"                        : "hex",
-            "update-client.storage-address"            : "(1024*1024*1)",
-            "update-client.storage-size"               : "(1024*1024*1)",
-            "update-client.storage-locations"          : 1,
-            "update-client.storage-page"               : 1,
-            "sd.SPI_CS"                                : "A0",
-            "sd.SPI_MOSI"                              : "A1",
-            "sd.SPI_MISO"                              : "A2",
-            "sd.SPI_CLK"                               : "A3",
-            "target.features_remove"                   : ["CRYPTOCELL310"],
-            "target.macros_remove"                     : ["MBEDTLS_CONFIG_HW_SUPPORT"],
-            "target.macros_add"                        : ["NRFX_RNG_ENABLED=1", "RNG_ENABLED=1", "NRF_QUEUE_ENABLED=1"]
+            "target.static_memory_defines"     : true,
+            "target.features_remove"           : ["CRYPTOCELL310"],
+            "target.macros_remove"             : ["MBEDTLS_CONFIG_HW_SUPPORT"],
+            "target.macros_add"                : ["NRFX_RNG_ENABLED=1", "RNG_ENABLED=1", "NRF_QUEUE_ENABLED=1"]
+        },
+        "NUCLEO_L073RZ": {
+            "target.boot-stack-size"                   : "1024"
         }
     }
 }

@@ -72,8 +72,7 @@
     "target_overrides": {
         "*": {
             "platform.use-mpu"                         : false,
-            "platform.stdio-baud-rate"                 : 115200,
-            "platform.stdio-flush-at-exit"             : false,
+            "platform.default-serial-baud-rate"        : 115200,
             "update-client.storage-address"            : "(1024*1024*64)",
             "update-client.storage-size"               : "((MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS) * MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS)",
             "update-client.storage-locations"          : 1,

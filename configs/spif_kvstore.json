@@ -57,8 +57,7 @@
     "target_overrides": {
         "*": {
             "platform.use-mpu"                         : false,
-            "platform.stdio-baud-rate"                 : 115200,
-            "platform.stdio-flush-at-exit"             : false,
+            "platform.default-serial-baud-rate"        : 115200,
 
             "target.restrict_size"                     : "0x8000",
 

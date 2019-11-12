@@ -1,0 +1,15 @@
+{
+    "config": {
+        "output-uuid": "\"PREDEFINED_APP_OUTPUT\""
+    },
+    "target_overrides": {
+        "*": {
+            "target.features_add"  : ["BOOTLOADER"],
+            "platform.stdio-convert-newlines": true,
+            "platform.stdio-baud-rate": 115200,
+            "target.bootloader_img" : "BOOTLOADER_BIN",
+            "target.header_offset" : "HEADER_OFFSET",
+            "target.app_offset"  : "APP_OFFSET"
+        }
+    }
+}

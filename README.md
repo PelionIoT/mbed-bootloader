@@ -6,7 +6,8 @@ Generic bootloader to be used in conjunction with [Pelion Device Management Clie
 
 1. Install `mbed-cli` https://github.com/ARMmbed/mbed-cli
 1. Run `mbed deploy` to pull in dependencies
-1. Compile by running `mbed compile -t GCC_ARM -m (K64F|NUCLEO_F429ZI|UBLOX_EVK_ODIN_W2) --profile=tiny.json`
+1. Compile by running `mbed compile -t GCC_ARM -m [target] --profile=tiny.json --app-config=configs/.json`
+
 
 ## Installation instructions
 
@@ -216,8 +217,8 @@ The firmware update candidates is stored on an external sd card if the default c
     |                          |
     +--------------------------+<-+ update-client.storage-size + update-client.storage-address
     |                          |
-    +--------------------------+
-    |                          |
+    +--------------------------+
+    |                          |
     |   Firmware Candidate 1   |
     |                          |
     +--------------------------+
@@ -226,7 +227,7 @@ The firmware update candidates is stored on an external sd card if the default c
     +--------------------------+
     |                          |
     +--------------------------+
-    |                          |
+    |                          |
     |   Firmware Candidate 0   |
     |                          |
     +--------------------------+

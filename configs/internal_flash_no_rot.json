@@ -80,8 +80,7 @@
     ],
     "target_overrides": {
         "*": {
-            "platform.stdio-baud-rate"                 : 115200,
-            "platform.stdio-flush-at-exit"             : false,
+            "platform.default-serial-baud-rate"        : 115200,
             "update-client.firmware-header-version"    : "2",
             "mbed-bootloader.use-kvstore-rot"          : 0,
             "mbed-bootloader.bootloader-size"          : "APPLICATION_SIZE",
@@ -98,6 +97,10 @@
         },
         "K64F": {
             "kvstore-size": "2*16*1024",
+            "update-client.storage-page": 8
+        },
+        "K66F": {
+            "kvstore-size": "2*48*1024",
             "update-client.storage-page": 8
         },
         "NUCLEO_F429ZI": {

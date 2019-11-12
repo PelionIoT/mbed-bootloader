@@ -28,7 +28,7 @@
             "options": [
                     "The configuration for boards is:",
                     "- Firmware storage is on an external QSPI Flash(QSPIF) block device",
-                    "- Internal KVStore only",
+                    "- KVStore is on an external QSPI Flash block device",
                     "The flash regions are as follows:",
                     "1. Bootloader - 32KiB from the beginning of flash",
                     "2. KVSTORE - 2 flash sectors immediately following the bootloader",
@@ -68,7 +68,12 @@
                     "+--------------------------+",
                     "|   Firmware Candidate 0   |",
                     "|     Metadata Header      |",
-                    "+--------------------------+ <-+ Start of QSPIF block device (i.e. 0x0); update-client.storage-address"
+                    "+--------------------------+ <-+ update-client.storage-address (1024 * 1024)",
+                    "|                          |",
+                    "|     External KVStore     |",
+                    "|      Size: 1MB           |",
+                    "|                          |",
+                    "+--------------------------+ <-+ Start of QSPIF block device (i.e. 0x0); "
             ]
         }
     },
@@ -85,13 +90,17 @@
             "platform.stdio-flush-at-exit"              : false,
             "update-client.firmware-header-version"     : "2",
             "target.restrict_size"                      : "0x8000",
-            "storage.storage_type"                      : "TDB_INTERNAL",
-            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START+MBED_BOOTLOADER_SIZE)",
-            "storage_tdb_internal.internal_size"        : "APP_KVSTORE_SIZE",
-            "update-client.application-details"         : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE+MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)",
+            "storage.storage_type"                      : "FILESYSTEM",
+            "storage_filesystem.filesystem"             : "LITTLE",
+            "storage_filesystem.blockdevice"            : "QSPIF",
+            "storage_filesystem.external_size"          : "(1024 * 1024)",
+            "storage_filesystem.external_base_address"  : "(0)",
+            "storage_filesystem.rbp_internal_size"      : "(APP_KVSTORE_SIZE)",
+            "storage_filesystem.internal_base_address"  : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE)",
+            "update-client.application-details"         : "(MBED_CONF_STORAGE_FILESYSTEM_INTERNAL_BASE_ADDRESS + MBED_CONF_STORAGE_FILESYSTEM_RBP_INTERNAL_SIZE)",
             "mbed-bootloader.application-start-address" : "(MBED_CONF_UPDATE_CLIENT_APPLICATION_DETAILS + MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE)",
             "target.components_add"                     : ["QSPIF"],
-            "update-client.storage-address"             : "0",
+            "update-client.storage-address"             : "(MBED_CONF_STORAGE_FILESYSTEM_EXTERNAL_BASE_ADDRESS + MBED_CONF_STORAGE_FILESYSTEM_EXTERNAL_SIZE)",
             "update-client.storage-size"                : "((MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS) * MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS)",
             "update-client.storage-locations"           : 1
         },
