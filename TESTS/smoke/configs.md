@@ -4,12 +4,12 @@ Following table is parsed automatically by build scripts, so follow the format E
 
 |TARGET|BOOTLOADER_BIN|HEADER_OFFSET|APP_OFFSET|UPDATE_HEADER_OFFSET|UPDATE_APP_OFFSET|
 |------|--------------|-------------|---------|--------------------|------------------|
-|DISCO_L475VG_IOT01A|../../BUILD/mbed_app/DISCO_L475VG_IOT01A/GCC_ARM/mbed-bootloader-internal.bin|0x8000|0x8400|0x80000|0x80070|
-|K64F|../../BUILD/mbed_app/K64F/GCC_ARM/mbed-bootloader-internal.bin|0x8000|0x8400|0x80000|0x80070|
-|NRF52840_DK|../../BUILD/mbed_app/NRF52840_DK/GCC_ARM/mbed-bootloader-internal.hex|0x8000|0x8400|0x80000|0x80070|
-|NUCLEO_F303RE|../../BUILD/mbed_app/NUCLEO_F303RE/GCC_ARM/mbed-bootloader-internal.bin|0x8000|0x8400|0x40000|0x40070|
-|NUCLEO_F411RE|../../BUILD/mbed_app/NUCLEO_F411RE/GCC_ARM/mbed-bootloader-internal.bin|0x8000|0x8400|0x40000|0x40070|
-|NUCLEO_F429ZI|../../BUILD/mbed_app/NUCLEO_F429ZI/GCC_ARM/mbed-bootloader-internal.bin|0x8000|0x8400|0x100000|0x100070|
+|DISCO_L475VG_IOT01A|../../BUILD/mbed_app/DISCO_L475VG_IOT01A/GCC_ARM/mbed-bootloader.bin|0x8000|0x8400|0x80000|0x80070|
+|K64F|../../BUILD/mbed_app/K64F/GCC_ARM/mbed-bootloader.bin|0x8000|0x8400|0x80000|0x80070|
+|NRF52840_DK|../../BUILD/mbed_app/NRF52840_DK/GCC_ARM/mbed-bootloader.hex|0x8000|0x8400|0x80000|0x80070|
+|NUCLEO_F303RE|../../BUILD/mbed_app/NUCLEO_F303RE/GCC_ARM/mbed-bootloader.bin|0x8000|0x8400|0x40000|0x40070|
+|NUCLEO_F411RE|../../BUILD/mbed_app/NUCLEO_F411RE/GCC_ARM/mbed-bootloader.bin|0x8000|0x8400|0x40000|0x40070|
+|NUCLEO_F429ZI|../../BUILD/mbed_app/NUCLEO_F429ZI/GCC_ARM/mbed-bootloader.bin|0x8000|0x8400|0x100000|0x100070|
 
 
 ## Finding the values
@@ -25,8 +25,8 @@ Most values could be found from the `mbed_app.json` used for building the binary
 Usually you need to calculate these values from `mbed_config.h`, sometimes these are easy to find from compilation output.
 
 ```
-Building project mbed-bootloader-internal (K64F, GCC_ARM)
-Scan: mbed-bootloader-internal
+Building project mbed-bootloader (K64F, GCC_ARM)
+Scan: mbed-bootloader
 Using ROM regions application, post_application in this build.
   Region application: size 0x8000, offset 0x0
   Region post_application: size 0xf8000, offset 0x8000
