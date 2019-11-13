@@ -12,7 +12,7 @@
 //   from ARM Limited or its affiliates.
 //----------------------------------------------------------------------------
 
-repoName = "mbed-bootloader-internal"
+repoName = "mbed-bootloader"
 
 // This build archives artifacts at build stage and later on copies artifacts
 // on the later state. Permission is needed for copying, even for the job itself.
@@ -218,7 +218,7 @@ def SmokeTestStep(step_name,
 
           deleteDir()
           unstash "deployed_bootloader_repo"
-          copyArtifacts filter: '**/mbed-bootloader-internal.*', projectName: '${JOB_NAME}', selector: specific('${BUILD_NUMBER}')
+          copyArtifacts filter: '**/mbed-bootloader.*', projectName: '${JOB_NAME}', selector: specific('${BUILD_NUMBER}')
           dir('TESTS/smoke') {
             sh "./build.sh ${target}"
             sh "ls"
@@ -261,7 +261,7 @@ def ReleaseStep() {
         dir(repoName) {
           deleteDir()
           unstash "deployed_bootloader_repo"
-          copyArtifacts filter: '**/mbed-bootloader-internal*', projectName: '${JOB_NAME}', selector: specific('${BUILD_NUMBER}')
+          copyArtifacts filter: '**/mbed-bootloader*', projectName: '${JOB_NAME}', selector: specific('${BUILD_NUMBER}')
           sh 'mkdir release'
           sh 'python2 ./scripts/make_release.py -o release --prebuilt'
           archiveArtifacts artifacts: 'release/*'
