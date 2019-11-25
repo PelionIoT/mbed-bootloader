@@ -48,7 +48,9 @@ def deployBootloaderRepoStep() {
           execute("mbed ls")
           execute("mkdir release")
           execute("python ./scripts/make_release.py --patch -o release")
-          stash name: "deployed_bootloader_repo", useDefaultExcludes: false
+          execute("cd mbed-os;git archive -o ../mbed.tar HEAD")
+          execute("tar cjf mbed-bootloader.tar.bz2 --exclude mbed-os --exclude mbed-bootloader.tar.bz2 * .[a-z]*")
+          stash name: "deployed_bootloader_repo", includes: "mbed-bootloader.tar.bz2", useDefaultExcludes: false
         }
       }
     }
@@ -67,6 +69,9 @@ def bootloaderBuildStep(stepName,
           // get the deployed source code from previous step
           deleteDir()
           unstash "deployed_bootloader_repo"
+          execute("tar xjf mbed-bootloader.tar.bz2")
+          execute("mkdir mbed-os")
+          execute("tar xf mbed.tar -C mbed-os")
           execute("mbed config root .")
           execute("ls -al")
           def build_dir = mbed_app_json[0..-6]
@@ -148,6 +153,9 @@ def greenteaTestStep(step_name,
         dir(repo_name) {
           deleteDir()
           unstash "deployed_bootloader_repo"
+          execute("tar xjf mbed-bootloader.tar.bz2")
+          execute("mkdir mbed-os")
+          execute("tar xf mbed.tar -C mbed-os")
           execute("mbed config root .")
           execute("ls -al")
 
@@ -218,6 +226,9 @@ def SmokeTestStep(step_name,
 
           deleteDir()
           unstash "deployed_bootloader_repo"
+          execute("tar xjf mbed-bootloader.tar.bz2")
+          execute("mkdir mbed-os")
+          execute("tar xf mbed.tar -C mbed-os")
           copyArtifacts filter: '**/mbed-bootloader.*', projectName: '${JOB_NAME}', selector: specific('${BUILD_NUMBER}')
           dir('TESTS/smoke') {
             sh "./build.sh ${target}"
@@ -261,8 +272,11 @@ def ReleaseStep() {
         dir(repoName) {
           deleteDir()
           unstash "deployed_bootloader_repo"
+          execute("tar xjf mbed-bootloader.tar.bz2")
+          execute("mkdir mbed-os")
+          execute("tar xf mbed.tar -C mbed-os")
           copyArtifacts filter: '**/mbed-bootloader*', projectName: '${JOB_NAME}', selector: specific('${BUILD_NUMBER}')
-          sh 'mkdir release'
+          sh 'mkdir -p release'
           sh 'python2 ./scripts/make_release.py -o release --prebuilt'
           archiveArtifacts artifacts: 'release/*'
         }
