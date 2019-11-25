@@ -55,6 +55,7 @@ targets = [
     ("K64F", "internal_flash_no_rot"),  # cloud client
     ("K64F", "internal_kvstore_with_sd"),  # cloud client
     ("K66F", "internal_flash_no_rot"),  # cloud client
+    ("NUCLEO_L4R5ZI", "internal_flash_no_rot"),  # cloud client
     ("NUCLEO_F429ZI", "internal_flash_no_rot"),  # cloud client
     ("UBLOX_EVK_ODIN_W2", "internal_kvstore_with_sd"),  # cloud client
     ("NUCLEO_F411RE", "kvstore_and_fw_candidate_on_sd"),  # cloud client
