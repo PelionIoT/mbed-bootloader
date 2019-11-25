@@ -12,6 +12,7 @@
                  "filesystem",
                  "filesystemstore",
                  "littlefs",
+                 "fat_chan",
                  "spif",
                  "spif-driver",
                  "qspif",
