@@ -12,6 +12,7 @@
                  "filesystem",
                  "filesystemstore",
                  "littlefs",
+                 "fat_chan",
                  "spif",
                  "qspif",
                  "sd",
