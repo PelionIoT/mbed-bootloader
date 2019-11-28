@@ -52,6 +52,7 @@ targets = [
     ("NUCLEO_L4R5ZI", "internal_flash_no_rot"),  # cloud client
     ("NUCLEO_F429ZI", "internal_flash_no_rot"),  # cloud client
     ("UBLOX_EVK_ODIN_W2", "internal_kvstore_with_sd"),  # cloud client
+    ("NRF52840_DK", "internal_kvstore_with_qspif"),
     ("NUCLEO_F411RE", "kvstore_and_fw_candidate_on_sd"),  # cloud client
     ("DISCO_L475VG_IOT01A", "internal_kvstore_with_qspif"),  # cloud client
     ("LPC55S69_NS", "psa"),  # cloud client

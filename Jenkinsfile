@@ -123,6 +123,7 @@ def build_test_config = [
   ["K64F", "configs/internal_flash_no_rot.json",          "GCC_ARM"],
   ["K64F", "configs/internal_kvstore_with_sd.json",       "GCC_ARM"],
   ["K66F", "configs/internal_flash_no_rot.json",          "GCC_ARM"],
+  ["NRF52840_DK",         "configs/internal_kvstore_with_qspif.json",    "GCC_ARM"],
   ["NUCLEO_L4R5ZI",       "configs/internal_flash_no_rot.json",          "GCC_ARM"],
   ["NUCLEO_F429ZI",       "configs/internal_flash_no_rot.json",          "GCC_ARM"],
   ["UBLOX_EVK_ODIN_W2",   "configs/internal_kvstore_with_sd.json",       "GCC_ARM"],

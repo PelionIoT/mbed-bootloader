@@ -92,14 +92,20 @@
             "storage_tdb_internal.internal_size"        : "APP_KVSTORE_SIZE",
             "update-client.application-details"         : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE+MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)",
             "mbed-bootloader.application-start-address" : "(MBED_CONF_UPDATE_CLIENT_APPLICATION_DETAILS + MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE)",
-            "target.components_add"                     : ["QSPIF"],
             "update-client.storage-address"             : "0",
             "update-client.storage-size"                : "((MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS) * MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS)",
-            "update-client.storage-locations"           : 1
+            "update-client.storage-locations"           : 1,
+            "update-client.storage-page"                : 1
         },
         "DISCO_L475VG_IOT01A": {
             "target.restrict_size"           : "0x9000",
             "mbed-bootloader.bootloader-size": "(36*1024)"
+        },
+        "NRF52840_DK": {
+            "target.static_memory_defines"             : true,
+            "target.features_remove"                   : ["CRYPTOCELL310"],
+            "target.macros_remove"                     : ["MBEDTLS_CONFIG_HW_SUPPORT"],
+            "target.macros_add"                        : ["NRFX_RNG_ENABLED=1", "RNG_ENABLED=1", "NRF_QUEUE_ENABLED=1"]
         }
     }
 }
