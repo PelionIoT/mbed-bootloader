@@ -30,12 +30,6 @@ bootloader_configs = {
     "internal_flash_no_rot": (
         "configs/internal_flash_no_rot.json", "internal-flash", "no-rot"
     ),
-    "nrf52_block_device_fake_rot": (
-        "configs/nrf52_block_device_fake_rot.json", "block-device", "fake-rot"
-    ),
-    "nrf52_internal_flash_fake_rot": (
-        "configs/nrf52_internal_flash_fake_rot.json", "internal-flash", "fake-rot"
-    ),
     "internal_kvstore_with_sd": (
         "configs/internal_kvstore_with_sd.json", "internal-flash", "sd-update"
     ),
@@ -228,7 +222,7 @@ if __name__ == '__main__':
             map_file = path.join(build_dir, bootloader_repo_name + '_application.map')
 
             bin_file_type = "bin"
-            if target == "NRF52_DK" or target == "LPC55S69_NS":
+            if target == "NRF52840_DK" or target == "LPC55S69_NS":
                 bin_file_type = "hex"
             bin_file = path.join(build_dir, bootloader_repo_name + '.' + bin_file_type)
 
@@ -249,10 +243,10 @@ if __name__ == '__main__':
                 release_desc, bin_file_type)
             dst = path.join(result_dir, fn)
 
-            if target == "NRF52_DK":
+            if target == "NRF52840_DK":
                 print("merging uicr with bootloader")
                 # merge bootloader with uicr
-                uicr_fn = "scripts/uicr-0x74000.hex"
+                uicr_fn = "configs/uicr-0x74000.hex"
                 mergehex(bin_file, uicr_fn)
 
             print(dst, path.isfile(dst))
