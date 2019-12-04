@@ -82,7 +82,7 @@ def bootloaderBuildStep(stepName,
 
           // build with default setup
           execute("mbed --version")
-          execute("mbed compile -m ${target} -t ${toolchain} --app-config ${mbed_app_json} --build ${build_dir} --profile=tiny.json")
+          execute("mbed compile -m ${target} -t ${toolchain} --app-config ${mbed_app_json} --build ${build_dir} --profile release")
 
           // Archive the binary
           def file_extension = ("${target}" == "NRF52_DK" || "${target}" == "NRF52840_DK" || "${target}" == "LPC55S69_NS") ? "hex" : "bin"

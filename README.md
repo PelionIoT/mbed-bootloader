@@ -6,7 +6,7 @@ Generic bootloader to be used in conjunction with [Pelion Device Management Clie
 
 1. Install `mbed-cli` https://github.com/ARMmbed/mbed-cli
 1. Run `mbed deploy` to pull in dependencies
-1. Compile by running `mbed compile -t GCC_ARM -m [target] --profile=tiny.json --app-config=configs/.json`
+1. Compile by running `mbed compile -t GCC_ARM -m [target] --profile release --app-config=configs/.json`
 
 
 ## Installation instructions
@@ -121,10 +121,10 @@ User **may** set in `mbed_app.json`:
     +--------------------------+ <-+ 0
 ```
 
-### Notes on Flash Layout of non PSA tagets with external storage 
+### Notes on Flash Layout of non PSA tagets with external storage
 
 - This is the default implementation at the default mbed_app.json
-- The default flash layout is tested with GCC_ARM compiler and tiny.json compiler profile only. If a different compiler is used, the bootloader binary size will be larger and the offsets needs to be adjusted.
+- The default flash layout is tested with GCC_ARM compiler with newlib-nano and release profile only. If a different compiler is used, the bootloader binary size will be larger and the offsets needs to be adjusted.
 - The KVSTORE regions require even number of flash erase sectors.
 
 ### The flash layout for non PSA targets with KVStore and firmware storage on internal flash
@@ -159,10 +159,10 @@ User **may** set in `mbed_app.json`:
     +--------------------------+ <-+ 0
 ```
 
-### Notes on Flash Layout of non PSA targets 
+### Notes on Flash Layout of non PSA targets
 
 - Internal Flash Only layout can be enabled by compiling the bootloader with the configuration file `--app-config configs/internal_flash_no_rot.json`. By default the firmware storage region and filesystem is on [external sd card](#external-storage).
-- The default flash layout is tested with GCC_ARM compiler and tiny.json compiler profile only. If a different compiler is used, the bootloader binary size will be larger and the offsets needs to be adjusted.
+- The default flash layout is tested with GCC_ARM compiler with newlib-nano and release profile only. If a different compiler is used, the bootloader binary size will be larger and the offsets needs to be adjusted.
 - The KVSTORE regions require even number of flash erase sectors. If the firmware candidate is stored on internal flash, the bootloader does not access the KVStore. But it still needs to be there for the benefit of the Pelion Device Management Client.
 - Some micro-controller chips are designed with 2 banks of flash that can be read from and written to independently from each other. Hence it is a good idea to put your bootloader and active application on bank 1, your kvstore and firmware candidate storage on bank 2. This way when the application writes data to flash, it doesn't need to halt the processor execution to do it.
 
@@ -198,7 +198,7 @@ User **may** set in `mbed_app.json`:
 ### Notes on Flash Layout of PSA targets
 
 - This is the PSA default implementation using the default mbed_app.json
-- The default flash layout is tested with GCC_ARM compiler and tiny.json compiler profile only. If a different compiler is used, the bootloader binary size will be larger and the offsets needs to be adjusted.
+- The default flash layout is tested with GCC_ARM compiler with newlib-nano and release profile only. If a different compiler is used, the bootloader binary size will be larger and the offsets needs to be adjusted.
 - The KVSTORE regions require even number of flash erase sectors. For PSA targets the KVStore is located at the ends of the flash.
 
 ### Alignment

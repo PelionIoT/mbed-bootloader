@@ -64,7 +64,7 @@ targets = [
     ("NUCLEO_F303RE", "internal_kvstore_with_spif")  # cloud client
 ]
 toolchain = "GCC_ARM"
-profile = "tiny.json"  # default value, changed via command line arg --profile
+profile = "release"  # default value, changed via command line arg --profile
 bootloader_repo_name = os.path.basename(os.getcwd())
 
 def check_clean():
