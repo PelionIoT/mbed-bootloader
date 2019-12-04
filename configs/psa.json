@@ -72,6 +72,7 @@
     ],
     "target_overrides": {
         "*": {
+            "target.default_lib"                       : "small",
             "platform.use-mpu"                         : false,
             "platform.default-serial-baud-rate"        : 115200,
             "update-client.storage-address"            : "(1024*1024*64)",

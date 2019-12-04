@@ -54,7 +54,7 @@ The `mbedhtrun --compare-log` method is explained here: https://github.com/ARMmb
 
 ## Running
 
-1. Build the bootloader, for example `mbed compile -m K64F --profile tiny.json`
+1. Build the bootloader, for example `mbed compile -m K64F --profile release`
 1. Go to smoke test directory `cd TESTS/smoke`
 1. Build smoke test image `./build.sh K64F`
 1. Run in RAAS: `./test.sh K64F https://ruka.mbedcloudtesting.com:443`
