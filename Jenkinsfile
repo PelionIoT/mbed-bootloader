@@ -288,7 +288,7 @@ def ReleaseStep() {
             mkdir mbed-os
             tar xf mbed.tar -C mbed-os
             mkdir -p release
-            python2 ./scripts/make_release.py -o release --prebuilt
+            python ./scripts/make_release.py -o release --prebuilt
           ''')
           archiveArtifacts artifacts: 'release/*'
         }
