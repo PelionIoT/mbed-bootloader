@@ -44,12 +44,16 @@ def deployBootloaderRepoStep() {
         dir(repoName) {
           deleteDir()
           checkout scm
-          execute("mbed deploy --protocol ssh")
-          execute("mbed ls")
-          execute("mkdir release")
-          execute("python ./scripts/make_release.py --patch -o release")
-          execute("cd mbed-os;git archive -o ../mbed.tar HEAD")
-          execute("tar cjf mbed-bootloader.tar.bz2 --exclude mbed-os --exclude mbed-bootloader.tar.bz2 * .[a-z]*")
+          sh ('''
+            mbed deploy --protocol ssh
+            mbed ls
+            mkdir release
+            python ./scripts/make_release.py --patch -o release
+            cd mbed-os
+            git archive -o ../mbed.tar HEAD
+            cd ..
+            tar cjf mbed-bootloader.tar.bz2 --exclude mbed-os --exclude mbed-bootloader.tar.bz2 * .[a-z]*
+          ''')
           stash name: "deployed_bootloader_repo", includes: "mbed-bootloader.tar.bz2", useDefaultExcludes: false
         }
       }
@@ -69,11 +73,12 @@ def bootloaderBuildStep(stepName,
           // get the deployed source code from previous step
           deleteDir()
           unstash "deployed_bootloader_repo"
-          execute("tar xjf mbed-bootloader.tar.bz2")
-          execute("mkdir mbed-os")
-          execute("tar xf mbed.tar -C mbed-os")
-          execute("mbed config root .")
-          execute("ls -al")
+          sh ('''
+            tar xjf mbed-bootloader.tar.bz2
+            mkdir mbed-os
+            tar xf mbed.tar -C mbed-os
+            mbed config root .
+          ''')
           def build_dir = mbed_app_json[0..-6]
           if (build_dir.indexOf('/') != -1) {
             build_dir = build_dir.tokenize('/')[1]
@@ -81,8 +86,10 @@ def bootloaderBuildStep(stepName,
           build_dir = "BUILD/" + build_dir + "/${target}/${toolchain}"
 
           // build with default setup
-          execute("mbed --version")
-          execute("mbed compile -m ${target} -t ${toolchain} --app-config ${mbed_app_json} --build ${build_dir} --profile release")
+          sh ("""
+            mbed --version
+            mbed compile -m ${target} -t ${toolchain} --app-config ${mbed_app_json} --build ${build_dir} --profile release
+          """)
 
           // Archive the binary
           def file_extension = ("${target}" == "NRF52_DK" || "${target}" == "NRF52840_DK" || "${target}" == "LPC55S69_NS") ? "hex" : "bin"
@@ -92,7 +99,7 @@ def bootloaderBuildStep(stepName,
 
           // Run generate size graph if it is K64F
           if ("${toolchain}" == "GCC_ARM" && "${target}" == "K64F") {
-            execute("./scripts/runSizeTestAndGenerateGraph.sh")
+            sh('./scripts/runSizeTestAndGenerateGraph.sh')
             archiveArtifacts artifacts: 'mbed-os-linker-report/**/*.*'
           }
         }
@@ -154,18 +161,19 @@ def greenteaTestStep(step_name,
         dir(repo_name) {
           deleteDir()
           unstash "deployed_bootloader_repo"
-          execute("tar xjf mbed-bootloader.tar.bz2")
-          execute("mkdir mbed-os")
-          execute("tar xf mbed.tar -C mbed-os")
-          execute("mbed config root .")
-          execute("ls -al")
+          sh ("""
+            tar xjf mbed-bootloader.tar.bz2
+            mkdir mbed-os
+            tar xf mbed.tar -C mbed-os
+            mbed config root .
+            ls -al
 
-          // remove bootloader application main file
-          execute("rm source/main.cpp")
+            # remove bootloader application main file
+            rm source/main.cpp
 
-          // build greentea tests
-          execute("mbed test --compile -m ${target} -t ${toolchain} -n '*bootloader-hmac*' --app-config configs/test_configs/greentea.json")
-
+            # build greentea tests
+            mbed test --compile -m ${target} -t ${toolchain} -n '*bootloader-hmac*' --app-config configs/test_configs/greentea.json
+          """)
           env.RAAS_USERNAME = "ci"
           env.RAAS_PASSWORD = "ci"
           env.RAAS_PYCLIENT_FORCE_REMOTE_ALLOCATION = 1
@@ -180,7 +188,7 @@ def greenteaTestStep(step_name,
           if (test_spec_json_empty.trim() == "1") {
             echo "test_spec.json is empty, no tests to run"
           } else {
-            execute("mbedgt -g ${target}:raas_client:${raas}:443 -vV")
+            sh ("mbedgt -g ${target}:raas_client:${raas}:443 -vV")
           }
         }
       }
@@ -227,13 +235,14 @@ def SmokeTestStep(step_name,
 
           deleteDir()
           unstash "deployed_bootloader_repo"
-          execute("tar xjf mbed-bootloader.tar.bz2")
-          execute("mkdir mbed-os")
-          execute("tar xf mbed.tar -C mbed-os")
+          sh ('''
+            tar xjf mbed-bootloader.tar.bz2
+            mkdir mbed-os
+            tar xf mbed.tar -C mbed-os
+          ''')
           copyArtifacts filter: '**/mbed-bootloader.*', projectName: '${JOB_NAME}', selector: specific('${BUILD_NUMBER}')
           dir('TESTS/smoke') {
             sh "./build.sh ${target}"
-            sh "ls"
             archiveArtifacts artifacts: "**/${target}_smoke.*"
             sh "./test.sh ${target} ${raas}"
           }
@@ -273,12 +282,14 @@ def ReleaseStep() {
         dir(repoName) {
           deleteDir()
           unstash "deployed_bootloader_repo"
-          execute("tar xjf mbed-bootloader.tar.bz2")
-          execute("mkdir mbed-os")
-          execute("tar xf mbed.tar -C mbed-os")
           copyArtifacts filter: '**/mbed-bootloader*', projectName: '${JOB_NAME}', selector: specific('${BUILD_NUMBER}')
-          sh 'mkdir -p release'
-          sh 'python2 ./scripts/make_release.py -o release --prebuilt'
+          sh ('''
+            tar xjf mbed-bootloader.tar.bz2
+            mkdir mbed-os
+            tar xf mbed.tar -C mbed-os
+            mkdir -p release
+            python2 ./scripts/make_release.py -o release --prebuilt
+          ''')
           archiveArtifacts artifacts: 'release/*'
         }
       }
