@@ -96,12 +96,6 @@ def bootloaderBuildStep(stepName,
           def binary_path = build_dir + "/${repoName}.${file_extension}"
           archiveArtifacts artifacts: binary_path
           archiveArtifacts artifacts: build_dir + "/${repoName}_application.map"
-
-          // Run generate size graph if it is K64F
-          if ("${toolchain}" == "GCC_ARM" && "${target}" == "K64F") {
-            sh('./scripts/runSizeTestAndGenerateGraph.sh')
-            archiveArtifacts artifacts: 'mbed-os-linker-report/**/*.*'
-          }
         }
       }
     }
