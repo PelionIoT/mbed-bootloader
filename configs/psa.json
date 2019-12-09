@@ -92,32 +92,12 @@
         },
         "LPC55S69_NS": {
             "target.components_remove"                     : [ "SPM_MAILBOX" ],
-            "target.features_remove"                       : [ "BLE" ],
             "target.macros_remove"                         : ["MBED_FAULT_HANDLER_DISABLED"],
             "storage_filesystem.internal_base_address"     : "0x94000",
             "storage_filesystem.rbp_internal_size"         : "(15*1024)",
             "update-client.application-details"            : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE)",
             "mbed-bootloader.default-max-application-size" : "(MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS - MBED_CONF_STORAGE_FILESYSTEM_RBP_INTERNAL_SIZE)",
-            "target.secure_image_filename"                 : null,
-            "platform.stdio-baud-rate"                     : 115200,
-            "target.device_has_remove"                     : [
-                                                              "SERIAL_ASYNCH",
-                                                              "SERIAL_FC",
-                                                              "PORTOUT",
-                                                              "PORTINOUT",
-                                                              "RTC",
-                                                              "I2C_ASYNCH",
-                                                              "I2CSLAVE",
-                                                              "SPI_ASYNCH",
-                                                              "STDIO_MESSAGES",
-                                                              "LPTICKER",
-                                                              "CRC",
-                                                              "PORTIN",
-                                                              "PWMOUT",
-                                                              "ANALOGIN",
-                                                              "ANALOGOUT",
-                                                              "I2C"
-                                                             ]
+            "target.secure_image_filename"                 : null
         }
     }
 }
