@@ -122,8 +122,7 @@
             "update-client.storage-size"               : "(512*1024)",
             "update-client.storage-locations"          : 1,
             "update-client.storage-page"               : 1,
-            "mbed-bootloader.max-application-size"     : "((32+127+256)*1024)",
-            "target.device_has_remove"                 : [ "LPTICKER" ]
+            "mbed-bootloader.max-application-size"     : "((32+127+256)*1024)"
         },
         "NUCLEO_H743ZI2": {
             "kvstore-size"                     : "(2*128*1024)",
