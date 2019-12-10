@@ -88,7 +88,7 @@ def bootloaderBuildStep(stepName,
           // build with default setup
           sh ("""
             mbed --version
-            mbed compile -m ${target} -t ${toolchain} --app-config ${mbed_app_json} --build ${build_dir} --profile release
+            mbed compile -m ${target} -t ${toolchain} --app-config ${mbed_app_json} --build ${build_dir} --profile tiny.json
           """)
 
           // Archive the binary
