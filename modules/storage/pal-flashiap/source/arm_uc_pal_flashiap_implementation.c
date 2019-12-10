@@ -131,10 +131,6 @@ static arm_uc_error_t arm_uc_pal_flashiap_get_slot_addr_size(uint32_t slot_id,
             (slot_start_addr == ARM_UC_FLASH_INVALID_SIZE) ||
             (slot_end_addr == ARM_UC_FLASH_INVALID_SIZE) ||
             (slot_id >= MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS)) {
-        UC_PAAL_ERR_MSG("Aligning fw storage slot to erase sector failed"
-                        " storage_start_addr %" PRIX32 " slot_start_addr %" PRIX32
-                        " max_slot_size %" PRIX32, storage_start_addr, slot_start_addr,
-                        max_slot_size);
         *slot_addr = ARM_UC_FLASH_INVALID_SIZE;
         *slot_size = ARM_UC_FLASH_INVALID_SIZE;
     } else {
@@ -195,9 +191,6 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t slot_id,
                                            const arm_uc_firmware_details_t *details,
                                            arm_uc_buffer_t *buffer)
 {
-    UC_PAAL_TRACE("ARM_UC_PAL_FlashIAP_Prepare slot_id %" PRIu32 " details %p buffer %p",
-                  slot_id, details, buffer);
-
     arm_uc_error_t result = { .code = ERR_INVALID_PARAMETER };
     uint32_t slot_addr = ARM_UC_FLASH_INVALID_SIZE;
     uint32_t slot_size = ARM_UC_FLASH_INVALID_SIZE;
@@ -206,10 +199,8 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t slot_id,
     /* validate input */
     if (details && buffer && buffer->ptr && \
             slot_id < MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS) {
-        UC_PAAL_TRACE("FW size %" PRIu64, details->size);
         result.error = ERR_NONE;
     } else {
-        UC_PAAL_TRACE("Input validation failed");
     }
 
     /* calculate space for new firmware */
@@ -226,8 +217,6 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t slot_id,
 
         if ((result.error == ERR_NONE) && (erase_size > slot_size)) {
             result.code = PAAL_ERR_FIRMWARE_TOO_LARGE;
-            UC_PAAL_ERR_MSG("Firmware too large! required %" PRIX32 " available: %" PRIX32,
-                            erase_size, slot_size);
         }
     }
 
@@ -237,7 +226,6 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t slot_id,
         int32_t status = arm_uc_flashiap_erase(slot_addr, erase_size);
 
         if (status != ARM_UC_FLASHIAP_SUCCESS) {
-            UC_PAAL_ERR_MSG("Flash erase failed with status %" PRIi32, status);
             result.code = ERR_INVALID_PARAMETER;
         }
     }
@@ -246,16 +234,12 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t slot_id,
     if (result.error == ERR_NONE) {
         result  = arm_uc_create_internal_header_v2(details, buffer);
         if (result.error != ERR_NONE) {
-            UC_PAAL_ERR_MSG("arm_uc_create_internal_header_v2 failed");
         }
     }
 
     /* write header blob */
     if (result.error == ERR_NONE) {
         uint32_t hdr_size = arm_uc_flashiap_round_up_to_page_size(ARM_UC_PAL_HEADER_SIZE);
-        UC_PAAL_TRACE("program: %" PRIX32 " %" PRIX32,
-                      slot_addr, hdr_size);
-
         /* write header */
         int32_t status = arm_uc_flashiap_program((const uint8_t *) buffer->ptr,
                                                  slot_addr,
@@ -302,9 +286,6 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Write(uint32_t slot_id,
                                                                    &slot_size);
 
     if (buffer && buffer->ptr && result.error == ERR_NONE) {
-        UC_PAAL_TRACE("ARM_UC_PAL_FlashIAP_Write: %p %" PRIX32 " %" PRIX32 " %" PRIX32,
-                      buffer->ptr, buffer->size, slot_addr, offset);
-
         /* set default error */
         result.code = ERR_INVALID_PARAMETER;
 
@@ -323,21 +304,13 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Write(uint32_t slot_id,
 
         /* check page alignment of the program address and size */
         if ((write_size % page_size == 0) && (physical_address % page_size == 0)) {
-            UC_PAAL_TRACE("programming addr %" PRIX32 " size %" PRIX32,
-                          physical_address, write_size);
             int status = arm_uc_flashiap_program((const uint8_t *) buffer->ptr,
                                                  physical_address,
                                                  write_size);
-            if (status != ARM_UC_FLASHIAP_SUCCESS) {
-                UC_PAAL_ERR_MSG("arm_uc_flashiap_program failed");
-            } else {
+            if (status == ARM_UC_FLASHIAP_SUCCESS) {
                 result.code = ERR_NONE;
                 arm_uc_pal_flashiap_signal_internal(ARM_UC_PAAL_EVENT_WRITE_DONE);
             }
-        } else {
-            UC_PAAL_ERR_MSG("program size %" PRIX32 " or address %" PRIX32
-                            " not aligned to page size %" PRIX32, buffer->size,
-                            physical_address, page_size);
         }
     } else {
         result.code = ERR_INVALID_PARAMETER;
@@ -358,7 +331,6 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Finalize(uint32_t slot_id)
 {
     arm_uc_error_t result = { .code = ERR_NONE };
 
-    UC_PAAL_TRACE("ARM_UC_PAL_FlashIAP_Finalize");
 
     arm_uc_pal_flashiap_signal_internal(ARM_UC_PAAL_EVENT_FINALIZE_DONE);
 
@@ -392,16 +364,10 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Read(uint32_t slot_id,
                                                                    &slot_size);
 
     if (buffer && buffer->ptr && result.error == ERR_NONE) {
-        UC_PAAL_TRACE("ARM_UC_PAL_FlashIAP_Read: %" PRIX32 " %" PRIX32 " %" PRIX32,
-                      slot_id, offset, buffer->size);
-
         /* find physical address of the read */
         uint32_t read_size = buffer->size;
         uint32_t hdr_size = arm_uc_flashiap_round_up_to_page_size(ARM_UC_PAL_HEADER_SIZE);
         uint32_t physical_address = slot_addr + hdr_size + offset;
-
-        UC_PAAL_TRACE("reading addr %" PRIX32 " size %" PRIX32,
-                      physical_address, read_size);
 
         int status = arm_uc_flashiap_read(buffer->ptr,
                                           physical_address,
@@ -412,7 +378,6 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Read(uint32_t slot_id,
             arm_uc_pal_flashiap_signal_internal(ARM_UC_PAAL_EVENT_READ_DONE);
         } else {
             result.code = ERR_INVALID_PARAMETER;
-            UC_PAAL_ERR_MSG("arm_uc_flashiap_read failed");
         }
     } else {
         result.code = ERR_INVALID_PARAMETER;
@@ -441,7 +406,6 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Activate(uint32_t slot_id)
 {
     arm_uc_error_t result = { .code = ERR_NONE };
 
-    UC_PAAL_TRACE("ARM_UC_PAL_FlashIAP_Activate");
 
     arm_uc_pal_flashiap_signal_internal(ARM_UC_PAAL_EVENT_ACTIVATE_DONE);
 
@@ -464,7 +428,6 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_GetFirmwareDetails(
     uint32_t slot_id,
     arm_uc_firmware_details_t *details)
 {
-    UC_PAAL_TRACE("ARM_UC_PAL_FlashIAP_GetFirmwareDetails");
 
     /* find slot address and size */
     uint32_t slot_addr = ARM_UC_FLASH_INVALID_SIZE;
@@ -487,10 +450,8 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_GetFirmwareDetails(
                 /* signal done */
                 arm_uc_pal_flashiap_signal_internal(ARM_UC_PAAL_EVENT_GET_FIRMWARE_DETAILS_DONE);
             } else {
-                UC_PAAL_ERR_MSG("arm_uc_parse_internal_header_v2 failed");
             }
         } else {
-            UC_PAAL_ERR_MSG("arm_uc_flashiap_read failed");
         }
     }
 
@@ -532,7 +493,6 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_GetActiveDetails(arm_uc_firmware_details_t *d
                         result.code = ERR_NONE;
                         /* Check the header magic */
                         if (headerMagic != ARM_UC_INTERNAL_HEADER_MAGIC_V2) {
-                            UC_PAAL_ERR_MSG("firmware header is v2, but does not contain v2 magic");
                             result.code = ERR_NOT_READY;
                         }
 
@@ -544,14 +504,12 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_GetActiveDetails(arm_uc_firmware_details_t *d
                                                       ARM_UC_INTERNAL_HEADER_SIZE_V2);
                             if (rc != 0) {
                                 result.code = ERR_NOT_READY;
-                                UC_PAAL_ERR_MSG("failed to read v2 header");
                             }
                         }
                         /* Parse the header */
                         if (result.error == ERR_NONE) {
                             result = arm_uc_parse_internal_header_v2(read_buffer, details);
                             if (result.error != ERR_NONE) {
-                                UC_PAAL_ERR_MSG("failed to parse v2 header");
                             }
                         }
                         break;
@@ -560,12 +518,10 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_GetActiveDetails(arm_uc_firmware_details_t *d
                      * Other firmware header versions can be supported here.
                      */
                     default: {
-                        UC_PAAL_ERR_MSG("unrecognized firmware header version");
                         result.code = ERR_NOT_READY;
                     }
                 }
             } else {
-                UC_PAAL_ERR_MSG("flash read failed");
             }
         } else {
             /* offset not set - zero out struct */
@@ -576,7 +532,6 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_GetActiveDetails(arm_uc_firmware_details_t *d
 
         /* signal event if operation was successful */
         if (result.error == ERR_NONE) {
-            UC_PAAL_TRACE("callback");
 
             arm_uc_pal_flashiap_signal_internal(ARM_UC_PAAL_EVENT_GET_ACTIVE_FIRMWARE_DETAILS_DONE);
         }

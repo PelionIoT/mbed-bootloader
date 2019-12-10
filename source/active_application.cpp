@@ -128,11 +128,6 @@ int checkActiveApplication(arm_uc_firmware_details_t *details)
 
                 /* update remaining bytes */
                 remaining -= readSize;
-
-#if defined(SHOW_PROGRESS_BAR) && SHOW_PROGRESS_BAR == 1
-                printProgress(details->size - remaining,
-                              details->size);
-#endif
             }
 
             /* finalize hash */
@@ -144,9 +139,6 @@ int checkActiveApplication(arm_uc_firmware_details_t *details)
 
             if (diff == 0) {
                 result = RESULT_SUCCESS;
-            } else {
-                printSHA256(details->hash);
-                printSHA256(SHA);
             }
         } else if ((headerValid) && (details->size == 0)) {
             /* header is valid but application size is 0 */
@@ -329,11 +321,6 @@ bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t *details)
                                                      programSize);
 
                 result = (retval == ARM_UC_FLASHIAP_SUCCESS);
-
-#if defined(SHOW_PROGRESS_BAR) && SHOW_PROGRESS_BAR == 1
-                printProgress(offset, details->size);
-#endif
-
                 offset += programSize;
             } else {
                 boot_debug("[DBG ] ARM_UCP_Read returned 0 bytes\r\n");

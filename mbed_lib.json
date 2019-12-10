@@ -22,11 +22,6 @@
             "value": 3,
             "macro_name": "MAX_BOOT_RETRIES"
         },
-        "show-progress-bar": {
-            "help": "show a progress bar during various stages of bootloader operation",
-            "value": 0,
-            "macro_name": "SHOW_PROGRESS_BAR"
-        },
         "show-serial-output": {
             "help": "Show boot status and progress on serial output. Disable output to save space on headless devices.",
             "value": 1,
