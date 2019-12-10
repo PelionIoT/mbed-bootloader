@@ -24,7 +24,7 @@
 
 #include "mbed.h"
 
-#include "update-client-paal/arm_uc_paal_update.h"
+#include "update-client-paal/arm_uc_paal_update_api.h"
 #include "update-client-common/arm_uc_types.h"
 
 #include "mbed_bootloader_info.h"
@@ -39,28 +39,6 @@ const arm_uc_installer_details_t bootloader = {
     .oem_hash = BOOTLOADER_OEM_SOURCE_HASH,
     .layout   = BOOTLOADER_STORAGE_LAYOUT
 };
-
-/* use a cut down version of ARM_UCP_FLASHIAP_BLOCKDEVICE to reduce
-   binary size if ARM_UC_USE_PAL_BLOCKDEVICE is set */
-#if defined(ARM_UC_USE_PAL_BLOCKDEVICE) && (ARM_UC_USE_PAL_BLOCKDEVICE==1)
-#undef  MBED_CLOUD_CLIENT_UPDATE_STORAGE
-#define MBED_CLOUD_CLIENT_UPDATE_STORAGE ARM_UCP_FLASHIAP_BLOCKDEVICE_READ_ONLY
-#endif
-
-#ifdef MBED_CLOUD_CLIENT_UPDATE_STORAGE
-extern ARM_UC_PAAL_UPDATE MBED_CLOUD_CLIENT_UPDATE_STORAGE;
-#else
-#error Update client storage must be defined in user configuration file
-#endif
-
-#ifndef MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS
-#error Application start address must be defined
-#endif
-
-/* If jump address is not set then default to start address. */
-#ifndef MBED_CONF_APP_APPLICATION_JUMP_ADDRESS
-#define MBED_CONF_APP_APPLICATION_JUMP_ADDRESS MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS
-#endif
 
 int main(void)
 {
@@ -83,11 +61,8 @@ int main(void)
     mbed_trace_print_function_set(boot_debug);
 #endif // MBED_CONF_MBED_TRACE_ENABLE
 
-    /* Set PAAL Update implementation before initializing Firmware Manager */
-    ARM_UCP_SetPAALUpdate(&MBED_CLOUD_CLIENT_UPDATE_STORAGE);
-
     /* Initialize PAL */
-    arm_uc_error_t ucp_result = ARM_UCP_Initialize(arm_ucp_event_handler);
+    arm_uc_error_t ucp_result = MBED_CLOUD_CLIENT_UPDATE_STORAGE.Initialize(arm_ucp_event_handler);
 
     /*************************************************************************/
     /* Update                                                                */
