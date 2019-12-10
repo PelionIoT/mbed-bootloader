@@ -31,10 +31,6 @@
 
 #include <inttypes.h>
 
-#if defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1)
-#include "firmware_update_test.h"
-#endif
-
 #ifndef MAX_FIRMWARE_LOCATIONS
 #define MAX_FIRMWARE_LOCATIONS             1
 #endif
@@ -183,13 +179,6 @@ bool upgradeApplicationFromStorage(void)
     /*************************************************************************/
     int activeApplicationStatus = checkActiveApplication(&imageDetails);
 
-#if (defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1))
-    /* for tests, always copy firmware from sd card
-     * hence disable version check by setting the active version to 0.
-     */
-    imageDetails.version = 0;
-#endif
-
     /* Compare active firmware hash with SHA256 in heap. Because mbed Cloud
        Client uses dynamic memory, if the hash is identical then:
         (1) the bootloader must have already copied it in once and
@@ -267,15 +256,11 @@ bool upgradeApplicationFromStorage(void)
             /* default to use firmware candidate */
             bool firmwareDifferentFromActive = true;
 
-            /* disable duplicate hash check when running test */
-#if !defined(FIRMWARE_UPDATE_TEST) || (FIRMWARE_UPDATE_TEST == 0)
-
             /* compare stored firmware with the currently active one */
             if (heapVersion) {
                 firmwareDifferentFromActive =
                     (*heapVersion != imageDetails.version);
             }
-#endif
 
             /* Only hash check firmwares with higher version number than the
                active image and with a different hash. This prevents rollbacks
@@ -341,9 +326,6 @@ bool upgradeApplicationFromStorage(void)
             /* if image is valid, break out from loop */
             if (activeFirmwareValid) {
                 boot_debug("[DBG ] New active firmware is valid\r\n");
-#if defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1)
-                firmware_update_test_validate();
-#endif
                 break;
             } else {
                 boot_debug("[DBG ] Firmware update failed\r\n");
