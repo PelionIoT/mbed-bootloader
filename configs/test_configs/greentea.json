@@ -25,7 +25,8 @@
                  "device_key",
                  "greentea-client",
                  "unity",
-                 "utest"
+                 "utest",
+                 "mbed-trace"
     ],
     "macros": [
         "MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE=1024"

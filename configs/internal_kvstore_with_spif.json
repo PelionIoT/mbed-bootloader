@@ -23,7 +23,8 @@
                  "kv-config",
                  "kv-global-api",
                  "kv-map",
-                 "device_key"
+                 "device_key",
+                 "mbed-trace"
     ],
     "config": {
         "documentation": {

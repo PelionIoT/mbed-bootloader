@@ -80,55 +80,6 @@ void boot_debug(const char *s);
     }                                            \
 }
 
-
-#if SHOW_SERIAL_OUTPUT
-#define printSHA256 print_sha256_function
-#define printProgress print_progress_function
-#else
-#define printSHA256
-#define printProgress
-#endif
-
-#if MBED_CONF_MBED_TRACE_ENABLE
-
-#ifndef SHOW_SERIAL_OUTPUT
-#define SHOW_SERIAL_OUTPUT 1
-#endif
-
-#else
-
-#ifdef tr_debug
-#undef tr_debug
-#endif
-#define tr_debug(...)
-
-#ifdef tr_info
-#undef tr_info
-#endif
-#define tr_info(...)
-
-#ifdef tr_warning
-#undef tr_warning
-#endif
-#define tr_warning(...)
-
-#ifdef tr_error
-#undef tr_error
-#endif
-#define tr_error(...)
-
-#ifdef tr_trace
-#undef tr_trace
-#endif
-#define tr_trace(...)
-
-#ifdef tr_flush
-#undef tr_flush
-#endif
-#define tr_flush(x)
-
-#endif
-
 #ifdef __cplusplus
 }
 #endif
