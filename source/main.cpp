@@ -34,10 +34,6 @@
 #include "mbed_application.h"
 #include "upgrade.h"
 
-#if defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1)
-#include "firmware_update_test.h"
-#endif
-
 const arm_uc_installer_details_t bootloader = {
     .arm_hash = BOOTLOADER_ARM_SOURCE_HASH,
     .oem_hash = BOOTLOADER_OEM_SOURCE_HASH,
@@ -93,14 +89,6 @@ int main(void)
     /* Initialize PAL */
     arm_uc_error_t ucp_result = ARM_UCP_Initialize(arm_ucp_event_handler);
 
-#if defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1)
-    const uint32_t firmware_size = 1024 * 16;
-    copyAppToSDCard(firmware_size);
-    firmware_update_test_setup();
-#endif
-
-
-
     /*************************************************************************/
     /* Update                                                                */
     /*************************************************************************/
@@ -124,10 +112,6 @@ int main(void)
 
     /* forward control to ACTIVE application if it is deemed sane */
     if (canForward) {
-#if defined(FIRMWARE_UPDATE_TEST) && (FIRMWARE_UPDATE_TEST == 1)
-        firmware_update_test_end();
-#endif
-
         boot_debug("booting...\r\n\r\n");
         mbed_start_application(MBED_CONF_APP_APPLICATION_JUMP_ADDRESS);
     }
