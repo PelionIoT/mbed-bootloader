@@ -70,10 +70,6 @@ extern const char hexTable[16];
 
 void arm_ucp_event_handler(uint32_t event);
 
-void print_sha256_function(const uint8_t SHA[SIZEOF_SHA256]);
-
-void print_progress_function(uint32_t progress, uint32_t total);
-
 void boot_debug(const char *s);
 
 #define MBED_BOOTLOADER_ASSERT(condition, ...) { \

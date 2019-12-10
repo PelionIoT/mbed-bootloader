@@ -106,10 +106,6 @@ bool checkStoredApplication(uint32_t source,
                 boot_debug("[DBG ] ARM_UCP_Read returned 0 bytes\r\n");
                 break;
             }
-
-#if defined(SHOW_PROGRESS_BAR) && SHOW_PROGRESS_BAR == 1
-            printProgress(offset, details->size);
-#endif
         }
 
         /* make sure buffer is large enough to contain both the SHA and HMAC */
@@ -136,9 +132,6 @@ bool checkStoredApplication(uint32_t source,
 
         if (diff == 0) {
             result = true;
-        } else {
-            printSHA256(details->hash);
-            printSHA256(hash_buffer.ptr);
         }
     }
 
@@ -210,8 +203,6 @@ bool upgradeApplicationFromStorage(void)
     /* mark active image as valid */
     if ((activeApplicationStatus == RESULT_SUCCESS) &&
             (localCounter < MAX_BOOT_RETRIES)) {
-        printSHA256(imageDetails.hash);
-
         /* mark active firmware as usable */
         activeFirmwareValid = true;
 
@@ -278,8 +269,6 @@ bool upgradeApplicationFromStorage(void)
 
                 if (firmwareValid) {
                     /* Integrity check passed */
-                    printSHA256(imageDetails.hash);
-
                     /* check firmware size fits */
                     if (imageDetails.size <= MBED_CONF_MBED_BOOTLOADER_MAX_APPLICATION_SIZE) {
                         /* Update best candidate information */
@@ -302,9 +291,6 @@ bool upgradeApplicationFromStorage(void)
                 }
             } else {
                 boot_debug("Update image is older\r\n");
-                /* do not print HMAC version
-                printSHA256(imageDetails.hash);
-                */
             }
         } else {
             boot_debug("No Update image\r\n");
