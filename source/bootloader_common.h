@@ -21,6 +21,29 @@
 
 #include <stdint.h>
 #include "bootloader_config.h"
+#include "arm_uc_paal_update_api.h"
+
+/* use a cut down version of ARM_UCP_FLASHIAP_BLOCKDEVICE to reduce
+   binary size if ARM_UC_USE_PAL_BLOCKDEVICE is set */
+#if defined(ARM_UC_USE_PAL_BLOCKDEVICE) && (ARM_UC_USE_PAL_BLOCKDEVICE==1)
+#undef  MBED_CLOUD_CLIENT_UPDATE_STORAGE
+#define MBED_CLOUD_CLIENT_UPDATE_STORAGE ARM_UCP_FLASHIAP_BLOCKDEVICE_READ_ONLY
+#endif
+
+#ifdef MBED_CLOUD_CLIENT_UPDATE_STORAGE
+extern ARM_UC_PAAL_UPDATE MBED_CLOUD_CLIENT_UPDATE_STORAGE;
+#else
+#error Update client storage must be defined in user configuration file
+#endif
+
+#ifndef MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS
+#error Application start address must be defined
+#endif
+
+/* If jump address is not set then default to start address. */
+#ifndef MBED_CONF_APP_APPLICATION_JUMP_ADDRESS
+#define MBED_CONF_APP_APPLICATION_JUMP_ADDRESS MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS
+#endif
 
 #ifdef __cplusplus
 extern "C" {

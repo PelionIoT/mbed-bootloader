@@ -22,7 +22,7 @@
 
 #include "upgrade.h"
 
-#include "update-client-paal/arm_uc_paal_update.h"
+#include "update-client-paal/arm_uc_paal_update_api.h"
 #include "active_application.h"
 #include "bootloader_common.h"
 
@@ -84,7 +84,7 @@ bool checkStoredApplication(uint32_t source,
                           buffer.size_max : (details->size - offset);
 
             /* fill buffer using UCP */
-            arm_uc_error_t ucp_status = ARM_UCP_Read(source,
+            arm_uc_error_t ucp_status = MBED_CLOUD_CLIENT_UPDATE_STORAGE.Read(source,
                                                      offset,
                                                      &buffer);
 
@@ -241,9 +241,10 @@ bool upgradeApplicationFromStorage(void)
         event_callback = CLEAR_EVENT;
 
         /* Check version and checksum first */
-        arm_uc_error_t ucp_status = ARM_UCP_GetFirmwareDetails(index,
-                                                               &imageDetails);
-
+        /*arm_uc_error_t ucp_status = ARM_UCP_GetFirmwareDetails(index,
+                                                               &imageDetails);*/
+        arm_uc_error_t ucp_status = MBED_CLOUD_CLIENT_UPDATE_STORAGE.GetFirmwareDetails(index,
+                                                                &imageDetails);
         /* wait for event if the call is accepted */
         if (ucp_status.error == ERR_NONE) {
             while (event_callback == CLEAR_EVENT) {

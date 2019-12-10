@@ -24,7 +24,7 @@
 #include "bootloader_common.h"
 
 #include "update-client-metadata-header/arm_uc_metadata_header_v2.h"
-#include "update-client-paal/arm_uc_paal_update.h"
+#include "update-client-paal/arm_uc_paal_update_api.h"
 #include "update-client-pal-flashiap/arm_uc_pal_flashiap_platform.h"
 #include "mbedtls/sha256.h"
 #include "mbed.h"
@@ -58,7 +58,7 @@ bool readActiveFirmwareHeader(arm_uc_firmware_details_t *details)
         event_callback = CLEAR_EVENT;
 
         /* get active firmware details using UCP */
-        arm_uc_error_t status = ARM_UCP_GetActiveFirmwareDetails(details);
+        arm_uc_error_t status = MBED_CLOUD_CLIENT_UPDATE_STORAGE.GetActiveFirmwareDetails(details);
 
         /* if the call was accepted,
            the event will indicate if the call succeeded
@@ -306,7 +306,7 @@ bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t *details)
                           buffer.size_max : (details->size - offset);
 
             /* fill buffer using UCP */
-            arm_uc_error_t ucp_status = ARM_UCP_Read(index, offset, &buffer);
+            arm_uc_error_t ucp_status = MBED_CLOUD_CLIENT_UPDATE_STORAGE.Read(index, offset, &buffer);
 
             /* wait for event if the call is accepted */
             if (ucp_status.error == ERR_NONE) {
