@@ -108,6 +108,10 @@
         "NUCLEO_F429ZI": {
             "kvstore-size": "2*64*1024"
         },
+        "NRF52840_DK": {
+            "target.macros_remove"                     : ["MBEDTLS_CONFIG_HW_SUPPORT"],
+            "target.features_remove"                   : ["CRYPTOCELL310"]
+        },
         "DISCO_F746NG": {
             "mbed-bootloader.bootloader-size"          : "(32*1024)",
             "kvstore-size"                             : "(2*32*1024)",
