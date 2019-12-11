@@ -63,30 +63,27 @@ int main(void)
 
     /* Initialize PAL */
     arm_uc_error_t ucp_result = MBED_CLOUD_CLIENT_UPDATE_STORAGE.Initialize(arm_ucp_event_handler);
+    if (ucp_result.error != ERR_NONE) {
+        boot_debug("Failed to initialize update storage\r\n");
+        return -1;
+    }
 
     /*************************************************************************/
     /* Update                                                                */
     /*************************************************************************/
 
-    /* Default to booting application */
-    bool canForward = true;
-
-    /* check UCP initialization result */
-    if (ucp_result.error == ERR_NONE) {
-        /* Initialize internal flash */
-        bool storageResult = activeStorageInit();
-
-        if (storageResult) {
-            /* Try to update firmware from journal */
-            canForward = upgradeApplicationFromStorage();
-
-            /* deinit storage driver */
-            activeStorageDeinit();
-        }
+    /* Initialize internal flash */
+    if (!activeStorageInit()) {
+        boot_debug("Failed to initialize active storage\r\n");
+        return -1;
     }
 
-    /* forward control to ACTIVE application if it is deemed sane */
-    if (canForward) {
+    /* Try to update firmware from journal */
+    if (upgradeApplicationFromStorage()) {
+        /* deinit storage driver */
+        activeStorageDeinit();
+
+        /* forward control to ACTIVE application if it is deemed sane */
         boot_debug("booting...\r\n\r\n");
         mbed_start_application(MBED_CONF_APP_APPLICATION_JUMP_ADDRESS);
     }
@@ -99,4 +96,5 @@ int main(void)
     }
 
     boot_debug("Failed to jump to application!\r\n");
+    return -1;
 }
