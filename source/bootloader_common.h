@@ -32,12 +32,6 @@
 
 #ifdef MBED_CLOUD_CLIENT_UPDATE_STORAGE
 extern ARM_UC_PAAL_UPDATE MBED_CLOUD_CLIENT_UPDATE_STORAGE;
-#else
-#error Update client storage must be defined in user configuration file
-#endif
-
-#ifndef MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS
-#error Application start address must be defined
 #endif
 
 /* If jump address is not set then default to start address. */
