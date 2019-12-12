@@ -115,6 +115,7 @@ def build_test_config = [
   ["NRF52840_DK",   "configs/kvstore_and_fw_candidate_on_sd.json", "GCC_ARM"],
   ["NUCLEO_L073RZ", "configs/kvstore_and_fw_candidate_on_sd.json", "GCC_ARM"],
   ["DISCO_L475VG_IOT01A", "configs/external_kvstore_with_qspif.json", "GCC_ARM"],
+  ["NUCLEO_H743ZI2", "configs/internal_flash_no_rot.json", "GCC_ARM"],
 
   // Bootloaders for release.
   // NOTE: Must match make_release.py
