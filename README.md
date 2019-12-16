@@ -79,12 +79,21 @@ For this information to propagate to the cloud, the 3 macros (`BOOTLOADER_ARM_SO
 1. `BOOTLOADER_OEM_SOURCE_HASH` is used to indicate any modification that OEMs have made on top of the vanilla mbed-bootloader. Hence it should be populated with the OEM modified bootloader SHA-1 git commit hash.
 1. `BOOTLOADER_STORAGE_LAYOUT` is a proprietary enum to indicate the storage layout supported by this bootloader. The OEM is free to define the meaning of this number.
 
-In order for the cloud client to recognise this struct and obtain the information. The offset of the symbol in the bootloader binary needs to be populated in the cloud client's configuration file:
-1. Compile the bootloader. Flash and run the bootloader. On the serial UART you will see the following printout:
+In order for the cloud client to recognise this struct and obtain the information. The offset of the symbol in the bootloader binary needs to be populated in the cloud client's configuration file. This information can be obtained from the map file of the compiled bootloader. 
 
-    > Layout: <layout_no> <boot_loader_info_address>
-1. Keep a note of the `boot_loader_info_address` which we will use in the next step.
-1. In the `mbed_app.json` of the Pelion Cloud Client Application, change the following: `"update-client.bootloader-details" : "<boot_loader_info_address>"`
+1. Example python code for obtaining the location:
+    ```python
+    with open("BUILD/UBLOX_EVK_ODIN_W2/GCC_ARM/mbed-bootloader.map", 'r') as fd:
+        s = fd.read()
+
+    regex = r"\.rodata\..*{}\s+(0x[0-9a-fA-F]+)".format("bootloader")
+    match = re.search(regex, s, re.MULTILINE)
+    offset = int(match.groups()[0], 16)
+    print hex(offset)
+    ```
+1. In the `mbed_app.json` of the Pelion Cloud Client Application, change the following:
+
+    > `"update-client.bootloader-details" : "<boot_loader_info_address>"`
 
 ### MISC
 
