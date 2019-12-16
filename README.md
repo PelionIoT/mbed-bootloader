@@ -106,35 +106,33 @@ User **may** set in `mbed_app.json`:
 
 ## Flash Layout
 
-### Default configuration using flash layout with KVStore and firmware storage on external storage
+### Default configuration using flash layout with active app and firmware storage on internal flash
 
 ```
     +--------------------------+
     |                          |
     |                          |
     |                          |
+    |Firmware Candidate Storage|
+    |                          |
+    |                          |
+    |                          |
+    +--------------------------+ <-+ update-client.storage-address
+    |                          |
     |        Active App        |
-    |                          |
-    |                          |
-    |                          |
     +--------------------------+ <-+ mbed-bootloader.application-start-address
     |Active App Metadata Header|
     +--------------------------+ <-+ update-client.application-details
-    |                          |
-    |         KVSTORE          |
-    |                          |
-    +--------------------------+ <-+ storage_tdb_internal.internal_base_address
     |                          |
     |        Bootloader        |
     |                          |
     +--------------------------+ <-+ 0
 ```
 
-### Notes on Flash Layout of non PSA tagets with external storage
+### Notes on Flash Layout of non PSA tagets with internal flash
 
 - This is the default implementation at the default mbed_app.json
 - The default flash layout is tested with GCC_ARM compiler with newlib-nano and release profile only. If a different compiler is used, the bootloader binary size will be larger and the offsets needs to be adjusted.
-- The KVSTORE regions require even number of flash erase sectors.
 
 ### The flash layout for non PSA targets with KVStore and firmware storage on internal flash
 
