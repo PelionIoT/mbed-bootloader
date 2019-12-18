@@ -276,15 +276,12 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_Prepare(uint32_t slot_id,
 
                             /* signal done */
                             pal_blockdevice_signal_internal(ARM_UC_PAAL_EVENT_PREPARE_DONE);
-                        } else {
                         }
-                    } else {
                     }
                 } else {
                     result.code = PAAL_ERR_FIRMWARE_TOO_LARGE;
                 }
             }
-        } else {
         }
     }
 
