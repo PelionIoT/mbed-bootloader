@@ -46,7 +46,7 @@ def deployBootloaderRepoStep() {
           checkout scm
           sh ('''
             mbed deploy --protocol ssh
-            mbed ls
+            mbed ls > requirements.mdp
             mkdir release
             python ./scripts/make_release.py --patch -o release
             cd mbed-os
@@ -55,6 +55,7 @@ def deployBootloaderRepoStep() {
             tar cjf mbed-bootloader.tar.bz2 --exclude mbed-os --exclude mbed-bootloader.tar.bz2 * .[a-z]*
           ''')
           stash name: "deployed_bootloader_repo", includes: "mbed-bootloader.tar.bz2", useDefaultExcludes: false
+          archiveArtifacts artifacts: "requirements.mdp"
         }
       }
     }
