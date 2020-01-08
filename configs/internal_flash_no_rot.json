@@ -128,6 +128,20 @@
             "target.restrict_size"             : "0x20000",
             "mbed-bootloader.bootloader-size"  : "(128*1024)",
             "update-client.application-details": "(MBED_ROM_START + MBED_BOOTLOADER_SIZE + 128*1024)"
+        },
+        "GR_LYCHEE": {
+            "target.bootloader_supported"      : true,
+            "kvstore-size"                     : "(2*24*1024)",
+            "target.restrict_size"             : "0x10000",
+            "mbed-bootloader.bootloader-size"  : "(64*1024)",
+            "update-client.storage-page"       : 1
+        },
+        "RZ_A1H": {
+            "target.bootloader_supported"      : true,
+            "kvstore-size"                     : "(2*24*1024)",
+            "target.restrict_size"             : "0x10000",
+            "mbed-bootloader.bootloader-size"  : "(64*1024)",
+            "update-client.storage-page"       : 1
         }
     }
 }
