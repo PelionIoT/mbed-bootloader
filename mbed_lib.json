@@ -41,6 +41,10 @@
             "help": "bootloader size",
             "value": "(32*1024)",
             "macro_name": "MBED_BOOTLOADER_SIZE"
+        },
+        "startup-delay": {
+            "help": "Startup delay before initializing the storage hardware. (In milliseconds)",
+            "value": 0
         }
     },
     "macros": [
