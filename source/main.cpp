@@ -61,6 +61,10 @@ int main(void)
     mbed_trace_print_function_set(boot_debug);
 #endif // MBED_CONF_MBED_TRACE_ENABLE
 
+#if MBED_CONF_MBED_BOOTLOADER_STARTUP_DELAY
+    ThisThread::sleep_for(MBED_CONF_MBED_BOOTLOADER_STARTUP_DELAY);
+#endif // MBED_CONF_MBED_BOOTLOADER_STARTUP_DELAY
+
     /* Initialize PAL */
     arm_uc_error_t ucp_result = MBED_CLOUD_CLIENT_UPDATE_STORAGE.Initialize(arm_ucp_event_handler);
     if (ucp_result.error != ERR_NONE) {
