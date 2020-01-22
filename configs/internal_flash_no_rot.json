@@ -143,6 +143,14 @@
             "target.restrict_size"             : "0x10000",
             "mbed-bootloader.bootloader-size"  : "(64*1024)",
             "update-client.storage-page"       : 1
+        },
+        "UHURU_RAVEN": {
+            "target.components_remove"                 : ["SPIF"],
+            "mbed-bootloader.bootloader-size"          : "(32*1024)",
+            "kvstore-size"                             : "(2*32*1024)",
+            "update-client.application-details"        : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE + KVSTORE_SIZE)",
+            "update-client.storage-address"            : "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE)",
+            "mbed-bootloader.max-application-size"     : "((1024-32-64)*1024)"
         }
     }
 }
