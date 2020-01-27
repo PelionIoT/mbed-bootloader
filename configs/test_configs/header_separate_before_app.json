@@ -5,7 +5,7 @@
     ],
     "target_overrides": {
         "*": {
-            "target.default_lib"             : "small",
+            "target.c_lib"                   : "small",
             "platform.stdio-baud-rate"       : 115200,
             "platform.stdio-flush-at-exit"   : false,
             "update-client.storage-address"  : "(1024*1024*64)",
