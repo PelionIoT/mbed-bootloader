@@ -92,7 +92,7 @@ def bootloaderBuildStep(stepName,
           """)
 
           // Archive the binary
-          def file_extension = ("${target}" == "NRF52_DK" || "${target}" == "NRF52840_DK" || "${target}" == "LPC55S69_NS") ? "hex" : "bin"
+          def file_extension = ("${target}" == "NRF52840_DK" || "${target}" == "LPC55S69_NS") ? "hex" : "bin"
           def binary_path = build_dir + "/${repoName}.${file_extension}"
           archiveArtifacts artifacts: binary_path
           archiveArtifacts artifacts: build_dir + "/${repoName}_application.map"
