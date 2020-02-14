@@ -102,6 +102,10 @@
             "target.restrict_size"           : "0x9000",
             "mbed-bootloader.bootloader-size": "(36*1024)"
         },
+        "DISCO_L496AG": {
+            "target.restrict_size"           : "0x9000",
+            "mbed-bootloader.bootloader-size": "(36*1024)"
+        },
         "NRF52840_DK": {
             "target.static_memory_defines"             : true,
             "target.features_remove"                   : ["CRYPTOCELL310"],
