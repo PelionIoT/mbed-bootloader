@@ -110,6 +110,10 @@
         "DISCO_L475VG_IOT01A": {
             "target.restrict_size"           : "0x9000",
             "mbed-bootloader.bootloader-size": "(36*1024)"
+        },
+        "DISCO_L496AG": {
+            "target.restrict_size"           : "0x9000",
+            "mbed-bootloader.bootloader-size": "(36*1024)"
         }
     }
 }
