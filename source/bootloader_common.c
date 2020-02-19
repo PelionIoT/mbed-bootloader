@@ -21,9 +21,6 @@
 /* buffer used in storage operations */
 uint8_t buffer_array[BUFFER_SIZE];
 
-/* variable for exposing the most recent event */
-uint32_t event_callback = CLEAR_EVENT;
-
 /* lookup table for printing hexadecimal values */
 const char hexTable[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
                            '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
@@ -85,12 +82,3 @@ void boot_debug(const char *s)
 
 #endif // DEVICE_SERIAL && SHOW_SERIAL_OUTPUT
 
-/**
- * @brief Event handler for UCP callbacks.
- *
- * @param event Event
- */
-void arm_ucp_event_handler(uint32_t event)
-{
-    event_callback = event;
-}

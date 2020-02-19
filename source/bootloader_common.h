@@ -59,10 +59,7 @@ enum {
 
 extern uint8_t buffer_array[BUFFER_SIZE];
 
-extern uint32_t event_callback;
 extern const char hexTable[16];
-
-void arm_ucp_event_handler(uint32_t event);
 
 void boot_debug(const char *s);
 

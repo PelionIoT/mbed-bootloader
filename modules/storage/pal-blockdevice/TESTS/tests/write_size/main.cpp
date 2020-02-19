@@ -71,25 +71,6 @@ SDBlockDevice sd(MBED_CONF_SD_SPI_MOSI, MBED_CONF_SD_SPI_MISO, MBED_CONF_SD_SPI_
 BlockDevice *arm_uc_blockdevice = &sd;
 volatile uint8_t event_received = 0;
 
-void callback(uint32_t event)
-{
-    switch (event) {
-        case ARM_UC_PAAL_EVENT_INITIALIZE_DONE:
-        case ARM_UC_PAAL_EVENT_PREPARE_DONE:
-        case ARM_UC_PAAL_EVENT_WRITE_DONE:
-        case ARM_UC_PAAL_EVENT_FINALIZE_DONE:
-        case ARM_UC_PAAL_EVENT_READ_DONE:
-        case ARM_UC_PAAL_EVENT_ACTIVATE_DONE:
-        case ARM_UC_PAAL_EVENT_GET_ACTIVE_FIRMWARE_DETAILS_DONE:
-        case ARM_UC_PAAL_EVENT_GET_FIRMWARE_DETAILS_DONE:
-        case ARM_UC_PAAL_EVENT_GET_INSTALLER_DETAILS_DONE:
-            event_received = 1;
-            break;
-        default:
-            break;
-    }
-}
-
 void test_unit()
 {
     uint32_t program_size = arm_uc_blockdevice->get_program_size();
@@ -102,11 +83,8 @@ void test_unit()
     uint8_t storage_location = 0;
 
     event_received = 0;
-    arm_uc_error_t err = ARM_UCP_FLASHIAP_BLOCKDEVICE.Initialize(callback);
-    TEST_ASSERT_EQUAL_HEX(ERR_NONE, err.code);
-    while (!event_received) {
-        __WFI();
-    }
+    int32_t err = ARM_UCP_FLASHIAP_BLOCKDEVICE.Initialize();
+    TEST_ASSERT_EQUAL_HEX(ERR_NONE, err);
 
     /* firmware details struct */
     arm_uc_firmware_details_t details = { 0 };
@@ -123,10 +101,7 @@ void test_unit()
 
     event_received = 0;
     err = ARM_UCP_FLASHIAP_BLOCKDEVICE.Prepare(storage_location, &details, &buffer);
-    TEST_ASSERT_EQUAL_HEX(ERR_NONE, err.code);
-    while (!event_received) {
-        __WFI();
-    }
+    TEST_ASSERT_EQUAL_HEX(ERR_NONE, err);
 
     /* prepare hash context */
     unsigned char write_hash[SIZEOF_SHA256];
@@ -150,10 +125,7 @@ void test_unit()
         printf("writing %u bytes at offset %u\r\n", buffer.size, offset);
         event_received = 0;
         err = ARM_UCP_FLASHIAP_BLOCKDEVICE.Write(storage_location, offset, &buffer);
-        TEST_ASSERT_EQUAL_HEX(ERR_NONE, err.code);
-        while (!event_received) {
-            __WFI();
-        }
+        TEST_ASSERT_EQUAL_HEX(ERR_NONE, err);
         offset += buffer.size;
 
         mbedtls_sha256_update(&ctx, buffer.ptr, buffer.size);
@@ -163,10 +135,7 @@ void test_unit()
 
     event_received = 0;
     err = ARM_UCP_FLASHIAP_BLOCKDEVICE.Finalize(storage_location);
-    TEST_ASSERT_EQUAL_HEX(ERR_NONE, err.code);
-    while (!event_received) {
-        __WFI();
-    }
+    TEST_ASSERT_EQUAL_HEX(ERR_NONE, err);
 
     /* read firmware back */
     offset = 0;
@@ -178,10 +147,7 @@ void test_unit()
         printf("reading %u bytes at offset %u\r\n", buffer.size, offset);
         event_received = 0;
         err = ARM_UCP_FLASHIAP_BLOCKDEVICE.Read(storage_location, offset, &buffer);
-        TEST_ASSERT_EQUAL_HEX(ERR_NONE, err.code);
-        while (!event_received) {
-            __WFI();
-        }
+        TEST_ASSERT_EQUAL_HEX(ERR_NONE, err);
         offset += buffer.size;
 
         mbedtls_sha256_update(&ctx, buffer.ptr, buffer.size);

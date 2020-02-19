@@ -76,15 +76,6 @@
 
 static uint64_t arm_uc_pal_flashiap_firmware_size = 0;
 
-static void (*arm_uc_pal_flashiap_callback)(uint32_t) = NULL;
-
-static void arm_uc_pal_flashiap_signal_internal(uint32_t event)
-{
-    if (arm_uc_pal_flashiap_callback) {
-        arm_uc_pal_flashiap_callback(event);
-    }
-}
-
 /**
  * @brief Get the physicl slot address and size given slot_id
  *
@@ -94,11 +85,11 @@ static void arm_uc_pal_flashiap_signal_internal(uint32_t event)
  * @return Returns ERR_NONE on success.
  *         Returns ERR_INVALID_PARAMETER on error.
  */
-static arm_uc_error_t arm_uc_pal_flashiap_get_slot_addr_size(uint32_t slot_id,
+static int32_t arm_uc_pal_flashiap_get_slot_addr_size(uint32_t slot_id,
                                                              uint32_t *slot_addr,
                                                              uint32_t *slot_size)
 {
-    arm_uc_error_t result = { .code = ERR_INVALID_PARAMETER };
+    int32_t result = ERR_INVALID_PARAMETER;
     /* find the start address of the whole storage area. It needs to be aligned to
        sector boundary and we cannot go outside user defined storage area, hence
        rounding up to sector boundary */
@@ -136,7 +127,7 @@ static arm_uc_error_t arm_uc_pal_flashiap_get_slot_addr_size(uint32_t slot_id,
     } else {
         *slot_addr = slot_start_addr;
         *slot_size = slot_end_addr - slot_start_addr;
-        result.code = ERR_NONE;
+        result = ERR_NONE;
     }
 
     return result;
@@ -149,20 +140,9 @@ static arm_uc_error_t arm_uc_pal_flashiap_get_slot_addr_size(uint32_t slot_id,
  * @return Returns ERR_NONE on success.
  *         Returns ERR_INVALID_PARAMETER on error.
  */
-arm_uc_error_t ARM_UC_PAL_FlashIAP_Initialize(void (*callback)(uint32_t))
+int32_t ARM_UC_PAL_FlashIAP_Initialize(void)
 {
-    arm_uc_error_t result = { .code = ERR_INVALID_PARAMETER };
-
-    int32_t status = arm_uc_flashiap_init();
-
-    if (status == ARM_UC_FLASHIAP_SUCCESS) {
-        arm_uc_pal_flashiap_callback = callback;
-        arm_uc_pal_flashiap_signal_internal(ARM_UC_PAAL_EVENT_INITIALIZE_DONE);
-
-        result.code = ERR_NONE;
-    }
-
-    return result;
+    return arm_uc_flashiap_init();
 }
 
 /**
@@ -183,15 +163,14 @@ uint32_t ARM_UC_PAL_FlashIAP_GetMaxID(void)
  * @param slot_id Storage location ID.
  * @param details Pointer to a struct with firmware details.
  * @param buffer Temporary buffer for formatting and storing metadata.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t slot_id,
+int32_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t slot_id,
                                            const arm_uc_firmware_details_t *details,
                                            arm_uc_buffer_t *buffer)
 {
-    arm_uc_error_t result = { .code = ERR_INVALID_PARAMETER };
+    int32_t result = ERR_INVALID_PARAMETER;
     uint32_t slot_addr = ARM_UC_FLASH_INVALID_SIZE;
     uint32_t slot_size = ARM_UC_FLASH_INVALID_SIZE;
     uint32_t erase_size = ARM_UC_FLASH_INVALID_SIZE;
@@ -199,12 +178,12 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t slot_id,
     /* validate input */
     if (details && buffer && buffer->ptr && \
             slot_id < MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS) {
-        result.error = ERR_NONE;
+        result = ERR_NONE;
     } else {
     }
 
     /* calculate space for new firmware */
-    if (result.error == ERR_NONE) {
+    if (result == ERR_NONE) {
         /* find slot start address */
         result = arm_uc_pal_flashiap_get_slot_addr_size(slot_id, &slot_addr, &slot_size);
 
@@ -215,30 +194,28 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t slot_id,
                          arm_uc_flashiap_round_up_to_page_size(ARM_UC_PAL_HEADER_SIZE),
                          0) - slot_addr;
 
-        if ((result.error == ERR_NONE) && (erase_size > slot_size)) {
-            result.code = PAAL_ERR_FIRMWARE_TOO_LARGE;
+        if ((result == ERR_NONE) && (erase_size > slot_size)) {
+            result = PAAL_ERR_FIRMWARE_TOO_LARGE;
         }
     }
 
     /* erase space for new firmware */
-    if (result.error == ERR_NONE) {
+    if (result == ERR_NONE) {
 
         int32_t status = arm_uc_flashiap_erase(slot_addr, erase_size);
 
         if (status != ARM_UC_FLASHIAP_SUCCESS) {
-            result.code = ERR_INVALID_PARAMETER;
+            result = ERR_INVALID_PARAMETER;
         }
     }
 
     /* generate header blob */
-    if (result.error == ERR_NONE) {
+    if (result == ERR_NONE) {
         result  = arm_uc_create_internal_header_v2(details, buffer);
-        if (result.error != ERR_NONE) {
-        }
     }
 
     /* write header blob */
-    if (result.error == ERR_NONE) {
+    if (result == ERR_NONE) {
         uint32_t hdr_size = arm_uc_flashiap_round_up_to_page_size(ARM_UC_PAL_HEADER_SIZE);
         /* write header */
         int32_t status = arm_uc_flashiap_program((const uint8_t *) buffer->ptr,
@@ -246,16 +223,13 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t slot_id,
                                                  hdr_size);
         if (status != ARM_UC_FLASHIAP_SUCCESS) {
             /* set return code */
-            result.code = ERR_INVALID_PARAMETER;
+            result = ERR_INVALID_PARAMETER;
         }
     }
 
-    if (result.error == ERR_NONE) {
+    if (result == ERR_NONE) {
         /* store firmware size in global */
         arm_uc_pal_flashiap_firmware_size = details->size;
-
-        /* signal done */
-        arm_uc_pal_flashiap_signal_internal(ARM_UC_PAAL_EVENT_PREPARE_DONE);
     }
 
     return result;
@@ -270,24 +244,23 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t slot_id,
  * @param slot_id Storage location ID.
  * @param offset Offset in bytes to where the fragment should be written.
  * @param buffer Pointer to buffer struct with fragment.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_FlashIAP_Write(uint32_t slot_id,
+int32_t ARM_UC_PAL_FlashIAP_Write(uint32_t slot_id,
                                          uint32_t offset,
                                          const arm_uc_buffer_t *buffer)
 {
     /* find slot address and size */
     uint32_t slot_addr = ARM_UC_FLASH_INVALID_SIZE;
     uint32_t slot_size = ARM_UC_FLASH_INVALID_SIZE;
-    arm_uc_error_t result = arm_uc_pal_flashiap_get_slot_addr_size(slot_id,
+    int32_t result = arm_uc_pal_flashiap_get_slot_addr_size(slot_id,
                                                                    &slot_addr,
                                                                    &slot_size);
 
-    if (buffer && buffer->ptr && result.error == ERR_NONE) {
+    if (buffer && buffer->ptr && result == ERR_NONE) {
         /* set default error */
-        result.code = ERR_INVALID_PARAMETER;
+        result = ERR_INVALID_PARAMETER;
 
         /* find physical address of the write */
         uint32_t page_size = arm_uc_flashiap_get_page_size();
@@ -308,12 +281,11 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Write(uint32_t slot_id,
                                                  physical_address,
                                                  write_size);
             if (status == ARM_UC_FLASHIAP_SUCCESS) {
-                result.code = ERR_NONE;
-                arm_uc_pal_flashiap_signal_internal(ARM_UC_PAAL_EVENT_WRITE_DONE);
-            }
+                result = ERR_NONE;
+             }
         }
     } else {
-        result.code = ERR_INVALID_PARAMETER;
+        result = ERR_INVALID_PARAMETER;
     }
 
     return result;
@@ -323,18 +295,12 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Write(uint32_t slot_id,
  * @brief Close storage location for writing and flush pending data.
  *
  * @param slot_id Storage location ID.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_FlashIAP_Finalize(uint32_t slot_id)
+int32_t ARM_UC_PAL_FlashIAP_Finalize(uint32_t slot_id)
 {
-    arm_uc_error_t result = { .code = ERR_NONE };
-
-
-    arm_uc_pal_flashiap_signal_internal(ARM_UC_PAAL_EVENT_FINALIZE_DONE);
-
-    return result;
+    return ERR_NONE;
 }
 
 /**
@@ -347,23 +313,22 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Finalize(uint32_t slot_id)
  * @param offset Offset in bytes to read from.
  * @param buffer Pointer to buffer struct to store fragment. buffer->size
  *        contains the intended read size.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  *         buffer->size contains actual bytes read on return.
  */
-arm_uc_error_t ARM_UC_PAL_FlashIAP_Read(uint32_t slot_id,
+int32_t ARM_UC_PAL_FlashIAP_Read(uint32_t slot_id,
                                         uint32_t offset,
                                         arm_uc_buffer_t *buffer)
 {
     /* find slot address and size */
     uint32_t slot_addr = ARM_UC_FLASH_INVALID_SIZE;
     uint32_t slot_size = ARM_UC_FLASH_INVALID_SIZE;
-    arm_uc_error_t result = arm_uc_pal_flashiap_get_slot_addr_size(slot_id,
+    int32_t result = arm_uc_pal_flashiap_get_slot_addr_size(slot_id,
                                                                    &slot_addr,
                                                                    &slot_size);
 
-    if (buffer && buffer->ptr && result.error == ERR_NONE) {
+    if (buffer && buffer->ptr && result == ERR_NONE) {
         /* find physical address of the read */
         uint32_t read_size = buffer->size;
         uint32_t hdr_size = arm_uc_flashiap_round_up_to_page_size(ARM_UC_PAL_HEADER_SIZE);
@@ -374,13 +339,12 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Read(uint32_t slot_id,
                                           read_size);
 
         if (status == ARM_UC_FLASHIAP_SUCCESS) {
-            result.code = ERR_NONE;
-            arm_uc_pal_flashiap_signal_internal(ARM_UC_PAAL_EVENT_READ_DONE);
+            result = ERR_NONE;
         } else {
-            result.code = ERR_INVALID_PARAMETER;
+            result = ERR_INVALID_PARAMETER;
         }
     } else {
-        result.code = ERR_INVALID_PARAMETER;
+        result = ERR_INVALID_PARAMETER;
     }
 
     return result;
@@ -398,18 +362,12 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Read(uint32_t slot_id,
  *             top of another.
  *
  * @param slot_id Storage location ID.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_FlashIAP_Activate(uint32_t slot_id)
+int32_t ARM_UC_PAL_FlashIAP_Activate(uint32_t slot_id)
 {
-    arm_uc_error_t result = { .code = ERR_NONE };
-
-
-    arm_uc_pal_flashiap_signal_internal(ARM_UC_PAAL_EVENT_ACTIVATE_DONE);
-
-    return result;
+    return ERR_NONE;
 }
 
 /**
@@ -420,23 +378,21 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Activate(uint32_t slot_id)
  *          values.
  *
  * @param details Pointer to firmware details struct to be populated.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_FlashIAP_GetFirmwareDetails(
+int32_t ARM_UC_PAL_FlashIAP_GetFirmwareDetails(
     uint32_t slot_id,
     arm_uc_firmware_details_t *details)
 {
-
     /* find slot address and size */
     uint32_t slot_addr = ARM_UC_FLASH_INVALID_SIZE;
     uint32_t slot_size = ARM_UC_FLASH_INVALID_SIZE;
-    arm_uc_error_t result = arm_uc_pal_flashiap_get_slot_addr_size(slot_id,
+    int32_t result = arm_uc_pal_flashiap_get_slot_addr_size(slot_id,
                                                                    &slot_addr,
                                                                    &slot_size);
 
-    if (details && result.error == ERR_NONE) {
+    if (details && result == ERR_NONE) {
         uint8_t buffer[ARM_UC_PAL_HEADER_SIZE] = { 0 };
 
         int status = arm_uc_flashiap_read(buffer,
@@ -445,12 +401,6 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_GetFirmwareDetails(
 
         if (status == ARM_UC_FLASHIAP_SUCCESS) {
             result = arm_uc_parse_internal_header_v2(buffer, details);
-
-            if (result.error == ERR_NONE) {
-                /* signal done */
-                arm_uc_pal_flashiap_signal_internal(ARM_UC_PAAL_EVENT_GET_FIRMWARE_DETAILS_DONE);
-            } else {
-            }
         } else {
         }
     }
@@ -460,15 +410,15 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_GetFirmwareDetails(
 
 /*****************************************************************************/
 
-arm_uc_error_t ARM_UC_PAL_FlashIAP_GetActiveDetails(arm_uc_firmware_details_t *details)
+int32_t ARM_UC_PAL_FlashIAP_GetActiveDetails(arm_uc_firmware_details_t *details)
 {
-    arm_uc_error_t result = { .code = ERR_INVALID_PARAMETER };
+    int32_t result = ERR_INVALID_PARAMETER;
 
     if (details) {
         /* read details from memory if offset is set */
         if (MBED_CONF_UPDATE_CLIENT_APPLICATION_DETAILS) {
             /* set default error code */
-            result.code = ERR_NOT_READY;
+            result = ERR_NOT_READY;
 
             /* Use flash driver eventhough we are reading from internal flash.
                This will make it easier to use with uVisor.
@@ -490,26 +440,26 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_GetActiveDetails(arm_uc_firmware_details_t *d
                 /* choose version to decode */
                 switch (headerVersion) {
                     case ARM_UC_INTERNAL_HEADER_VERSION_V2: {
-                        result.code = ERR_NONE;
+                        result = ERR_NONE;
                         /* Check the header magic */
                         if (headerMagic != ARM_UC_INTERNAL_HEADER_MAGIC_V2) {
-                            result.code = ERR_NOT_READY;
+                            result = ERR_NOT_READY;
                         }
 
                         uint8_t read_buffer[ARM_UC_INTERNAL_HEADER_SIZE_V2] = { 0 };
                         /* Read the rest of the header */
-                        if (result.error == ERR_NONE) {
+                        if (result == ERR_NONE) {
                             rc = arm_uc_flashiap_read(read_buffer,
                                                       MBED_CONF_UPDATE_CLIENT_APPLICATION_DETAILS,
                                                       ARM_UC_INTERNAL_HEADER_SIZE_V2);
                             if (rc != 0) {
-                                result.code = ERR_NOT_READY;
+                                result = ERR_NOT_READY;
                             }
                         }
                         /* Parse the header */
-                        if (result.error == ERR_NONE) {
+                        if (result == ERR_NONE) {
                             result = arm_uc_parse_internal_header_v2(read_buffer, details);
-                            if (result.error != ERR_NONE) {
+                            if (result != ERR_NONE) {
                             }
                         }
                         break;
@@ -518,7 +468,7 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_GetActiveDetails(arm_uc_firmware_details_t *d
                      * Other firmware header versions can be supported here.
                      */
                     default: {
-                        result.code = ERR_NOT_READY;
+                        result = ERR_NOT_READY;
                     }
                 }
             } else {
@@ -527,13 +477,7 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_GetActiveDetails(arm_uc_firmware_details_t *d
             /* offset not set - zero out struct */
             memset(details, 0, sizeof(arm_uc_firmware_details_t));
 
-            result.code = ERR_NONE;
-        }
-
-        /* signal event if operation was successful */
-        if (result.error == ERR_NONE) {
-
-            arm_uc_pal_flashiap_signal_internal(ARM_UC_PAAL_EVENT_GET_ACTIVE_FIRMWARE_DETAILS_DONE);
+            result = ERR_NONE;
         }
     }
 
@@ -546,13 +490,12 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_GetActiveDetails(arm_uc_firmware_details_t *d
  *          about the firmware installer.
  *
  * @param details Pointer to firmware details struct to be populated.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_FlashIAP_GetInstallerDetails(arm_uc_installer_details_t *details)
+int32_t ARM_UC_PAL_FlashIAP_GetInstallerDetails(arm_uc_installer_details_t *details)
 {
-    arm_uc_error_t result = { .code = ERR_INVALID_PARAMETER };
+    int32_t result = ERR_INVALID_PARAMETER;
 
     if (details) {
         /* only read from memory if offset is set */
@@ -574,10 +517,7 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_GetInstallerDetails(arm_uc_installer_details_
             /* offset not set, zero details struct */
             memset(details, 0, sizeof(arm_uc_installer_details_t));
         }
-
-        arm_uc_pal_flashiap_signal_internal(ARM_UC_PAAL_EVENT_GET_INSTALLER_DETAILS_DONE);
-
-        result.code = ERR_NONE;
+        result = ERR_NONE;
     }
 
     return result;

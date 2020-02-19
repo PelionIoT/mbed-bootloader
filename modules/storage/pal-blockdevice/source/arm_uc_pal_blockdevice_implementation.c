@@ -65,18 +65,10 @@
 #error Update client buffer must be divisible by the block page size
 #endif
 
-static ARM_UC_PAAL_UPDATE_SignalEvent_t pal_blockdevice_event_handler = NULL;
 static uint32_t pal_blockdevice_firmware_size = 0;
 static uint32_t pal_blockdevice_page_size = 0;
 static uint32_t pal_blockdevice_sector_size = 0;
 static uint32_t pal_blockdevice_hdr_size = 0;
-
-static void pal_blockdevice_signal_internal(uint32_t event)
-{
-    if (pal_blockdevice_event_handler) {
-        pal_blockdevice_event_handler(event);
-    }
-}
 
 /**
  * @brief Round size up to nearest page
@@ -143,11 +135,11 @@ static uint32_t pal_blockdevice_round_down_to_sector(uint32_t size)
  * @return Returns ERR_NONE on success.
  *         Returns ERR_INVALID_PARAMETER on error.
  */
-static arm_uc_error_t pal_blockdevice_get_slot_addr_size(uint32_t slot_id,
+static int32_t pal_blockdevice_get_slot_addr_size(uint32_t slot_id,
                                                          uint32_t *slot_addr,
                                                          uint32_t *slot_size)
 {
-    arm_uc_error_t result = { .code = ERR_INVALID_PARAMETER };
+    int32_t result = ERR_INVALID_PARAMETER;
 
     if ((slot_id < MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS) &&
             (slot_addr != NULL) &&
@@ -174,7 +166,7 @@ static arm_uc_error_t pal_blockdevice_get_slot_addr_size(uint32_t slot_id,
         /* Rounding down slot size to sector boundary same as
            the slot start address so that we make sure two slot don't overlap */
         *slot_size  = pal_blockdevice_round_down_to_sector(max_slot_size);
-        result.code = ERR_NONE;
+        result = ERR_NONE;
     }
 
     return result;
@@ -184,29 +176,16 @@ static arm_uc_error_t pal_blockdevice_get_slot_addr_size(uint32_t slot_id,
  * @brief Initialize the underlying storage and set the callback handler.
  *
  * @param callback Function pointer to event handler.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_BlockDevice_Initialize(ARM_UC_PAAL_UPDATE_SignalEvent_t callback)
+int32_t ARM_UC_PAL_BlockDevice_Initialize(void)
 {
-    arm_uc_error_t result = { .code = ERR_INVALID_PARAMETER };
-
-    if (callback) {
-
-        int status = arm_uc_blockdevice_init();
-        pal_blockdevice_page_size  = arm_uc_blockdevice_get_program_size();
-        pal_blockdevice_sector_size = arm_uc_blockdevice_get_erase_size();
-        pal_blockdevice_hdr_size   = pal_blockdevice_round_up_to_page(ARM_UC_EXTERNAL_HEADER_SIZE_V2);
-
-        if (status == ARM_UC_BLOCKDEVICE_SUCCESS) {
-            pal_blockdevice_event_handler = callback;
-            pal_blockdevice_signal_internal(ARM_UC_PAAL_EVENT_INITIALIZE_DONE);
-            result.code = ERR_NONE;
-        }
-    }
-
-    return result;
+    int32_t status = arm_uc_blockdevice_init();
+    pal_blockdevice_page_size  = arm_uc_blockdevice_get_program_size();
+    pal_blockdevice_sector_size = arm_uc_blockdevice_get_erase_size();
+    pal_blockdevice_hdr_size   = pal_blockdevice_round_up_to_page(ARM_UC_EXTERNAL_HEADER_SIZE_V2);
+    return status;
 }
 
 /**
@@ -227,20 +206,19 @@ uint32_t ARM_UC_PAL_BlockDevice_GetMaxID(void)
  * @param slot_id Storage location ID.
  * @param details Pointer to a struct with firmware details.
  * @param buffer Temporary buffer for formatting and storing metadata.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_BlockDevice_Prepare(uint32_t slot_id,
+int32_t ARM_UC_PAL_BlockDevice_Prepare(uint32_t slot_id,
                                               const arm_uc_firmware_details_t *details,
                                               arm_uc_buffer_t *buffer)
 {
-    arm_uc_error_t result = { .code = ERR_INVALID_PARAMETER };
+    int32_t result = ERR_INVALID_PARAMETER;
 
     if (details && buffer && buffer->ptr) {
         /* encode firmware details in buffer */
-        arm_uc_error_t header_status = arm_uc_create_external_header_v2(details, buffer);
-        if (header_status.error == ERR_NONE) {
+        int32_t header_status = arm_uc_create_external_header_v2(details, buffer);
+        if (header_status == ERR_NONE) {
             /* find the size needed to erase. Header is stored contiguous with firmware */
             uint32_t erase_size = pal_blockdevice_round_up_to_sector(pal_blockdevice_hdr_size + \
                                                                      details->size);
@@ -251,9 +229,9 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_Prepare(uint32_t slot_id,
             result = pal_blockdevice_get_slot_addr_size(slot_id, &slot_addr, &slot_size);
 
 
-            if (result.error == ERR_NONE) {
+            if (result == ERR_NONE) {
                 /* reset error code */
-                result.code = ERR_INVALID_PARAMETER;
+                result = ERR_INVALID_PARAMETER;
 
                 if (erase_size <= slot_size) {
                     /* erase */
@@ -269,17 +247,11 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_Prepare(uint32_t slot_id,
 
                         if (status == ARM_UC_BLOCKDEVICE_SUCCESS) {
                             /* set return code */
-                            result.code = ERR_NONE;
-
-                            /* store firmware size in global */
-                            pal_blockdevice_firmware_size = details->size;
-
-                            /* signal done */
-                            pal_blockdevice_signal_internal(ARM_UC_PAAL_EVENT_PREPARE_DONE);
+                            result = ERR_NONE;
                         }
                     }
                 } else {
-                    result.code = PAAL_ERR_FIRMWARE_TOO_LARGE;
+                    result = PAAL_ERR_FIRMWARE_TOO_LARGE;
                 }
             }
         }
@@ -297,15 +269,14 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_Prepare(uint32_t slot_id,
  * @param slot_id Storage location ID.
  * @param offset Offset in bytes to where the fragment should be written.
  * @param buffer Pointer to buffer struct with fragment.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_BlockDevice_Write(uint32_t slot_id,
+int32_t ARM_UC_PAL_BlockDevice_Write(uint32_t slot_id,
                                             uint32_t offset,
                                             const arm_uc_buffer_t *buffer)
 {
-    arm_uc_error_t result = { .code = ERR_INVALID_PARAMETER };
+    int32_t result = ERR_INVALID_PARAMETER;
 
     if (buffer && buffer->ptr) {
         int status = ARM_UC_BLOCKDEVICE_SUCCESS;
@@ -329,7 +300,7 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_Write(uint32_t slot_id,
         }
 
         /* aligned write */
-        if (result.error == ERR_NONE && aligned_size > 0) {
+        if (result == ERR_NONE && aligned_size > 0) {
             status = arm_uc_blockdevice_program(buffer->ptr,
                                                 physical_address,
                                                 aligned_size);
@@ -352,10 +323,7 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_Write(uint32_t slot_id,
 
         if (status == ARM_UC_BLOCKDEVICE_SUCCESS) {
             /* set return code */
-            result.code = ERR_NONE;
-
-            /* signal done */
-            pal_blockdevice_signal_internal(ARM_UC_PAAL_EVENT_WRITE_DONE);
+            result = ERR_NONE;
         } else {
         }
     }
@@ -367,17 +335,12 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_Write(uint32_t slot_id,
  * @brief Close storage location for writing and flush pending data.
  *
  * @param slot_id Storage location ID.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_BlockDevice_Finalize(uint32_t slot_id)
+int32_t ARM_UC_PAL_BlockDevice_Finalize(uint32_t slot_id)
 {
-    arm_uc_error_t result = { .code = ERR_NONE };
-
-    pal_blockdevice_signal_internal(ARM_UC_PAAL_EVENT_FINALIZE_DONE);
-
-    return result;
+    return ERR_NONE;
 }
 
 /**
@@ -390,16 +353,15 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_Finalize(uint32_t slot_id)
  * @param offset Offset in bytes to read from.
  * @param buffer Pointer to buffer struct to store fragment. buffer->size
  *        contains the intended read size.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  *         buffer->size contains actual bytes read on return.
  */
-arm_uc_error_t ARM_UC_PAL_BlockDevice_Read(uint32_t slot_id,
+int32_t ARM_UC_PAL_BlockDevice_Read(uint32_t slot_id,
                                            uint32_t offset,
                                            arm_uc_buffer_t *buffer)
 {
-    arm_uc_error_t result = { .code = ERR_INVALID_PARAMETER };
+    int32_t result = ERR_INVALID_PARAMETER;
 
     if (buffer && buffer->ptr) {
         /* find address of slot */
@@ -420,10 +382,8 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_Read(uint32_t slot_id,
 
         if (status == ARM_UC_BLOCKDEVICE_SUCCESS) {
             /* set return code */
-            result.code = ERR_NONE;
+            result = ERR_NONE;
 
-            /* signal done */
-            pal_blockdevice_signal_internal(ARM_UC_PAAL_EVENT_READ_DONE);
         } else {
         }
     }
@@ -443,18 +403,12 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_Read(uint32_t slot_id,
  *             top of another.
  *
  * @param slot_id Storage location ID.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_BlockDevice_Activate(uint32_t slot_id)
+int32_t ARM_UC_PAL_BlockDevice_Activate(uint32_t slot_id)
 {
-    arm_uc_error_t result = { .code = ERR_NONE };
-
-
-    pal_blockdevice_signal_internal(ARM_UC_PAAL_EVENT_ACTIVATE_DONE);
-
-    return result;
+    return ERR_NONE;
 }
 
 /**
@@ -466,15 +420,14 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_Activate(uint32_t slot_id)
  *
  * @param slot_id Storage location ID.
  * @param details Pointer to firmware details struct to be populated.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_BlockDevice_GetFirmwareDetails(
+int32_t ARM_UC_PAL_BlockDevice_GetFirmwareDetails(
     uint32_t slot_id,
     arm_uc_firmware_details_t *details)
 {
-    arm_uc_error_t result = { .code = ERR_INVALID_PARAMETER };
+    int32_t result = ERR_INVALID_PARAMETER;
 
     if (details) {
 
@@ -491,11 +444,6 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_GetFirmwareDetails(
         if (status == ARM_UC_BLOCKDEVICE_SUCCESS) {
             result = arm_uc_parse_external_header_v2(buffer, details);
 
-            if (result.error == ERR_NONE) {
-                /* signal done */
-                pal_blockdevice_signal_internal(ARM_UC_PAAL_EVENT_GET_FIRMWARE_DETAILS_DONE);
-            } else {
-            }
         } else {
         }
     }

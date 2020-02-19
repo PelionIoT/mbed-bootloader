@@ -76,27 +76,17 @@ bool checkStoredApplication(uint32_t source,
         /* read full firmware using PAL Update API */
         uint32_t offset = 0;
         while (offset < details->size) {
-            /* clear most recent UCP event */
-            event_callback = CLEAR_EVENT;
-
             /* set the number of bytes expected */
             buffer.size = (details->size - offset) > buffer.size_max ?
                           buffer.size_max : (details->size - offset);
 
             /* fill buffer using UCP */
-            arm_uc_error_t ucp_status = MBED_CLOUD_CLIENT_UPDATE_STORAGE.Read(source,
+            int32_t ucp_status = MBED_CLOUD_CLIENT_UPDATE_STORAGE.Read(source,
                                                      offset,
                                                      &buffer);
 
-            /* wait for event if the call is accepted */
-            if (ucp_status.error == ERR_NONE) {
-                while (event_callback == CLEAR_EVENT) {
-                    __WFI();
-                }
-            }
-
             /* check status and actual read size */
-            if ((event_callback == ARM_UC_PAAL_EVENT_READ_DONE) &&
+            if ((ucp_status == ERR_NONE) &&
                     (buffer.size > 0)) {
                 /* update hash */
                 mbedtls_sha256_update(&mbedtls_ctx, buffer.ptr, buffer.size);
@@ -228,23 +218,14 @@ bool upgradeApplicationFromStorage(void)
     /*************************************************************************/
 
     for (uint32_t index = 0; index < MAX_FIRMWARE_LOCATIONS; index++) {
-        /* clear most recent UCP event */
-        event_callback = CLEAR_EVENT;
-
         /* Check version and checksum first */
         /*arm_uc_error_t ucp_status = ARM_UCP_GetFirmwareDetails(index,
                                                                &imageDetails);*/
-        arm_uc_error_t ucp_status = MBED_CLOUD_CLIENT_UPDATE_STORAGE.GetFirmwareDetails(index,
+        int32_t ucp_status = MBED_CLOUD_CLIENT_UPDATE_STORAGE.GetFirmwareDetails(index,
                                                                 &imageDetails);
-        /* wait for event if the call is accepted */
-        if (ucp_status.error == ERR_NONE) {
-            while (event_callback == CLEAR_EVENT) {
-                __WFI();
-            }
-        }
 
         /* check event */
-        if (event_callback == ARM_UC_PAAL_EVENT_GET_FIRMWARE_DETAILS_DONE) {
+        if (ucp_status == ERR_NONE) {
             /* default to use firmware candidate */
             bool firmwareDifferentFromActive = true;
 

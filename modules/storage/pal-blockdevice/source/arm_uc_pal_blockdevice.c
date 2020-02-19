@@ -25,29 +25,26 @@
 #include "update-client-pal-flashiap/arm_uc_pal_flashiap_implementation.h"
 
 /**
- * @brief Initialize the underlying storage and set the callback handler.
+ * @brief Initialize the underlying storage.
  *
  * @param callback Function pointer to event handler.
  * @return Returns ERR_NONE on accept, and signals the event handler with
  *         either DONE or ERROR when complete.
  *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
  */
-arm_uc_error_t ARM_UCP_FashIAP_BlockDevice_Initialize(ARM_UC_PAAL_UPDATE_SignalEvent_t callback)
+int32_t ARM_UCP_FashIAP_BlockDevice_Initialize(void)
 {
-    arm_uc_error_t result = { .code = ERR_INVALID_PARAMETER };
-
-    if (callback) {
-        arm_uc_error_t status1 = ARM_UC_PAL_FlashIAP_Initialize(callback);
-        arm_uc_error_t status2 = ARM_UC_PAL_BlockDevice_Initialize(callback);
-
-        if ((status1.error == ERR_NONE) && (status2.error == ERR_NONE)) {
-            result.code = ERR_NONE;
-        } else {
-            result.code = ERR_NOT_READY;
-        }
+    int32_t status = ARM_UC_PAL_FlashIAP_Initialize();
+    if (status != ERR_NONE) {
+        return status;
     }
 
-    return result;
+    status = ARM_UC_PAL_BlockDevice_Initialize();
+    if (status != ERR_NONE) {
+        return status;
+    }
+
+    return ERR_NONE;
 }
 
 ARM_UC_PAAL_UPDATE_CAPABILITIES ARM_UCP_FashIAP_BlockDevice_GetCapabilities(void)
