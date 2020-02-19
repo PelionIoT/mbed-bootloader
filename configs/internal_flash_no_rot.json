@@ -151,6 +151,14 @@
             "update-client.application-details"        : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE + KVSTORE_SIZE)",
             "update-client.storage-address"            : "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE)",
             "mbed-bootloader.max-application-size"     : "((1024-32-64)*1024)"
+        },
+        "DISCO_F769NI": {
+            "mbed-bootloader.bootloader-size"           : "(64*1024)",
+            "target.restrict_size"                      : "0x10000",
+            "update-client.application-details"         : "(MBED_ROM_START + 256*1024)",
+            "update-client.storage-address"             : "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE)",
+            "kvstore-size"                              : "(2*32*1024)",
+            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START+MBED_BOOTLOADER_SIZE)"
         }
     }
 }
