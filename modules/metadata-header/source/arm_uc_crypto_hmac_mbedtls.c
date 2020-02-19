@@ -63,13 +63,11 @@
  *             ERR_NONE on success.
  *             ARM_UC_CU_ERR_INVALID_PARAMETER on failure.
  */
-arm_uc_error_t ARM_UC_cryptoHMACSHA256(arm_uc_buffer_t *key,
+int32_t ARM_UC_cryptoHMACSHA256(arm_uc_buffer_t *key,
                                        arm_uc_buffer_t *input,
                                        arm_uc_buffer_t *output)
 {
-    arm_uc_error_t result = (arm_uc_error_t) {
-        ARM_UC_CU_ERR_INVALID_PARAMETER
-    };
+    int32_t result = ARM_UC_CU_ERR_INVALID_PARAMETER;
 
     if (key && key->ptr &&
             (key->size <= ARM_UC_SHA256_INTERNAL_BLOCK_SIZE) &&
@@ -151,9 +149,7 @@ arm_uc_error_t ARM_UC_cryptoHMACSHA256(arm_uc_buffer_t *key,
 
                             output->size = ARM_UC_SHA256_SIZE;
 
-                            result = (arm_uc_error_t) {
-                                ERR_NONE
-                            };
+                            result = ERR_NONE;
                         }
                     }
                 }

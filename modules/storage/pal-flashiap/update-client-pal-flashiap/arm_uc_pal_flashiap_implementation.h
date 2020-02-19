@@ -25,7 +25,7 @@
 extern "C" {
 #endif
 
-arm_uc_error_t ARM_UC_PAL_FlashIAP_Initialize(ARM_UC_PAAL_UPDATE_SignalEvent_t callback);
+int32_t ARM_UC_PAL_FlashIAP_Initialize(void);
 
 /**
  * @brief Get maximum number of supported storage locations.
@@ -42,11 +42,10 @@ uint32_t ARM_UC_PAL_FlashIAP_GetMaxID(void);
  * @param location Storage location ID.
  * @param details Pointer to a struct with firmware details.
  * @param buffer Temporary buffer for formatting and storing metadata.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t location,
+int32_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t location,
                                            const arm_uc_firmware_details_t *details,
                                            arm_uc_buffer_t *buffer);
 
@@ -59,11 +58,10 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Prepare(uint32_t location,
  * @param location Storage location ID.
  * @param offset Offset in bytes to where the fragment should be written.
  * @param buffer Pointer to buffer struct with fragment.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_FlashIAP_Write(uint32_t location,
+int32_t ARM_UC_PAL_FlashIAP_Write(uint32_t location,
                                          uint32_t offset,
                                          const arm_uc_buffer_t *buffer);
 
@@ -71,11 +69,10 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Write(uint32_t location,
  * @brief Close storage location for writing and flush pending data.
  *
  * @param location Storage location ID.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_FlashIAP_Finalize(uint32_t location);
+int32_t ARM_UC_PAL_FlashIAP_Finalize(uint32_t location);
 
 /**
  * @brief Read a fragment from the indicated storage location.
@@ -87,12 +84,11 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Finalize(uint32_t location);
  * @param offset Offset in bytes to read from.
  * @param buffer Pointer to buffer struct to store fragment. buffer->size
  *        contains the intended read size.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  *         buffer->size contains actual bytes read on return.
  */
-arm_uc_error_t ARM_UC_PAL_FlashIAP_Read(uint32_t location,
+int32_t ARM_UC_PAL_FlashIAP_Read(uint32_t location,
                                         uint32_t offset,
                                         arm_uc_buffer_t *buffer);
 
@@ -108,11 +104,10 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Read(uint32_t location,
  *             top of another.
  *
  * @param location Storage location ID.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_FlashIAP_Activate(uint32_t location);
+int32_t ARM_UC_PAL_FlashIAP_Activate(uint32_t location);
 
 /**
  * @brief Get firmware details for the firmware image in the slot passed.
@@ -122,19 +117,18 @@ arm_uc_error_t ARM_UC_PAL_FlashIAP_Activate(uint32_t location);
  *          values.
  *
  * @param details Pointer to firmware details struct to be populated.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_FlashIAP_GetFirmwareDetails(
+int32_t ARM_UC_PAL_FlashIAP_GetFirmwareDetails(
     uint32_t location,
     arm_uc_firmware_details_t *details);
 
 /*****************************************************************************/
 
-arm_uc_error_t ARM_UC_PAL_FlashIAP_GetActiveDetails(arm_uc_firmware_details_t *details);
+int32_t ARM_UC_PAL_FlashIAP_GetActiveDetails(arm_uc_firmware_details_t *details);
 
-arm_uc_error_t ARM_UC_PAL_FlashIAP_GetInstallerDetails(arm_uc_installer_details_t *details);
+int32_t ARM_UC_PAL_FlashIAP_GetInstallerDetails(arm_uc_installer_details_t *details);
 
 #ifdef __cplusplus
 }

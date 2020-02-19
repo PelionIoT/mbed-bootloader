@@ -66,8 +66,8 @@ int main(void)
 #endif // MBED_CONF_MBED_BOOTLOADER_STARTUP_DELAY
 
     /* Initialize PAL */
-    arm_uc_error_t ucp_result = MBED_CLOUD_CLIENT_UPDATE_STORAGE.Initialize(arm_ucp_event_handler);
-    if (ucp_result.error != ERR_NONE) {
+    int32_t ucp_result = MBED_CLOUD_CLIENT_UPDATE_STORAGE.Initialize();
+    if (ucp_result != ERR_NONE) {
         boot_debug("Failed to initialize update storage\r\n");
         return -1;
     }

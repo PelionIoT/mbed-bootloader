@@ -36,7 +36,7 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
-extern "C" arm_uc_error_t ARM_UC_cryptoHMACSHA256(arm_uc_buffer_t *key, arm_uc_buffer_t *input,
+extern "C" int32_t ARM_UC_cryptoHMACSHA256(arm_uc_buffer_t *key, arm_uc_buffer_t *input,
                                                   arm_uc_buffer_t *output);
 
 using namespace utest::v1;
@@ -65,7 +65,7 @@ static uint8_t hash_bootloader[HASH_SIZE] = { 0 };
 
 static control_t test_unit(const size_t call_count)
 {
-    arm_uc_error_t result;
+    int32_t result;
 
     arm_uc_buffer_t key_buffer = { 0 };
     arm_uc_buffer_t input_buffer = { 0 };
@@ -75,35 +75,35 @@ static control_t test_unit(const size_t call_count)
      * Test invalid buffers.
      */
     result = ARM_UC_cryptoHMACSHA256(NULL, NULL, NULL);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, NULL, NULL);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, &input_buffer, NULL);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, &input_buffer, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, NULL, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(NULL, &input_buffer, NULL);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(NULL, &input_buffer, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(NULL, NULL, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     /**
@@ -114,35 +114,35 @@ static control_t test_unit(const size_t call_count)
     output_buffer.ptr = hash_bootloader;
 
     result = ARM_UC_cryptoHMACSHA256(NULL, NULL, NULL);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, NULL, NULL);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, &input_buffer, NULL);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, &input_buffer, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, NULL, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(NULL, &input_buffer, NULL);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(NULL, &input_buffer, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(NULL, NULL, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     /**
@@ -154,36 +154,36 @@ static control_t test_unit(const size_t call_count)
 
     /* ARM_UC_CU_ERR_INVALID_PARAMETER */
     result = ARM_UC_cryptoHMACSHA256(NULL, NULL, NULL);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, NULL, NULL);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, &input_buffer, NULL);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, NULL, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(NULL, &input_buffer, NULL);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(NULL, &input_buffer, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     result = ARM_UC_cryptoHMACSHA256(NULL, NULL, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code,
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result,
                                   "bootloader hmac returned wrong error code");
 
     /* ERR_NONE */
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, &input_buffer, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result.code, "valid input should have succeeded");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result, "valid input should have succeeded");
 
     /**
      * Test key length.
@@ -195,12 +195,12 @@ static control_t test_unit(const size_t call_count)
 
     /* max key size */
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, &input_buffer, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result.code, "valid input should have succeeded");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result, "valid input should have succeeded");
 
     /* max key size plus 1 */
     key_buffer.size = SHA256_BLOCK_SIZE + 1;
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, &input_buffer, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result.code, "too large key size should have failed");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ARM_UC_CU_ERR_INVALID_PARAMETER, result, "too large key size should have failed");
 
     return CaseNext;
 }
@@ -277,7 +277,7 @@ static control_t test_nist_vectors(const size_t call_count)
     /**
      * Use test vectors on ARM_UC_cryptoHMACSHA256.
      */
-    arm_uc_error_t result;
+    int32_t result;
     arm_uc_buffer_t key_buffer = { 0 };
     arm_uc_buffer_t input_buffer = { 0 };
     arm_uc_buffer_t output_buffer = { 0 };
@@ -296,7 +296,7 @@ static control_t test_nist_vectors(const size_t call_count)
 
     memset(hash_bootloader, 0, HASH_SIZE);
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, &input_buffer, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result.code, "bootloader hmac failed");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result, "bootloader hmac failed");
     TEST_ASSERT_EQUAL_INT_MESSAGE(HASH_SIZE, output_buffer.size, "bootloader incorrect hash length");
     TEST_ASSERT_EQUAL_UINT8_ARRAY_MESSAGE(nist_cavs_1_hmac, hash_bootloader, nist_cavs_1_hmac_len,
                                           "bootloader hmac incorrect");
@@ -318,7 +318,7 @@ static control_t test_nist_vectors(const size_t call_count)
 
     memset(hash_bootloader, 0, HASH_SIZE);
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, &input_buffer, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result.code, "bootloader hmac failed");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result, "bootloader hmac failed");
     TEST_ASSERT_EQUAL_INT_MESSAGE(HASH_SIZE, output_buffer.size, "bootloader incorrect hash length");
     TEST_ASSERT_EQUAL_UINT8_ARRAY_MESSAGE(nist_cavs_2_hmac, hash_bootloader, nist_cavs_2_hmac_len,
                                           "bootloader hmac incorrect");
@@ -340,7 +340,7 @@ static control_t test_nist_vectors(const size_t call_count)
 
     memset(hash_bootloader, 0, HASH_SIZE);
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, &input_buffer, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result.code, "bootloader hmac failed");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result, "bootloader hmac failed");
     TEST_ASSERT_EQUAL_INT_MESSAGE(HASH_SIZE, output_buffer.size, "bootloader incorrect hash length");
     TEST_ASSERT_EQUAL_UINT8_ARRAY_MESSAGE(nist_cavs_3_hmac, hash_bootloader, nist_cavs_3_hmac_len,
                                           "bootloader hmac incorrect");
@@ -362,7 +362,7 @@ static control_t test_nist_vectors(const size_t call_count)
 
     memset(hash_bootloader, 0, HASH_SIZE);
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, &input_buffer, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result.code, "bootloader hmac failed");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result, "bootloader hmac failed");
     TEST_ASSERT_EQUAL_INT_MESSAGE(HASH_SIZE, output_buffer.size, "bootloader incorrect hash length");
     TEST_ASSERT_EQUAL_UINT8_ARRAY_MESSAGE(nist_cavs_4_hmac, hash_bootloader, nist_cavs_4_hmac_len,
                                           "bootloader hmac incorrect");
@@ -384,7 +384,7 @@ static control_t test_nist_vectors(const size_t call_count)
 
     memset(hash_bootloader, 0, HASH_SIZE);
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, &input_buffer, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result.code, "bootloader hmac failed");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result, "bootloader hmac failed");
     TEST_ASSERT_EQUAL_INT_MESSAGE(HASH_SIZE, output_buffer.size, "bootloader incorrect hash length");
     TEST_ASSERT_EQUAL_UINT8_ARRAY_MESSAGE(nist_cavs_5_hmac, hash_bootloader, nist_cavs_5_hmac_len,
                                           "bootloader hmac incorrect");
@@ -406,7 +406,7 @@ static control_t test_nist_vectors(const size_t call_count)
 
     memset(hash_bootloader, 0, HASH_SIZE);
     result = ARM_UC_cryptoHMACSHA256(&key_buffer, &input_buffer, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result.code, "bootloader hmac failed");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result, "bootloader hmac failed");
     TEST_ASSERT_EQUAL_INT_MESSAGE(HASH_SIZE, output_buffer.size, "bootloader incorrect hash length");
     TEST_ASSERT_EQUAL_UINT8_ARRAY_MESSAGE(nist_cavs_6_hmac, hash_bootloader, nist_cavs_6_hmac_len,
                                           "bootloader hmac incorrect");
@@ -465,8 +465,8 @@ static control_t test_random_vector(const size_t call_count)
     output_buffer.size_max = HASH_SIZE;
     output_buffer.ptr = hash_bootloader;
 
-    arm_uc_error_t result = ARM_UC_cryptoHMACSHA256(&key_buffer, &input_buffer, &output_buffer);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result.code, "bootloader hmac failed");
+    int32_t result = ARM_UC_cryptoHMACSHA256(&key_buffer, &input_buffer, &output_buffer);
+    TEST_ASSERT_EQUAL_INT_MESSAGE(ERR_NONE, result, "bootloader hmac failed");
     TEST_ASSERT_EQUAL_INT_MESSAGE(HASH_SIZE, output_buffer.size, "incorrect hash length");
 
     printf("%" PRIu32 ": ", output_buffer.size);
