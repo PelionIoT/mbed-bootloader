@@ -22,6 +22,11 @@
             "value": 3,
             "macro_name": "MAX_BOOT_RETRIES"
         },
+        "nonstandard-entrypoint": {
+            "help": "Set to 1 to turn the Mbed Bootloader application into a library that can be ported to other platforms.",
+            "value": null,
+            "macro_name": "MBED_BOOTLOADER_NONSTANDARD_ENTRYPOINT"
+        },
         "show-serial-output": {
             "help": "Show boot status and progress on serial output. Disable output to save space on headless devices.",
             "value": 1,

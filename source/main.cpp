@@ -40,7 +40,12 @@ const arm_uc_installer_details_t bootloader = {
     .layout   = BOOTLOADER_STORAGE_LAYOUT
 };
 
+#if defined(MBED_BOOTLOADER_NONSTANDARD_ENTRYPOINT)
+extern "C"
+int mbed_bootloader_entrypoint(void)
+#else
 int main(void)
+#endif
 {
     // this forces the linker to keep bootloader object now that it's not
     // printed anymore
