@@ -318,7 +318,7 @@ bool hwResetReason(void) {
 #if DEVICE_RESET_REASON
     reset_reason_t  reason = hal_reset_reason_get();
 
-    if(reason < RESET_REASON_SOFTWARE) {
+    if(reason < RESET_REASON_WATCHDOG) {
         return true;
     }
     else {
