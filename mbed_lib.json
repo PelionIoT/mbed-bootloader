@@ -32,6 +32,11 @@
             "value": 1,
             "macro_name": "SHOW_SERIAL_OUTPUT"
         },
+        "show-swo-output": {
+            "help": "Show boot status and progress on SWO output instead of serial.",
+            "value": 0,
+            "macro_name": "SHOW_SWO_OUTPUT"
+        },
         "use-kvstore-rot": {
             "help": "use nvstore implementation of the ROT to authenticate firmware headers",
             "value": 1,

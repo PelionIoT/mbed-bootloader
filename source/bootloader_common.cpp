@@ -17,6 +17,9 @@
 // ----------------------------------------------------------------------------
 
 #include "bootloader_common.h"
+#include "mbed.h"
+#include "hal/serial_api.h"
+#include "SerialWireOutput.h"
 
 /* buffer used in storage operations */
 uint8_t buffer_array[BUFFER_SIZE];
@@ -29,9 +32,7 @@ const char hexTable[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
 
 #if DEVICE_SERIAL && SHOW_SERIAL_OUTPUT
 
-#include "hal/serial_api.h"
-
-static serial_t uart = { 0 };
+static serial_t uart = {};
 
 /* module variable for keeping track of initialization */
 static bool not_initialized = true;
@@ -66,6 +67,14 @@ void boot_debug(const char *s)
         serial_putc(&uart, *s);
         s++;
     }
+}
+
+#elif DEVICE_ITM && SHOW_SWO_OUTPUT
+
+void boot_debug(const char *s)
+{
+    static SerialWireOutput swo;
+    swo.write(s, strlen(s));
 }
 
 #else
