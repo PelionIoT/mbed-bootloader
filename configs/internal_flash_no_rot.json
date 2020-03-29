@@ -160,6 +160,21 @@
             "update-client.storage-address"             : "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE)",
             "kvstore-size"                              : "(2*32*1024)",
             "storage_tdb_internal.internal_base_address": "(MBED_ROM_START+MBED_BOOTLOADER_SIZE)"
+        },
+        "MIMXRT1050_EVK": {
+            "target.macros_remove"                      : ["HYPERFLASH_BOOT"],
+            "target.mbed_rom_start"                     : "0x60000000",
+            "target.mbed_rom_size"                      : "0x800000",
+            "target.restrict_size"                      : "0x10000",
+            "target.sectors"                            : [[1610612736,4096]],
+            "kvstore-size"                              : "(2*128*1024)",
+            "mbed-bootloader.bootloader-size"           : "(64*1024)",
+            "mbed-bootloader.application-start-address" : "(MBED_ROM_START + 64*1024 + 1024)",
+            "update-client.application-details"         : "(MBED_ROM_START + 64*1024)",
+            "update-client.storage-address"             : "(MBED_ROM_START + 64*1024 + 1984*1024)",
+            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + 64*1024 + 1984*2*1024 + 64*1024)",
+            "flashiap-block-device.base-address"        : "0x60010000",
+            "flashiap-block-device.size"                : "0x7F0000"
         }
     }
 }
