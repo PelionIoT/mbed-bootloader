@@ -24,7 +24,7 @@
 
 #include "mbed.h"
 
-#include "update-client-paal/arm_uc_paal_update.h"
+#include "update-client-paal/arm_uc_paal_update_api.h"
 #include "update-client-common/arm_uc_types.h"
 
 #include "mbed_bootloader_info.h"
@@ -40,29 +40,12 @@ const arm_uc_installer_details_t bootloader = {
     .layout   = BOOTLOADER_STORAGE_LAYOUT
 };
 
-/* use a cut down version of ARM_UCP_FLASHIAP_BLOCKDEVICE to reduce
-   binary size if ARM_UC_USE_PAL_BLOCKDEVICE is set */
-#if defined(ARM_UC_USE_PAL_BLOCKDEVICE) && (ARM_UC_USE_PAL_BLOCKDEVICE==1)
-#undef  MBED_CLOUD_CLIENT_UPDATE_STORAGE
-#define MBED_CLOUD_CLIENT_UPDATE_STORAGE ARM_UCP_FLASHIAP_BLOCKDEVICE_READ_ONLY
-#endif
-
-#ifdef MBED_CLOUD_CLIENT_UPDATE_STORAGE
-extern ARM_UC_PAAL_UPDATE MBED_CLOUD_CLIENT_UPDATE_STORAGE;
+#if defined(MBED_BOOTLOADER_NONSTANDARD_ENTRYPOINT)
+extern "C"
+int mbed_bootloader_entrypoint(void)
 #else
-#error Update client storage must be defined in user configuration file
-#endif
-
-#ifndef MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS
-#error Application start address must be defined
-#endif
-
-/* If jump address is not set then default to start address. */
-#ifndef MBED_CONF_APP_APPLICATION_JUMP_ADDRESS
-#define MBED_CONF_APP_APPLICATION_JUMP_ADDRESS MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS
-#endif
-
 int main(void)
+#endif
 {
     // this forces the linker to keep bootloader object now that it's not
     // printed anymore
@@ -83,35 +66,33 @@ int main(void)
     mbed_trace_print_function_set(boot_debug);
 #endif // MBED_CONF_MBED_TRACE_ENABLE
 
-    /* Set PAAL Update implementation before initializing Firmware Manager */
-    ARM_UCP_SetPAALUpdate(&MBED_CLOUD_CLIENT_UPDATE_STORAGE);
+#if MBED_CONF_MBED_BOOTLOADER_STARTUP_DELAY
+    ThisThread::sleep_for(MBED_CONF_MBED_BOOTLOADER_STARTUP_DELAY);
+#endif // MBED_CONF_MBED_BOOTLOADER_STARTUP_DELAY
 
     /* Initialize PAL */
-    arm_uc_error_t ucp_result = ARM_UCP_Initialize(arm_ucp_event_handler);
+    int32_t ucp_result = MBED_CLOUD_CLIENT_UPDATE_STORAGE.Initialize();
+    if (ucp_result != ERR_NONE) {
+        boot_debug("Failed to initialize update storage\r\n");
+        return -1;
+    }
 
     /*************************************************************************/
     /* Update                                                                */
     /*************************************************************************/
 
-    /* Default to booting application */
-    bool canForward = true;
-
-    /* check UCP initialization result */
-    if (ucp_result.error == ERR_NONE) {
-        /* Initialize internal flash */
-        bool storageResult = activeStorageInit();
-
-        if (storageResult) {
-            /* Try to update firmware from journal */
-            canForward = upgradeApplicationFromStorage();
-
-            /* deinit storage driver */
-            activeStorageDeinit();
-        }
+    /* Initialize internal flash */
+    if (!activeStorageInit()) {
+        boot_debug("Failed to initialize active storage\r\n");
+        return -1;
     }
 
-    /* forward control to ACTIVE application if it is deemed sane */
-    if (canForward) {
+    /* Try to update firmware from journal */
+    if (upgradeApplicationFromStorage()) {
+        /* deinit storage driver */
+        activeStorageDeinit();
+
+        /* forward control to ACTIVE application if it is deemed sane */
         boot_debug("booting...\r\n\r\n");
         mbed_start_application(MBED_CONF_APP_APPLICATION_JUMP_ADDRESS);
     }
@@ -124,4 +105,5 @@ int main(void)
     }
 
     boot_debug("Failed to jump to application!\r\n");
+    return -1;
 }

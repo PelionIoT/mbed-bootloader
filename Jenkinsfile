@@ -92,7 +92,7 @@ def bootloaderBuildStep(stepName,
           """)
 
           // Archive the binary
-          def file_extension = ("${target}" == "NRF52_DK" || "${target}" == "NRF52840_DK" || "${target}" == "LPC55S69_NS") ? "hex" : "bin"
+          def file_extension = ("${target}" == "NRF52840_DK" || "${target}" == "LPC55S69_NS") ? "hex" : "bin"
           def binary_path = build_dir + "/${repoName}.${file_extension}"
           archiveArtifacts artifacts: binary_path
           archiveArtifacts artifacts: build_dir + "/${repoName}_application.map"
@@ -110,6 +110,7 @@ def build_test_config = [
   ["NUCLEO_F303RE",       "mbed_app.json", "GCC_ARM"],
   ["NUCLEO_F411RE",       "mbed_app.json", "GCC_ARM"],
   ["NUCLEO_F429ZI",       "mbed_app.json", "GCC_ARM"],
+  ["DISCO_F769NI",        "mbed_app.json", "GCC_ARM"],
 
   // Bootloaders for just testing the build
   ["NRF52840_DK",   "configs/kvstore_and_fw_candidate_on_sd.json", "GCC_ARM"],
@@ -123,6 +124,7 @@ def build_test_config = [
   ["K64F", "configs/internal_flash_no_rot.json",          "GCC_ARM"],
   ["K64F", "configs/internal_kvstore_with_sd.json",       "GCC_ARM"],
   ["K66F", "configs/internal_flash_no_rot.json",          "GCC_ARM"],
+  ["NRF52840_DK",         "configs/internal_kvstore_with_qspif.json",    "GCC_ARM"],
   ["NUCLEO_L4R5ZI",       "configs/internal_flash_no_rot.json",          "GCC_ARM"],
   ["NUCLEO_F429ZI",       "configs/internal_flash_no_rot.json",          "GCC_ARM"],
   ["UBLOX_EVK_ODIN_W2",   "configs/internal_kvstore_with_sd.json",       "GCC_ARM"],
@@ -130,6 +132,7 @@ def build_test_config = [
   ["DISCO_L475VG_IOT01A", "configs/internal_kvstore_with_qspif.json",    "GCC_ARM"],
   ["LPC55S69_NS",         "configs/psa.json",                            "GCC_ARM"],
   ["NUCLEO_F303RE",       "configs/internal_kvstore_with_spif.json",     "GCC_ARM"],
+  ["DISCO_F769NI",        "configs/internal_flash_no_rot.json",          "GCC_ARM"],
 ]
 
 
@@ -254,6 +257,7 @@ def smoke_test_config = [
   "NUCLEO_F303RE":  ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"],
   "NUCLEO_F411RE":  ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
   "NUCLEO_F429ZI":  ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
+  "DISCO_F769NI":   ["toolchains": [ "GCC_ARM"], "raas": "https://rauni.mbedcloudtesting.com:443"],
 ]
 
 for (target in smoke_test_config.keySet()) {

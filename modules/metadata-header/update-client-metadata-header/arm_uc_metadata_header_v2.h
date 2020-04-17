@@ -178,7 +178,7 @@ typedef struct _arm_uc_external_header_t {
  *
  * @return ERR_NONE on success, error code on failure.
  */
-arm_uc_error_t ARM_UC_getDeviceKey256Bit(arm_uc_buffer_t *output);
+int32_t ARM_UC_getDeviceKey256Bit(arm_uc_buffer_t *output);
 
 /**
  * @brief Function to get the device root of trust
@@ -194,16 +194,16 @@ arm_uc_error_t ARM_UC_getDeviceKey256Bit(arm_uc_buffer_t *output);
  */
 int8_t mbed_cloud_client_get_rot_128bit(uint8_t *key_buf, uint32_t length);
 
-arm_uc_error_t arm_uc_parse_internal_header_v2(const uint8_t *input,
+int32_t arm_uc_parse_internal_header_v2(const uint8_t *input,
                                                arm_uc_firmware_details_t *output);
 
-arm_uc_error_t arm_uc_create_internal_header_v2(const arm_uc_firmware_details_t *input,
+int32_t arm_uc_create_internal_header_v2(const arm_uc_firmware_details_t *input,
                                                 arm_uc_buffer_t *output);
 
-arm_uc_error_t arm_uc_parse_external_header_v2(const uint8_t *input,
+int32_t arm_uc_parse_external_header_v2(const uint8_t *input,
                                                arm_uc_firmware_details_t *output);
 
-arm_uc_error_t arm_uc_create_external_header_v2(const arm_uc_firmware_details_t *input,
+int32_t arm_uc_create_external_header_v2(const arm_uc_firmware_details_t *input,
                                                 arm_uc_buffer_t *output);
 
 #ifdef __cplusplus

@@ -24,7 +24,7 @@
 #include "bootloader_common.h"
 
 #include "update-client-metadata-header/arm_uc_metadata_header_v2.h"
-#include "update-client-paal/arm_uc_paal_update.h"
+#include "update-client-paal/arm_uc_paal_update_api.h"
 #include "update-client-pal-flashiap/arm_uc_pal_flashiap_platform.h"
 #include "mbedtls/sha256.h"
 #include "mbed.h"
@@ -54,25 +54,13 @@ bool readActiveFirmwareHeader(arm_uc_firmware_details_t *details)
     bool result = false;
 
     if (details) {
-        /* clear most recent UCP event */
-        event_callback = CLEAR_EVENT;
 
         /* get active firmware details using UCP */
-        arm_uc_error_t status = ARM_UCP_GetActiveFirmwareDetails(details);
+        int32_t status = MBED_CLOUD_CLIENT_UPDATE_STORAGE.GetActiveFirmwareDetails(details);
 
-        /* if the call was accepted,
-           the event will indicate if the call succeeded
-        */
-        if (status.error == ERR_NONE) {
-            /* wait until the event has been set */
-            while (event_callback == CLEAR_EVENT) {
-                __WFI();
-            }
+        if (status == ERR_NONE) {
 
-            /* mark the firmware details as valid if so indicated by the event */
-            if (event_callback == ARM_UC_PAAL_EVENT_GET_ACTIVE_FIRMWARE_DETAILS_DONE) {
-                result = true;
-            }
+           result = true;
         }
     }
 
@@ -128,11 +116,6 @@ int checkActiveApplication(arm_uc_firmware_details_t *details)
 
                 /* update remaining bytes */
                 remaining -= readSize;
-
-#if defined(SHOW_PROGRESS_BAR) && SHOW_PROGRESS_BAR == 1
-                printProgress(details->size - remaining,
-                              details->size);
-#endif
             }
 
             /* finalize hash */
@@ -144,9 +127,6 @@ int checkActiveApplication(arm_uc_firmware_details_t *details)
 
             if (diff == 0) {
                 result = RESULT_SUCCESS;
-            } else {
-                printSHA256(details->hash);
-                printSHA256(SHA);
             }
         } else if ((headerValid) && (details->size == 0)) {
             /* header is valid but application size is 0 */
@@ -249,10 +229,10 @@ bool writeActiveFirmwareHeader(arm_uc_firmware_details_t *details)
             .ptr      = buffer_array
         };
 
-        arm_uc_error_t status = arm_uc_create_internal_header_v2(details,
+        int32_t status = arm_uc_create_internal_header_v2(details,
                                 &output_buffer);
 
-        if ((status.error == ERR_NONE) &&
+        if ((status == ERR_NONE) &&
                 (output_buffer.size == ARM_UC_INTERNAL_HEADER_SIZE_V2)) {
             /* write header using FlashIAP API */
             result = arm_uc_flashiap_program(buffer_array,
@@ -298,25 +278,16 @@ bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t *details)
         /* write firmware */
         while ((offset < details->size) &&
                 (result == true)) {
-            /* clear most recent UCP event */
-            event_callback = CLEAR_EVENT;
 
             /* set the number of bytes expected */
             buffer.size = (details->size - offset) > buffer.size_max ?
                           buffer.size_max : (details->size - offset);
 
             /* fill buffer using UCP */
-            arm_uc_error_t ucp_status = ARM_UCP_Read(index, offset, &buffer);
-
-            /* wait for event if the call is accepted */
-            if (ucp_status.error == ERR_NONE) {
-                while (event_callback == CLEAR_EVENT) {
-                    __WFI();
-                }
-            }
+            int32_t ucp_status = MBED_CLOUD_CLIENT_UPDATE_STORAGE.Read(index, offset, &buffer);
 
             /* check status and actual read size */
-            if ((event_callback == ARM_UC_PAAL_EVENT_READ_DONE) &&
+            if ((ucp_status == ERR_NONE) &&
                     (buffer.size > 0)) {
                 /* the last page, in the last buffer might not be completely
                    filled, round up the program size to include the last page
@@ -329,11 +300,6 @@ bool writeActiveFirmware(uint32_t index, arm_uc_firmware_details_t *details)
                                                      programSize);
 
                 result = (retval == ARM_UC_FLASHIAP_SUCCESS);
-
-#if defined(SHOW_PROGRESS_BAR) && SHOW_PROGRESS_BAR == 1
-                printProgress(offset, details->size);
-#endif
-
                 offset += programSize;
             } else {
                 boot_debug("[DBG ] ARM_UCP_Read returned 0 bytes\r\n");

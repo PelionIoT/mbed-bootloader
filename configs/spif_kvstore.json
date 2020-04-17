@@ -56,7 +56,8 @@
     ],
     "target_overrides": {
         "*": {
-            "target.default_lib"                       : "small",
+            "target.console-uart"                      : false,
+            "target.c_lib"                             : "small",
             "platform.use-mpu"                         : false,
             "platform.default-serial-baud-rate"        : 115200,
 

@@ -29,11 +29,10 @@ extern "C" {
  * @brief Initialize the underlying storage and set the callback handler.
  *
  * @param callback Function pointer to event handler.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_BlockDevice_Initialize(ARM_UC_PAAL_UPDATE_SignalEvent_t callback);
+uint32_t ARM_UC_PAL_BlockDevice_Initialize();
 
 /**
  * @brief Get maximum number of supported storage IDs.
@@ -50,11 +49,10 @@ uint32_t ARM_UC_PAL_BlockDevice_GetMaxID(void);
  * @param slot_id Storage location ID.
  * @param details Pointer to a struct with firmware details.
  * @param buffer Temporary buffer for formatting and storing metadata.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_BlockDevice_Prepare(uint32_t slot_id,
+int32_t ARM_UC_PAL_BlockDevice_Prepare(uint32_t slot_id,
                                               const arm_uc_firmware_details_t *details,
                                               arm_uc_buffer_t *buffer);
 
@@ -67,11 +65,10 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_Prepare(uint32_t slot_id,
  * @param slot_id Storage location ID.
  * @param offset Offset in bytes to where the fragment should be written.
  * @param buffer Pointer to buffer struct with fragment.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_BlockDevice_Write(uint32_t slot_id,
+int32_t ARM_UC_PAL_BlockDevice_Write(uint32_t slot_id,
                                             uint32_t offset,
                                             const arm_uc_buffer_t *buffer);
 
@@ -79,11 +76,10 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_Write(uint32_t slot_id,
  * @brief Close storage location for writing and flush pending data.
  *
  * @param slot_id Storage location ID.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_BlockDevice_Finalize(uint32_t slot_id);
+int32_t ARM_UC_PAL_BlockDevice_Finalize(uint32_t slot_id);
 
 /**
  * @brief Read a fragment from the indicated storage location.
@@ -95,12 +91,11 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_Finalize(uint32_t slot_id);
  * @param offset Offset in bytes to read from.
  * @param buffer Pointer to buffer struct to store fragment. buffer->size
  *        contains the intended read size.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  *         buffer->size contains actual bytes read on return.
  */
-arm_uc_error_t ARM_UC_PAL_BlockDevice_Read(uint32_t slot_id,
+int32_t ARM_UC_PAL_BlockDevice_Read(uint32_t slot_id,
                                            uint32_t offset,
                                            arm_uc_buffer_t *buffer);
 
@@ -116,11 +111,10 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_Read(uint32_t slot_id,
  *             top of another.
  *
  * @param slot_id Storage location ID.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_BlockDevice_Activate(uint32_t slot_id);
+int32_t ARM_UC_PAL_BlockDevice_Activate(uint32_t slot_id);
 
 /**
  * @brief Get firmware details for the firmware image in the slot passed.
@@ -131,11 +125,10 @@ arm_uc_error_t ARM_UC_PAL_BlockDevice_Activate(uint32_t slot_id);
  *
  * @param slot_id Storage location ID.
  * @param details Pointer to firmware details struct to be populated.
- * @return Returns ERR_NONE on accept, and signals the event handler with
- *         either DONE or ERROR when complete.
- *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+ * @return Returns ERR_NONE on accept.
+ *         Returns ERR_INVALID_PARAMETER on reject.
  */
-arm_uc_error_t ARM_UC_PAL_BlockDevice_GetFirmwareDetails(
+int32_t ARM_UC_PAL_BlockDevice_GetFirmwareDetails(
     uint32_t slot_id,
     arm_uc_firmware_details_t *details);
 

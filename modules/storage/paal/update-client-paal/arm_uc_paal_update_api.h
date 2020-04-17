@@ -32,63 +32,6 @@
 
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
-#if defined(MBED_CONF_MBED_TRACE_ENABLE) && MBED_CONF_MBED_TRACE_ENABLE == 1
-
-#include "mbed-trace/mbed_trace.h"
-#ifndef TRACE_GROUP
-#define TRACE_GROUP  "UCPI"
-#endif
-
-#define ARM_UC_TRACE_DEBUG_PRINTF(module, fmt, ...) tr_debug("[%-4s] %s:%d: " fmt, module, __FILENAME__, __LINE__, ##__VA_ARGS__)
-#define ARM_UC_TRACE_ERROR_PRINTF(module, fmt, ...) tr_error("[%-4s] %s:%d: " fmt, module, __FILENAME__, __LINE__, ##__VA_ARGS__)
-
-#else // if defined(MBED_CONF_MBED_TRACE_ENABLE) && MBED_CONF_MBED_TRACE_ENABLE == 1
-
-#include <stdio.h>
-
-#define ARM_UC_TRACE_DEBUG_PRINTF(module, fmt, ...) printf("[TRACE][%-4s] %s:%d: " fmt "\r\n", module, __FILENAME__, __LINE__, ##__VA_ARGS__)
-#define ARM_UC_TRACE_ERROR_PRINTF(module, fmt, ...) printf("[ERROR][%-4s] %s:%d: " fmt "\r\n", module, __FILENAME__, __LINE__, ##__VA_ARGS__)
-
-#endif // if defined(MBED_CONF_MBED_TRACE_ENABLE) && MBED_CONF_MBED_TRACE_ENABLE == 1
-
-#if ARM_UC_PAAL_TRACE_ENABLE
-#define UC_PAAL_TRACE(fmt, ...)   ARM_UC_TRACE_DEBUG_PRINTF("PAAL", fmt, ##__VA_ARGS__)
-#define UC_PAAL_ERR_MSG(fmt, ...) ARM_UC_TRACE_ERROR_PRINTF("PAAL", fmt, ##__VA_ARGS__)
-#else
-#define UC_PAAL_TRACE(fmt, ...)
-#define UC_PAAL_ERR_MSG(fmt, ...)
-#endif // if ARM_UC_PAAL_TRACE_ENABLE
-
-/**
- * @brief Prototype for event handler.
- */
-typedef void (*ARM_UC_PAAL_UPDATE_SignalEvent_t)(uint32_t event);
-
-/**
- * @brief Asynchronous events.
- */
-enum {
-    ARM_UC_PAAL_EVENT_INITIALIZE_DONE,
-    ARM_UC_PAAL_EVENT_PREPARE_DONE,
-    ARM_UC_PAAL_EVENT_WRITE_DONE,
-    ARM_UC_PAAL_EVENT_FINALIZE_DONE,
-    ARM_UC_PAAL_EVENT_READ_DONE,
-    ARM_UC_PAAL_EVENT_ACTIVATE_DONE,
-    ARM_UC_PAAL_EVENT_GET_ACTIVE_FIRMWARE_DETAILS_DONE,
-    ARM_UC_PAAL_EVENT_GET_FIRMWARE_DETAILS_DONE,
-    ARM_UC_PAAL_EVENT_GET_INSTALLER_DETAILS_DONE,
-    ARM_UC_PAAL_EVENT_INITIALIZE_ERROR,
-    ARM_UC_PAAL_EVENT_PREPARE_ERROR,
-    ARM_UC_PAAL_EVENT_FIRMWARE_TOO_LARGE_ERROR,
-    ARM_UC_PAAL_EVENT_WRITE_ERROR,
-    ARM_UC_PAAL_EVENT_FINALIZE_ERROR,
-    ARM_UC_PAAL_EVENT_READ_ERROR,
-    ARM_UC_PAAL_EVENT_ACTIVATE_ERROR,
-    ARM_UC_PAAL_EVENT_GET_ACTIVE_FIRMWARE_DETAILS_ERROR,
-    ARM_UC_PAAL_EVENT_GET_FIRMWARE_DETAILS_ERROR,
-    ARM_UC_PAAL_EVENT_GET_INSTALLER_DETAILS_ERROR,
-};
-
 /**
  * @brief Bitmap with supported header features.
  * @details The PAAL Update implementation indicates what features are
@@ -117,11 +60,10 @@ typedef struct _ARM_UC_PAAL_UPDATE {
      * @brief Initialize the underlying storage and set the callback handler.
      *
      * @param callback Function pointer to event handler.
-     * @return Returns ERR_NONE on accept, and signals the event handler with
-     *         either DONE or ERROR when complete.
-     *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+     * @return Returns ERR_NONE on accept.
+     *         Returns ERR_INVALID_PARAMETER on reject.
      */
-    arm_uc_error_t (*Initialize)(ARM_UC_PAAL_UPDATE_SignalEvent_t callback);
+    int32_t (*Initialize)(void);
 
     /**
      * @brief Get a bitmap indicating supported features.
@@ -148,11 +90,10 @@ typedef struct _ARM_UC_PAAL_UPDATE {
      * @param location Storage location ID.
      * @param details Pointer to a struct with firmware details.
      * @param buffer Temporary buffer for formatting and storing metadata.
-     * @return Returns ERR_NONE on accept, and signals the event handler with
-     *         either DONE or ERROR when complete.
-     *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+     * @return Returns ERR_NONE on accept.
+     *         Returns ERR_INVALID_PARAMETER on reject.
      */
-    arm_uc_error_t (*Prepare)(uint32_t location,
+    int32_t (*Prepare)(uint32_t location,
                               const arm_uc_firmware_details_t *details,
                               arm_uc_buffer_t *buffer);
 
@@ -165,11 +106,10 @@ typedef struct _ARM_UC_PAAL_UPDATE {
      * @param location Storage location ID.
      * @param offset Offset in bytes to where the fragment should be written.
      * @param buffer Pointer to buffer struct with fragment.
-     * @return Returns ERR_NONE on accept, and signals the event handler with
-     *         either DONE or ERROR when complete.
-     *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+     * @return Returns ERR_NONE on accept.
+     *         Returns ERR_INVALID_PARAMETER on reject.
      */
-    arm_uc_error_t (*Write)(uint32_t location,
+    int32_t (*Write)(uint32_t location,
                             uint32_t offset,
                             const arm_uc_buffer_t *buffer);
 
@@ -177,11 +117,10 @@ typedef struct _ARM_UC_PAAL_UPDATE {
      * @brief Close storage location for writing and flush pending data.
      *
      * @param location Storage location ID.
-     * @return Returns ERR_NONE on accept, and signals the event handler with
-     *         either DONE or ERROR when complete.
-     *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+     * @return Returns ERR_NONE on accept.
+     *         Returns ERR_INVALID_PARAMETER on reject.
      */
-    arm_uc_error_t (*Finalize)(uint32_t location);
+    int32_t (*Finalize)(uint32_t location);
 
     /**
      * @brief Read a fragment from the indicated storage location.
@@ -193,12 +132,11 @@ typedef struct _ARM_UC_PAAL_UPDATE {
      * @param offset Offset in bytes to read from.
      * @param buffer Pointer to buffer struct to store fragment. buffer->size
      *        contains the intended read size.
-     * @return Returns ERR_NONE on accept, and signals the event handler with
-     *         either DONE or ERROR when complete.
-     *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+     * @return Returns ERR_NONE on accept.
+     *         Returns ERR_INVALID_PARAMETER on reject.
      *         buffer->size contains actual bytes read on return.
      */
-    arm_uc_error_t (*Read)(uint32_t location,
+    int32_t (*Read)(uint32_t location,
                            uint32_t offset,
                            arm_uc_buffer_t *buffer);
 
@@ -214,11 +152,10 @@ typedef struct _ARM_UC_PAAL_UPDATE {
      *             top of another.
      *
      * @param location Storage location ID.
-     * @return Returns ERR_NONE on accept, and signals the event handler with
-     *         either DONE or ERROR when complete.
-     *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+     * @return Returns ERR_NONE on accept.
+     *         Returns ERR_INVALID_PARAMETER on reject.
      */
-    arm_uc_error_t (*Activate)(uint32_t location);
+    int32_t (*Activate)(uint32_t location);
 
     /**
      * @brief Get firmware details for the actively running firmware.
@@ -228,11 +165,10 @@ typedef struct _ARM_UC_PAAL_UPDATE {
      *          values.
      *
      * @param details Pointer to firmware details struct to be populated.
-     * @return Returns ERR_NONE on accept, and signals the event handler with
-     *         either DONE or ERROR when complete.
-     *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+     * @return Returns ERR_NONE on accept.
+     *         Returns ERR_INVALID_PARAMETER on reject.
      */
-    arm_uc_error_t (*GetActiveFirmwareDetails)(arm_uc_firmware_details_t *details);
+    int32_t (*GetActiveFirmwareDetails)(arm_uc_firmware_details_t *details);
 
     /**
      * @brief Get firmware details for the firmware image in the slot passed.
@@ -242,11 +178,10 @@ typedef struct _ARM_UC_PAAL_UPDATE {
      *          values.
      *
      * @param details Pointer to firmware details struct to be populated.
-     * @return Returns ERR_NONE on accept, and signals the event handler with
-     *         either DONE or ERROR when complete.
-     *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+     * @return Returns ERR_NONE on accept.
+     *         Returns ERR_INVALID_PARAMETER on reject.
      */
-    arm_uc_error_t (*GetFirmwareDetails)(uint32_t location,
+    int32_t (*GetFirmwareDetails)(uint32_t location,
                                          arm_uc_firmware_details_t *details);
 
     /**
@@ -259,11 +194,10 @@ typedef struct _ARM_UC_PAAL_UPDATE {
      *          image.
      *
      * @param details Pointer to installer details struct to be populated.
-     * @return Returns ERR_NONE on accept, and signals the event handler with
-     *         either DONE or ERROR when complete.
-     *         Returns ERR_INVALID_PARAMETER on reject, and no signal is sent.
+     * @return Returns ERR_NONE on accept.
+     *         Returns ERR_INVALID_PARAMETER on reject.
      */
-    arm_uc_error_t (*GetInstallerDetails)(arm_uc_installer_details_t *details);
+    int32_t (*GetInstallerDetails)(arm_uc_installer_details_t *details);
 
 } ARM_UC_PAAL_UPDATE;
 

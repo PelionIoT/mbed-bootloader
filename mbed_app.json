@@ -22,7 +22,8 @@
                  "kv-config",
                  "kv-global-api",
                  "kv-map",
-                 "device_key"
+                 "device_key",
+                 "mbed-trace"
     ],
     "config": {
         "documentation": {
@@ -68,7 +69,8 @@
     ],
     "target_overrides": {
         "*": {
-            "target.default_lib"                       : "small",
+            "target.console-uart"                      : false,
+            "target.c_lib"                             : "small",
             "platform.use-mpu"                         : false,
             "platform.default-serial-baud-rate"        : 115200,
             "update-client.firmware-header-version"    : "2",
@@ -95,6 +97,12 @@
         },
         "NUCLEO_L073RZ": {
             "target.boot-stack-size"                   : "1024"
+        },
+        "DISCO_F769NI": {
+            "target.extra_labels_remove"       : [ "PSA" ],
+            "mbed-bootloader.bootloader-size"  : "(64*1024)",
+            "target.restrict_size"             : "0x10000",
+            "update-client.application-details": "(MBED_ROM_START + 256*1024)"
         }
     }
 }

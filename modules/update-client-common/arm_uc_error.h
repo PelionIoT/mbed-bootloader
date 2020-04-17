@@ -194,53 +194,5 @@ enum arm_uc_error {
 #undef ENUM_AUTO
 #undef ENUM_FIXED
 };
-union arm_uc_error_code {
-    int32_t code;
-    struct {
-        int16_t error;
-        union {
-            uint16_t module;
-            uint8_t  modulecc[2];
-        };
-    };
-};
 
-typedef union arm_uc_error_code arm_uc_error_t;
-
-#define ARM_UC_ERROR(CODE)              ((arm_uc_error_t){ CODE })
-#define ARM_UC_IS_ERROR(VAR)            ((VAR).code != ERR_NONE)
-#define ARM_UC_IS_NOT_ERROR(VAR)        (!ARM_UC_IS_ERROR(VAR))
-#define ARM_UC_ERROR_MATCHES(VAR,CODE)  ((VAR).code == CODE)
-
-#define ARM_UC_CLEAR_ERROR(ERR)         ((ERR).code = (ERR_NONE))
-#define ARM_UC_INIT_ERROR(VAR, CODE)    arm_uc_error_t (VAR) = arm_uc_code_to_error( CODE )
-#define ARM_UC_GET_ERROR(VAR)           ((VAR).code)
-
-#if ARM_UC_ERROR_TRACE_ENABLE
-#define ARM_UC_SET_ERROR(VAR, CODE)\
-    do { (VAR).code = (CODE);\
-    if ( ARM_UC_IS_ERROR(VAR) ) \
-        UC_ERROR_TRACE("set error %" PRIx32, (long unsigned int)CODE);\
-    } while (0)
-#else
-#define ARM_UC_SET_ERROR(VAR, CODE)                 (VAR).code = (CODE)
-#endif
-// have a way to set errors without trace for values that are not strictly errors.
-#define ARM_UC_SET_ERROR_NEVER_TRACE(VAR, CODE)     (VAR).code = (CODE)
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-const char *ARM_UC_err2Str(arm_uc_error_t err);
-static inline arm_uc_error_t arm_uc_code_to_error(int32_t code)
-{
-    arm_uc_error_t err;
-    err.code = code;
-    return err;
-}
-
-#ifdef __cplusplus
-}
-#endif
 #endif // ARM_UPDATE_ERROR_H

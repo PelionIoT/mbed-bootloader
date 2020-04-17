@@ -25,14 +25,16 @@
                  "device_key",
                  "greentea-client",
                  "unity",
-                 "utest"
+                 "utest",
+                 "mbed-trace"
     ],
     "macros": [
-        "MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE=1024"
+        "MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE=1024",
+        "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP_BLOCKDEVICE_READ_ONLY"
     ],
     "target_overrides": {
         "*": {
-            "target.default_lib"                        : "small",
+            "target.c_lib"                              : "small",
             "platform.use-mpu"                          : false,
             "platform.stdio-baud-rate"                  : 115200,
             "platform.stdio-flush-at-exit"              : false,

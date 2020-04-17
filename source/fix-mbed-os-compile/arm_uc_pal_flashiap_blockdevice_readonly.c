@@ -3,7 +3,7 @@
 
 #if defined(ARM_UC_USE_PAL_BLOCKDEVICE) && (ARM_UC_USE_PAL_BLOCKDEVICE==1)
 
-extern arm_uc_error_t ARM_UCP_FashIAP_BlockDevice_Initialize(ARM_UC_PAAL_UPDATE_SignalEvent_t callback);
+extern int32_t ARM_UCP_FashIAP_BlockDevice_Initialize();
 
 ARM_UC_PAAL_UPDATE ARM_UCP_FLASHIAP_BLOCKDEVICE_READ_ONLY = {
     .Initialize                 = ARM_UCP_FashIAP_BlockDevice_Initialize,

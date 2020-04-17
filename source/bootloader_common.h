@@ -21,6 +21,23 @@
 
 #include <stdint.h>
 #include "bootloader_config.h"
+#include "arm_uc_paal_update_api.h"
+
+/* use a cut down version of ARM_UCP_FLASHIAP_BLOCKDEVICE to reduce
+   binary size if ARM_UC_USE_PAL_BLOCKDEVICE is set */
+#if defined(ARM_UC_USE_PAL_BLOCKDEVICE) && (ARM_UC_USE_PAL_BLOCKDEVICE==1)
+#undef  MBED_CLOUD_CLIENT_UPDATE_STORAGE
+#define MBED_CLOUD_CLIENT_UPDATE_STORAGE ARM_UCP_FLASHIAP_BLOCKDEVICE_READ_ONLY
+#endif
+
+#ifdef MBED_CLOUD_CLIENT_UPDATE_STORAGE
+extern ARM_UC_PAAL_UPDATE MBED_CLOUD_CLIENT_UPDATE_STORAGE;
+#endif
+
+/* If jump address is not set then default to start address. */
+#ifndef MBED_CONF_APP_APPLICATION_JUMP_ADDRESS
+#define MBED_CONF_APP_APPLICATION_JUMP_ADDRESS MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,14 +59,7 @@ enum {
 
 extern uint8_t buffer_array[BUFFER_SIZE];
 
-extern uint32_t event_callback;
 extern const char hexTable[16];
-
-void arm_ucp_event_handler(uint32_t event);
-
-void print_sha256_function(const uint8_t SHA[SIZEOF_SHA256]);
-
-void print_progress_function(uint32_t progress, uint32_t total);
 
 void boot_debug(const char *s);
 
@@ -60,55 +70,6 @@ void boot_debug(const char *s);
         while (1) __WFI();                       \
     }                                            \
 }
-
-
-#if SHOW_SERIAL_OUTPUT
-#define printSHA256 print_sha256_function
-#define printProgress print_progress_function
-#else
-#define printSHA256
-#define printProgress
-#endif
-
-#if MBED_CONF_MBED_TRACE_ENABLE
-
-#ifndef SHOW_SERIAL_OUTPUT
-#define SHOW_SERIAL_OUTPUT 1
-#endif
-
-#else
-
-#ifdef tr_debug
-#undef tr_debug
-#endif
-#define tr_debug(...)
-
-#ifdef tr_info
-#undef tr_info
-#endif
-#define tr_info(...)
-
-#ifdef tr_warning
-#undef tr_warning
-#endif
-#define tr_warning(...)
-
-#ifdef tr_error
-#undef tr_error
-#endif
-#define tr_error(...)
-
-#ifdef tr_trace
-#undef tr_trace
-#endif
-#define tr_trace(...)
-
-#ifdef tr_flush
-#undef tr_flush
-#endif
-#define tr_flush(x)
-
-#endif
 
 #ifdef __cplusplus
 }

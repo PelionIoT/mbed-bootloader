@@ -22,7 +22,8 @@
                  "kv-config",
                  "kv-global-api",
                  "kv-map",
-                 "device_key"
+                 "device_key",
+                 "mbed-trace"
     ],
     "config": {
         "documentation": {
@@ -86,7 +87,8 @@
     ],
     "target_overrides": {
         "*": {
-            "target.default_lib"                        : "small",
+            "target.console-uart"                      : false,
+            "target.c_lib"                              : "small",
             "platform.use-mpu"                          : false,
             "platform.default-serial-baud-rate"         : 115200,
             "platform.stdio-flush-at-exit"              : false,
@@ -107,6 +109,10 @@
             "update-client.storage-locations"           : 1
         },
         "DISCO_L475VG_IOT01A": {
+            "target.restrict_size"           : "0x9000",
+            "mbed-bootloader.bootloader-size": "(36*1024)"
+        },
+        "DISCO_L496AG": {
             "target.restrict_size"           : "0x9000",
             "mbed-bootloader.bootloader-size": "(36*1024)"
         }

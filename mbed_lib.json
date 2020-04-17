@@ -22,15 +22,20 @@
             "value": 3,
             "macro_name": "MAX_BOOT_RETRIES"
         },
-        "show-progress-bar": {
-            "help": "show a progress bar during various stages of bootloader operation",
-            "value": 0,
-            "macro_name": "SHOW_PROGRESS_BAR"
+        "nonstandard-entrypoint": {
+            "help": "Set to 1 to turn the Mbed Bootloader application into a library that can be ported to other platforms.",
+            "value": null,
+            "macro_name": "MBED_BOOTLOADER_NONSTANDARD_ENTRYPOINT"
         },
         "show-serial-output": {
             "help": "Show boot status and progress on serial output. Disable output to save space on headless devices.",
             "value": 1,
             "macro_name": "SHOW_SERIAL_OUTPUT"
+        },
+        "show-swo-output": {
+            "help": "Show boot status and progress on SWO output instead of serial.",
+            "value": 0,
+            "macro_name": "SHOW_SWO_OUTPUT"
         },
         "use-kvstore-rot": {
             "help": "use nvstore implementation of the ROT to authenticate firmware headers",
@@ -46,6 +51,10 @@
             "help": "bootloader size",
             "value": "(32*1024)",
             "macro_name": "MBED_BOOTLOADER_SIZE"
+        },
+        "startup-delay": {
+            "help": "Startup delay before initializing the storage hardware. (In milliseconds)",
+            "value": 0
         }
     },
     "macros": [

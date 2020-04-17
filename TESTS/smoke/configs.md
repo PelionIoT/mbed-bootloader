@@ -10,6 +10,7 @@ Following table is parsed automatically by build scripts, so follow the format E
 |NUCLEO_F303RE|../../BUILD/mbed_app/NUCLEO_F303RE/GCC_ARM/mbed-bootloader.bin|0x8000|0x8400|0x40000|0x40070|
 |NUCLEO_F411RE|../../BUILD/mbed_app/NUCLEO_F411RE/GCC_ARM/mbed-bootloader.bin|0x8000|0x8400|0x40000|0x40070|
 |NUCLEO_F429ZI|../../BUILD/mbed_app/NUCLEO_F429ZI/GCC_ARM/mbed-bootloader.bin|0x8000|0x8400|0x100000|0x100070|
+|DISCO_F769NI|../../BUILD/mbed_app/DISCO_F769NI/GCC_ARM/mbed-bootloader.bin|0x40000|0x40400|0x100000|0x100070|
 
 
 ## Finding the values
