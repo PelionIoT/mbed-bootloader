@@ -79,11 +79,11 @@ For this information to propagate to the cloud, the 3 macros (`BOOTLOADER_ARM_SO
 1. `BOOTLOADER_OEM_SOURCE_HASH` is used to indicate any modification that OEMs have made on top of the vanilla mbed-bootloader. Hence it should be populated with the OEM modified bootloader SHA-1 git commit hash.
 1. `BOOTLOADER_STORAGE_LAYOUT` is a proprietary enum to indicate the storage layout supported by this bootloader. The OEM is free to define the meaning of this number.
 
-In order for the cloud client to recognise this struct and obtain the information. The offset of the symbol in the bootloader binary needs to be populated in the cloud client's configuration file. This information can be obtained from the map file of the compiled bootloader. 
+In order for the cloud client to recognise this struct and obtain the information. The offset of the symbol in the bootloader binary needs to be populated in the cloud client's configuration file. This information can be obtained from the map file of the compiled bootloader.
 
 1. Example python code for obtaining the location:
     ```python
-    with open("BUILD/UBLOX_EVK_ODIN_W2/GCC_ARM/mbed-bootloader.map", 'r') as fd:
+    with open("BUILD/K66F/GCC_ARM/mbed-bootloader.map", 'r') as fd:
         s = fd.read()
 
     regex = r"\.rodata\..*{}\s+(0x[0-9a-fA-F]+)".format("bootloader")
