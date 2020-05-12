@@ -127,7 +127,6 @@ def build_test_config = [
   ["NRF52840_DK",         "configs/internal_kvstore_with_qspif.json",    "GCC_ARM"],
   ["NUCLEO_L4R5ZI",       "configs/internal_flash_no_rot.json",          "GCC_ARM"],
   ["NUCLEO_F429ZI",       "configs/internal_flash_no_rot.json",          "GCC_ARM"],
-  ["UBLOX_EVK_ODIN_W2",   "configs/internal_kvstore_with_sd.json",       "GCC_ARM"],
   ["NUCLEO_F411RE",       "configs/kvstore_and_fw_candidate_on_sd.json", "GCC_ARM"],
   ["DISCO_L475VG_IOT01A", "configs/internal_kvstore_with_qspif.json",    "GCC_ARM"],
   ["LPC55S69_NS",         "configs/psa.json",                            "GCC_ARM"],
