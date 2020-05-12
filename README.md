@@ -83,7 +83,7 @@ In order for the cloud client to recognise this struct and obtain the informatio
 
 1. Example python code for obtaining the location:
     ```python
-    with open("BUILD/UBLOX_EVK_ODIN_W2/GCC_ARM/mbed-bootloader.map", 'r') as fd:
+    with open("BUILD/K64F/GCC_ARM/mbed-bootloader.map", 'r') as fd:
         s = fd.read()
 
     regex = r"\.rodata\..*{}\s+(0x[0-9a-fA-F]+)".format("bootloader")
