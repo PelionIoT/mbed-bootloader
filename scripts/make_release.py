@@ -54,7 +54,8 @@ targets = [
     ("NRF52840_DK", "internal_kvstore_with_qspif"),
     ("NUCLEO_F411RE", "kvstore_and_fw_candidate_on_sd"),  # cloud client
     ("DISCO_L475VG_IOT01A", "internal_kvstore_with_qspif"),  # cloud client
-    ("LPC55S69_NS", "psa"),  # cloud client
+    # LPC55S69_NS is disabled for now in mbed-os
+    #("LPC55S69_NS", "psa"),  # cloud client
     ("NUCLEO_F303RE", "internal_kvstore_with_spif"),  # cloud client
     ("DISCO_F769NI", "internal_flash_no_rot")
 ]
