@@ -83,7 +83,7 @@
     ],
     "target_overrides": {
         "*": {
-            "target.console-uart"                      : false,
+            "target.console-uart"                       : false,
             "target.c_lib"                              : "small",
             "platform.use-mpu"                          : false,
             "platform.default-serial-baud-rate"         : 115200,
@@ -97,7 +97,8 @@
             "target.components_add"                     : ["SPIF"],
             "update-client.storage-address"             : "0",
             "update-client.storage-size"                : "((MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS) * MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS)",
-            "update-client.storage-locations"           : 1
+            "update-client.storage-locations"           : 1,
+            "update-client.storage-page"                : 1
         },
         "NUCLEO_F303RE": {
             "target.restrict_size"           : "0x9800",
@@ -107,6 +108,10 @@
             "spif-driver.SPI_CLK"            : "PC_10",
             "spif-driver.SPI_CS"             : "PA_15",
             "update-client.storage-page"     : 2
-        }
+        },
+        "NUCLEO_WB55RG": {
+            "target.restrict_size"               : "0x9000",
+            "mbed-bootloader.bootloader-size"    : "(36*1024)"
+	}
     }
 }
