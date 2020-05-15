@@ -61,8 +61,8 @@
                     "(storage-locations is set to 1 in this configuration)",
                     "",
                     "NRF52840_DK: Please note the config is different. The kvstore region is at the end of flash.",
-                    "Setting `target.static_memory_defines` as `true` is an alternative for the workaround",
-                    "https://github.com/ARMmbed/mbed-os/pull/11510 . The PR in question is waiting for approval"
+                    "Setting `target.static_memory_defines` as `true` is required due to an issue",
+                    "https://github.com/ARMmbed/mbed-os/issues/11737"
             ]
         }
     },
