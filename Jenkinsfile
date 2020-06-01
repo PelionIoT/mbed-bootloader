@@ -257,7 +257,8 @@ def smoke_test_config = [
   "NUCLEO_F303RE":  ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"],
   "NUCLEO_F411RE":  ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
   "NUCLEO_F429ZI":  ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
-  "DISCO_F769NI":   ["toolchains": [ "GCC_ARM"], "raas": "https://rauni.mbedcloudtesting.com:443"],
+// Disabled until dual-bank configuration enabled.
+//  "DISCO_F769NI":   ["toolchains": [ "GCC_ARM"], "raas": "https://rauni.mbedcloudtesting.com:443"],
 ]
 
 for (target in smoke_test_config.keySet()) {
