@@ -1,0 +1,72 @@
+{
+    "name": "fota",
+    "config": {
+        "block-device-type": {
+            "help": "Type of block device: Internal flash, custom (supply a block device instance) or external (implement all FOTA block device C APIs)",
+            "macro_name": "MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE",
+            "accepted_values": ["FOTA_INTERNAL_FLASH_BD", "FOTA_CUSTOM_BD", "FOTA_EXTERNAL_BD"],
+            "value": null
+        },
+        "storage-start-address": {
+            "help": "FW candidate storage start address (physical)",
+            "macro_name": "MBED_CLOUD_CLIENT_FOTA_STORAGE_START_ADDR",
+            "value": null
+        },
+        "storage-size": {
+            "help": "FW candidate storage size",
+            "macro_name": "MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE",
+            "value": null
+        },
+        "encryption-support": {
+            "help": "FW candidate encryption enabled",
+            "macro_name": "MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT",
+            "value": null
+        },
+        "candidate-block-size": {
+            "help": "FW candidate block size in storage - only relevant if encrypted or if resume is supported",
+            "macro_name": "MBED_CLOUD_CLIENT_FOTA_CANDIDATE_BLOCK_SIZE",
+            "value": 1024
+        },
+        "trace-enable": {
+            "help": "Enable FOTA trace",
+            "macro_name": "FOTA_TRACE_ENABLE",
+            "value": null
+        },
+        "debug-trace": {
+            "help": "Enable FOTA debug traces",
+            "macro_name": "FOTA_TRACE_DBG",
+            "value": null
+        },
+        "app-default-cb-no-print": {
+            "help": "Disable prints in default implementation of application callbacks code",
+            "macro_name": "FOTA_APP_DEFAULT_CB_NO_PRINT",
+            "value": 1
+        },
+        "is-bootloader": {
+            "help": "True when FOTA runs from bootloader",
+            "macro_name": "FOTA_IS_BOOTLOADER",
+            "value": null
+        },
+        "fi-mitigation-enable": {
+            "help": "Enable FI mitigation macros",
+            "macro_name": "FOTA_FI_MITIGATION_ENABLE",
+            "value": null
+        },
+        "num-components": {
+            "help": "Number of updateable components (including main firmware). Up to 8.",
+            "macro_name": "FOTA_NUM_COMPONENTS",
+            "value": 1
+        },
+        "resume-support": {
+            "help": "Type of resume support: unsupported, restart only, resume",
+            "macro_name": "MBED_CLOUD_CLIENT_FOTA_RESUME_SUPPORT",
+            "accepted_values": ["FOTA_RESUME_UNSUPPORTED", "FOTA_RESUME_SUPPORT_RESTART", "FOTA_RESUME_SUPPORT_RESUME"],
+            "value": "FOTA_RESUME_SUPPORT_RESUME"
+        },
+        "delta-block-size": {
+            "help": "size of bsdiff blocks used to create delta-update",
+            "macro_name": "MBED_CLOUD_CLIENT_FOTA_DELTA_BLOCK_SIZE",
+            "value": 1024
+        }
+    }
+}
