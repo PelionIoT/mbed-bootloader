@@ -37,10 +37,8 @@
         }
     },
     "requires": [     
-        "bootloader",
         "platform",
         "mbed-bootloader",
-        "rtos-api",
         "mbed-trace",
         "mbedtls",
         "system-storage",
@@ -49,7 +47,6 @@
         "flashiap-block-device",         
         "sd",
         "drivers",        
-		"spif-driver",
 		"storage_filesystem",
         "SecureStore",
         "filesystem",
