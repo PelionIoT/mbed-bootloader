@@ -29,6 +29,7 @@
 #include "mbed_trace.h"
 #include "storage/boot_nvm_storage.h"
 #include "platform/mbed_application.h"
+#include "platform/mbed_toolchain.h"
 #include "mbedtls/sha256.h"
 #include "mbedtls/platform_util.h"
 #include <stdlib.h>
@@ -249,7 +250,6 @@ static int validate_installed_fw()
 {
     fota_hash_context_t *digest_ctx;
     int tmp_ret = FOTA_STATUS_INTERNAL_ERROR;
-    int sig_verify_status = FOTA_STATUS_INTERNAL_ERROR;
     uint8_t digest[FOTA_CRYPTO_HASH_SIZE] = { 0 };
     int ret = FOTA_STATUS_INTERNAL_ERROR;
     uint32_t addr = MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS;
