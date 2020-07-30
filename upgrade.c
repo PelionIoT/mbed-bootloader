@@ -211,10 +211,10 @@ static int check_and_install_update()
         pr_error("Storage initialization failed!");
         return ret;
     }
-
+    
     flash_page_size = flash_get_page_size(&flash_obj);
 
-    ret = fota_candidate_iterate_image(validate, true, FOTA_COMPONENT_MAIN_COMPONENT_NAME, flash_page_size,
+    ret = fota_candidate_iterate_image(validate, false, FOTA_COMPONENT_MAIN_COMPONENT_NAME, flash_page_size,
                                        install_iterate_handler);
     if (ret) {
         goto end;
@@ -224,6 +224,7 @@ static int check_and_install_update()
 
 end:
     deinit_storage();
+    pr_info("check_and_install_update %d.", ret);
     return ret;
 }
 
@@ -275,6 +276,8 @@ static int validate_installed_fw()
         ret = FOTA_STATUS_INTERNAL_ERROR;
         goto fail;
     }
+    
+    pr_debug("Validating image on flash finished");
 
 #if defined(MBED_CLOUD_CLIENT_FOTA_SIGNED_IMAGE_SUPPORT)
     sig_verify_status = fota_verify_signature_prehashed(
@@ -288,10 +291,12 @@ static int validate_installed_fw()
         "FW image is not authentic"
     );
 #else
+    pr_debug("check hash");
     FOTA_FI_SAFE_MEMCMP(digest, installed_header.digest, FOTA_CRYPTO_HASH_SIZE,
                         FOTA_STATUS_INVALID_DATA, "Hash mismatch!");
 
 #endif
+    pr_debug("validate success");
     ret = FOTA_STATUS_SUCCESS;
 fail:
     fota_hash_finish(&digest_ctx);
@@ -323,6 +328,7 @@ int main(void)
         pr_error("NVM storage init failed");
     } else {
         ret = check_and_install_update();
+        pr_info("Searching for candidate image...%d, ret");
         if (ret == FOTA_STATUS_SUCCESS) {
             read_installed_fw_header();
         }
