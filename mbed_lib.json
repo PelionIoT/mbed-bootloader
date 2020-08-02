@@ -1,71 +1,53 @@
 {
     "name": "mbed-bootloader",
     "config": {
+        "application-header-address": {
+            "help": "Address to the beginning of the application header in flash",
+            "required": true
+        },
         "application-start-address": {
             "help": "Address to the beginning of the active application firmware in flash",
             "required": true
         },
         "application-jump-address": {
-            "help": "Jump address for running the active application firmware (if different from application-start-address)"
+            "help": "Jump address for running the active application firmware (if different from application-start-address)",
+            "value": "MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS"
         },
         "max-application-size": {
             "help": "Maximum size of the active application",
             "value": "DEFAULT_MAX_APPLICATION_SIZE"
         },
-        "max-copy-retries": {
-            "help": "number of retries for copying candidate image onto the active image area",
-            "value": 1,
-            "macro_name": "MAX_COPY_RETRIES"
-        },
-        "max-boot-retries": {
-            "help": "number of retries for booting into the active image",
-            "value": 3,
-            "macro_name": "MAX_BOOT_RETRIES"
-        },
-        "nonstandard-entrypoint": {
-            "help": "Set to 1 to turn the Mbed Bootloader application into a library that can be ported to other platforms.",
-            "value": null,
-            "macro_name": "MBED_BOOTLOADER_NONSTANDARD_ENTRYPOINT"
-        },
-        "show-serial-output": {
+        "trace": {
             "help": "Show boot status and progress on serial output. Disable output to save space on headless devices.",
-            "value": 1,
-            "macro_name": "SHOW_SERIAL_OUTPUT"
-        },
-        "show-swo-output": {
-            "help": "Show boot status and progress on SWO output instead of serial.",
-            "value": 0,
-            "macro_name": "SHOW_SWO_OUTPUT"
-        },
-        "use-kvstore-rot": {
-            "help": "use nvstore implementation of the ROT to authenticate firmware headers",
-            "value": 1,
-            "macro_name": "ARM_BOOTLOADER_USE_KVSTORE_ROT"
+            "value": true,
+            "macro_name": "MBED_BOOTLOADER_TRACE"
         },
         "default-max-application-size":{
             "help": "The max application size",
             "value": "(MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS)",
             "macro_name": "DEFAULT_MAX_APPLICATION_SIZE"
         },
-        "bootloader-size":{
-            "help": "bootloader size",
-            "value": "(32*1024)",
-            "macro_name": "MBED_BOOTLOADER_SIZE"
+        "debug":{
+            "help": "debug prints enabled",
+            "value": false,
+            "macro_name": "MBED_BOOTLOADER_DEBUG"
         },
-        "startup-delay": {
-            "help": "Startup delay before initializing the storage hardware. (In milliseconds)",
-            "value": 0
-        }
+        "external-traces-enabled":{
+            "help": "external traces enabled",
+            "value": false,
+            "macro_name": "MBED_BOOTLOADER_EXTERNAL_TRACES_ENABLED"
+        },
+        "storage-type": {
+            "help": "Select the used storage type: TDBSTORE or PDBSTORE",
+            "accepted_values": ["KVSTORE", "PDBSTORE"],
+            "value": "PDBSTORE"
+        }  
     },
     "macros": [
         "MBED_FAULT_HANDLER_DISABLED",
         "MBEDTLS_USER_CONFIG_FILE=\"bootloader_mbedtls_user_config.h\"",
-        "ARM_UC_PROFILE_MBED_CLOUD_CLIENT=1",
-        "ARM_UC_FEATURE_CRYPTO_PAL=0",
-        "ARM_UC_FEATURE_CRYPTO_MBEDTLS=1",
-        "Mutex=PlatformMutex",
-        "ARM_UC_PAAL_TRACE_ENABLE=0"
-    ],
+        "Mutex=PlatformMutex"
+    ],   
     "target_overrides": {
         "*": {
             "target.features_remove": ["LWIP", "STORAGE"]

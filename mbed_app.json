@@ -1,30 +1,4 @@
 {
-    "requires": ["bare-metal",
-                 "rtos-api",
-                 "update-client",
-                 "storage",
-                 "storage_filesystem",
-                 "SecureStore",
-                 "storage_tdb_internal",
-                 "mbed-bootloader",
-                 "mbedtls",
-                 "system-storage",
-                 "filesystem",
-                 "filesystemstore",
-                 "littlefs",
-                 "fat_chan",
-                 "spif",
-                 "qspif",
-                 "sd",
-                 "flashiap-block-device",
-                 "direct-access-devicekey",
-                 "tdbstore",
-                 "kv-config",
-                 "kv-global-api",
-                 "kv-map",
-                 "device_key",
-                 "mbed-trace"
-    ],
     "config": {
         "documentation": {
             "options": [
@@ -62,29 +36,88 @@
             ]
         }
     },
+    "requires": [     
+        "platform",
+        "mbed-bootloader",
+        "mbed-trace",
+        "mbedtls",
+        "system-storage",
+        "storage",
+        "storage_tdb_internal",
+        "flashiap-block-device",         
+        "drivers",        
+		"storage_filesystem",
+        "SecureStore",
+        "filesystem",
+        "filesystemstore",
+        "littlefs",
+        "fat_chan",
+        "direct-access-devicekey",
+        "tdbstore",
+        "kv-config",
+        "kv-global-api",
+        "kv-map",
+        "device_key",
+		 "fota"
+    ],
     "macros": [
-        "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP",
         "MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE=1024",
-        "MBED_BOOTLOADER_FLASH_BANK_SIZE=MBED_ROM_SIZE/2"
+        "MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION=3",
+        "MBED_CLOUD_CLIENT_FOTA_ENABLE=1"
     ],
     "target_overrides": {
         "*": {
-            "target.console-uart"                      : false,
+            "target.console-uart"                      : true,
             "target.c_lib"                             : "small",
-            "platform.use-mpu"                         : false,
-            "platform.default-serial-baud-rate"        : 115200,
-            "update-client.firmware-header-version"    : "2",
-            "mbed-bootloader.use-kvstore-rot"          : 0,
-            "target.restrict_size"                     : "0x8000",
-            "mbed-bootloader.application-start-address": "(MBED_CONF_UPDATE_CLIENT_APPLICATION_DETAILS + MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE)",
-            "update-client.application-details"        : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE)",
-            "update-client.storage-address"            : "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE)",
-            "update-client.storage-size"               : "(MBED_BOOTLOADER_FLASH_BANK_SIZE)",
-            "update-client.storage-locations"          : 1,
-            "update-client.storage-page"               : 1
+            "platform.stdio-baud-rate"                 : 115200,
+            "mbed-bootloader.trace"                    : true,
+            "fota.is-bootloader"                       : true,
+            "target.header_format": [
+                ["magic", "const", "32le", "0x5c0253a3"],
+                ["firmwareSize", "size", "32le", ["application"]],
+                ["firmwareVersion", "const", "64le", "0x0"],
+                ["firmwareDigest", "digest", "SHA256", "application"],
+                ["precursorDigest", "digest", "SHA256", "application"]
+            ],                                            
+            "fota.fi-mitigation-enable"                : false            
+        },
+        "DISCO_L475VG_IOT01A": {
+            "mbed-bootloader.application-header-address": "(MBED_ROM_START+0xD000)",
+            "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0xD200)",
+            "mbed-bootloader.debug"                     : false,
+            "mbed-bootloader.external-traces-enabled"   : false,
+            "mbed-bootloader.storage-type"               : "KVSTORE",
+            "fota.storage-size"                         : "(512*1024)",
+            "fota.candidate-block-size"                 : "1024",
+            "fota.encryption-support"                   : false,
+            "fota.trace-enable"                         : false,
+            "target.components_remove"                  : ["QSPIF", "BlueNRG_MS"],
+            "storage.storage_type"                      : "TDB_INTERNAL",
+            "fota.block-device-type"                    : "FOTA_INTERNAL_FLASH_BD",
+            "fota.storage-start-address"                : "MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE - 512*1024",
+            "storage_tdb_internal.internal_size"        : "(16*1024)",
+            "platform.crash-capture-enabled"            : false,
+            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)"
         },
         "K64F": {
-            "target.extra_labels_remove": [ "PSA" ]
+            "target.extra_labels_remove": [ "PSA" ],
+            "mbed-bootloader.application-header-address": "(MBED_ROM_START+0x8000)",
+            "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0x8200)",
+            "mbed-bootloader.debug"                     : false,
+            "mbed-bootloader.external-traces-enabled"   : false,
+            "mbed-bootloader.storage-type"               : "KVSTORE",
+            "fota.storage-size"                         : "(512*1024)",
+            "fota.candidate-block-size"                 : "1024",
+            "fota.encryption-support"                   : false,
+            "fota.trace-enable"                         : false,
+            "target.components_remove"                  : ["SD"],
+            "storage.storage_type"                      : "TDB_INTERNAL",
+            "fota.block-device-type"                    : "FOTA_INTERNAL_FLASH_BD",
+            "fota.storage-start-address"                : "MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE - 512*1024",
+            "storage_tdb_internal.internal_size"        : "(16*1024)",
+            "platform.crash-capture-enabled"            : false,
+            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)"
+
         },
         "NUCLEO_F429ZI": {
             "target.extra_labels_remove": [ "PSA" ]
