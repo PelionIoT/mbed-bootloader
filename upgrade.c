@@ -20,18 +20,22 @@
 #include "fota/fota_crypto.h"
 #include "fota/fota_platform.h"
 #include "fota/fota_header_info.h"
-#include "fota/fota_nvm.h"
 #include "fota/fota_candidate.h"
 #include "fota/fota_component.h"
 #include "fota/fota_component_internal.h"
 #include "fota/fota_status.h"
 #include "flash_api.h"
 #include "mbed_trace.h"
-#include "storage/boot_nvm_storage.h"
 #include "platform/mbed_application.h"
 #include "platform/mbed_toolchain.h"
 #include "mbedtls/sha256.h"
 #include "mbedtls/platform_util.h"
+
+#if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
+    #include "storage/boot_nvm_storage.h"
+    #include "fota/fota_nvm.h"    
+#endif // #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
+
 #include <stdlib.h>
 
 flash_t flash_obj;
@@ -198,6 +202,7 @@ static int check_and_install_update()
 {
     int ret = FOTA_STATUS_NOT_FOUND;
     bool validate = true;
+#if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
     uint8_t fw_key[FOTA_ENCRYPT_KEY_SIZE];
     ret = fota_nvm_fw_encryption_key_get(fw_key);
     if (ret) {
@@ -205,6 +210,7 @@ static int check_and_install_update()
         return FOTA_STATUS_NOT_FOUND;
     }
     memset(fw_key, 0, sizeof(fw_key));
+#endif // #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
 
     ret = init_storage();
     if (ret != FOTA_STATUS_SUCCESS) {
@@ -216,7 +222,14 @@ static int check_and_install_update()
 
     ret = fota_candidate_iterate_image(validate, false, FOTA_COMPONENT_MAIN_COMPONENT_NAME, flash_page_size,
                                        install_iterate_handler);
-    if (ret) {
+    if (ret) {                                       
+#if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 0)
+        if(ret == FOTA_STATUS_NOT_FOUND) {
+            deinit_storage();
+            pr_info("Candidate not found");
+            return ret;
+        }
+#endif
         goto end;
     }
 
@@ -324,21 +337,26 @@ int main(void)
 
     pr_info("Searching for candidate image...");
 
+#if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
     if (nvm_storage_init()) {
         pr_error("NVM storage init failed");
-    } else {
-        ret = check_and_install_update();
-        pr_info("Searching for candidate image...%d, ret");
-        if (ret == FOTA_STATUS_SUCCESS) {
-            read_installed_fw_header();
-        }
+        goto fail;
+    }
+#endif // #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
 
-        nvm_storage_deinit();
+    ret = check_and_install_update();
+    pr_debug("Searching for candidate image...%d, ret");
+    if (ret == FOTA_STATUS_SUCCESS) {
+        read_installed_fw_header();
+    }
 
-        if (installed_header.magic != FOTA_FW_HEADER_MAGIC) {
-            pr_error("Invalid header of current firmware");
-            goto fail;
-        }
+#if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
+    nvm_storage_deinit();
+#endif // #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
+
+    if (installed_header.magic != FOTA_FW_HEADER_MAGIC) {
+        pr_error("Invalid header of current firmware");
+        goto fail;
     }
 
     // Prevent FI on hash digest (so it won't be equal to 0 in both places)
