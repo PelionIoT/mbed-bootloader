@@ -97,7 +97,7 @@
             "storage.storage_type"                      : "TDB_INTERNAL",
             "fota.block-device-type"                    : "FOTA_INTERNAL_FLASH_BD",
             "fota.storage-start-address"                : "MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE - 512*1024",
-            "storage_tdb_internal.internal_size"        : "(16*1024)",
+            "storage_tdb_internal.internal_size"        : "(32*1024)",
             "platform.crash-capture-enabled"            : false,
             "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)"
         },
@@ -116,7 +116,7 @@
             "storage.storage_type"                      : "TDB_INTERNAL",
             "fota.block-device-type"                    : "FOTA_INTERNAL_FLASH_BD",
             "fota.storage-start-address"                : "MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE - 512*1024",
-            "storage_tdb_internal.internal_size"        : "(16*1024)",
+            "storage_tdb_internal.internal_size"        : "(32*1024)",
             "platform.crash-capture-enabled"            : false,
             "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)"
         },
@@ -137,7 +137,7 @@
             "storage.storage_type"                      : "TDB_INTERNAL",
             "fota.block-device-type"                    : "FOTA_INTERNAL_FLASH_BD",
             "fota.storage-start-address"                : "MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE - 512*1024",
-            "storage_tdb_internal.internal_size"        : "(16*1024)",
+            "storage_tdb_internal.internal_size"        : "(32*1024)",
             "platform.crash-capture-enabled"            : false,
             "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)"
         }
