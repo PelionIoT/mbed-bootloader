@@ -1,29 +1,28 @@
 {
-    "requires": ["bare-metal",
-                 "rtos-api",
-                 "update-client",
-                 "storage",
-                 "storage_filesystem",
-                 "SecureStore",
-                 "storage_tdb_internal",
+    
+
+    "requires": ["platform",
                  "mbed-bootloader",
+                 "mbed-trace",
                  "mbedtls",
                  "system-storage",
+                 "storage",
+                 "storage_tdb_internal",
+                 "flashiap-block-device",
+                 "drivers",
+                 "storage_filesystem",
+                 "SecureStore",
                  "filesystem",
                  "filesystemstore",
                  "littlefs",
                  "fat_chan",
-                 "spif",
-                 "qspif",
-                 "sd",
-                 "flashiap-block-device",
                  "direct-access-devicekey",
                  "tdbstore",
                  "kv-config",
                  "kv-global-api",
                  "kv-map",
                  "device_key",
-                 "mbed-trace"
+                 "fota"
     ],
     "config": {
         "documentation": {
@@ -68,112 +67,51 @@
                     "bootloader does not require a rot to operate. Hence the KVSTORE region is there for",
                     "the benefit of Pelion Device Management Client only"
             ]
-        },
-        "kvstore-size": {
-            "help": "The size of the area of flash reserved for kvstore, it neeeds to be even number of flash sectors",
-            "macro_name": "KVSTORE_SIZE",
-            "required": true
         }
     },
     "macros": [
-        "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP",
-        "MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE=1024",
-        "MBED_BOOTLOADER_FLASH_BANK_SIZE=MBED_ROM_SIZE/2"
+        "MBED_BOOTLOADER_FLASH_BANK_SIZE=MBED_ROM_SIZE/2",
+        "MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION=3",
+        "FOTA_HEADER_HAS_CANDIDATE_READY=1",        
+        "MBED_CLOUD_CLIENT_FOTA_ENABLE=1"
+
     ],
     "target_overrides": {
         "*": {
-            "target.console-uart"                      : false,
+            "target.console-uart"                      : true,
             "target.c_lib"                             : "small",
-            "platform.default-serial-baud-rate"        : 115200,
-            "update-client.firmware-header-version"    : "2",
-            "mbed-bootloader.use-kvstore-rot"          : 0,
-            "mbed-bootloader.bootloader-size"          : "APPLICATION_SIZE",
+            "platform.use-mpu"                         : false,
+            "platform.stdio-baud-rate"                 : 115200,
             "target.restrict_size"                     : "0x8000",
-            "kvstore-size"                             : "2*16*1024",
-            "update-client.application-details"        : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE)",
-            "mbed-bootloader.application-start-address": "(MBED_CONF_UPDATE_CLIENT_APPLICATION_DETAILS + MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE)",
-            "mbed-bootloader.max-application-size"     : "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS)",
-            "update-client.storage-address"            : "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE + KVSTORE_SIZE)",
-            "update-client.storage-size"               : "(MBED_BOOTLOADER_FLASH_BANK_SIZE - KVSTORE_SIZE)",
-            "update-client.storage-locations"          : 1,
+            "fota.is-bootloader"                       : true,
+            "target.header_format": [
+                ["magic", "const", "32le", "0x5c0253a3"],
+                ["firmwareSize", "size", "32le", ["application"]],
+                ["firmwareVersion", "const", "64le", "0x0"],
+                ["firmwareDigest", "digest", "SHA256", "application"],
+                ["precursorDigest", "digest", "SHA256", "application"]
+            ],                                            
+            "fota.fi-mitigation-enable"                : false,
             "target.extra_labels_remove"               : [ "PSA" ],
-            "update-client.storage-page"               : 1
-        },
-        "K64F": {
-            "kvstore-size": "2*16*1024",
-            "update-client.storage-page": 8
-        },
-        "K66F": {
-            "kvstore-size": "2*48*1024",
-            "update-client.storage-page": 8
-        },
-        "NUCLEO_F429ZI": {
-            "kvstore-size": "2*64*1024"
+            "mbed-bootloader.application-header-address": "(MBED_ROM_START+0x8000)",
+            "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0x8200)",
+            "mbed-bootloader.debug"                     : false,
+            "mbed-bootloader.external-traces-enabled"   : false,
+            "mbed-bootloader.storage-type"              : "KVSTORE",
+            "fota.storage-size"                         : "MBED_BOOTLOADER_FLASH_BANK_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
+            "fota.candidate-block-size"                 : "1024",
+            "fota.encryption-support"                   : false,
+            "fota.trace-enable"                         : false,
+            "storage.storage_type"                      : "TDB_INTERNAL",
+            "fota.block-device-type"                    : "FOTA_INTERNAL_FLASH_BD",
+            "fota.storage-start-address"                : "MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE + MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
+            "storage_tdb_internal.internal_size"        : "(32*1024)",
+            "platform.crash-capture-enabled"            : false,
+            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE)"
         },
         "NRF52840_DK": {
             "target.macros_remove"                     : ["MBEDTLS_CONFIG_HW_SUPPORT"],
             "target.features_remove"                   : ["CRYPTOCELL310"]
-        },
-        "DISCO_F746NG": {
-            "mbed-bootloader.bootloader-size"          : "(32*1024)",
-            "kvstore-size"                             : "(2*32*1024)",
-            "update-client.application-details"        : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE + KVSTORE_SIZE)",
-            "update-client.storage-address"            : "(MBED_ROM_START+512*1024)",
-            "update-client.storage-size"               : "(512*1024)",
-            "update-client.storage-locations"          : 1,
-            "update-client.storage-page"               : 1,
-            "mbed-bootloader.max-application-size"     : "((32+127+256)*1024)"
-        },
-        "NUCLEO_H743ZI2": {
-            "kvstore-size"                     : "(2*128*1024)",
-            "target.restrict_size"             : "0x20000",
-            "mbed-bootloader.bootloader-size"  : "(128*1024)",
-            "update-client.application-details": "(MBED_ROM_START + MBED_BOOTLOADER_SIZE + 128*1024)"
-        },
-        "GR_LYCHEE": {
-            "target.bootloader_supported"      : true,
-            "kvstore-size"                     : "(2*24*1024)",
-            "target.restrict_size"             : "0x10000",
-            "mbed-bootloader.bootloader-size"  : "(64*1024)",
-            "update-client.storage-page"       : 1
-        },
-        "RZ_A1H": {
-            "target.bootloader_supported"      : true,
-            "kvstore-size"                     : "(2*24*1024)",
-            "target.restrict_size"             : "0x10000",
-            "mbed-bootloader.bootloader-size"  : "(64*1024)",
-            "update-client.storage-page"       : 1
-        },
-        "UHURU_RAVEN": {
-            "target.components_remove"                 : ["SPIF"],
-            "mbed-bootloader.bootloader-size"          : "(32*1024)",
-            "kvstore-size"                             : "(2*32*1024)",
-            "update-client.application-details"        : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE + KVSTORE_SIZE)",
-            "update-client.storage-address"            : "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE)",
-            "mbed-bootloader.max-application-size"     : "((1024-32-64)*1024)"
-        },
-        "DISCO_F769NI": {
-            "mbed-bootloader.bootloader-size"           : "(64*1024)",
-            "target.restrict_size"                      : "0x10000",
-            "update-client.application-details"         : "(MBED_ROM_START + 256*1024)",
-            "update-client.storage-address"             : "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE)",
-            "kvstore-size"                              : "(2*32*1024)",
-            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START+MBED_BOOTLOADER_SIZE)"
-        },
-        "MIMXRT1050_EVK": {
-            "target.macros_remove"                      : ["HYPERFLASH_BOOT"],
-            "target.mbed_rom_start"                     : "0x60000000",
-            "target.mbed_rom_size"                      : "0x800000",
-            "target.restrict_size"                      : "0x10000",
-            "target.sectors"                            : [[1610612736,4096]],
-            "kvstore-size"                              : "(2*128*1024)",
-            "mbed-bootloader.bootloader-size"           : "(64*1024)",
-            "mbed-bootloader.application-start-address" : "(MBED_ROM_START + 64*1024 + 1024)",
-            "update-client.application-details"         : "(MBED_ROM_START + 64*1024)",
-            "update-client.storage-address"             : "(MBED_ROM_START + 64*1024 + 1984*1024)",
-            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + 64*1024 + 1984*2*1024 + 64*1024)",
-            "flashiap-block-device.base-address"        : "0x60010000",
-            "flashiap-block-device.size"                : "0x7F0000"
         }
     }
 }

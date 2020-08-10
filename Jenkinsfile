@@ -106,33 +106,33 @@ def build_test_config = [
   // Bootloaders for Smoke test using internal flash
   ["DISCO_L475VG_IOT01A", "mbed_app.json", "GCC_ARM"],
   ["K64F",                "mbed_app.json", "GCC_ARM"],
-  ["NRF52840_DK",         "mbed_app.json", "GCC_ARM"],
-  ["NUCLEO_F303RE",       "mbed_app.json", "GCC_ARM"],
-  ["NUCLEO_F411RE",       "mbed_app.json", "GCC_ARM"],
-  ["NUCLEO_F429ZI",       "mbed_app.json", "GCC_ARM"],
-  ["DISCO_F769NI",        "mbed_app.json", "GCC_ARM"],
+  ["NRF52840_DK",         "mbed_app.json", "GCC_ARM"]
+  // ["NUCLEO_F303RE",       "mbed_app.json", "GCC_ARM"],
+  // ["NUCLEO_F411RE",       "mbed_app.json", "GCC_ARM"],
+  // ["NUCLEO_F429ZI",       "mbed_app.json", "GCC_ARM"],
+  // ["DISCO_F769NI",        "mbed_app.json", "GCC_ARM"],
 
   // Bootloaders for just testing the build
-  ["NRF52840_DK",   "configs/kvstore_and_fw_candidate_on_sd.json", "GCC_ARM"],
-  ["NUCLEO_L073RZ", "configs/kvstore_and_fw_candidate_on_sd.json", "GCC_ARM"],
-  ["DISCO_L475VG_IOT01A", "configs/external_kvstore_with_qspif.json", "GCC_ARM"],
-  ["NUCLEO_H743ZI2", "configs/internal_flash_no_rot.json", "GCC_ARM"],
+  // ["NRF52840_DK",   "configs/kvstore_and_fw_candidate_on_sd.json", "GCC_ARM"],
+  // ["NUCLEO_L073RZ", "configs/kvstore_and_fw_candidate_on_sd.json", "GCC_ARM"],
+  // ["DISCO_L475VG_IOT01A", "configs/external_kvstore_with_qspif.json", "GCC_ARM"],
+  // ["NUCLEO_H743ZI2", "configs/internal_flash_no_rot.json", "GCC_ARM"],
 
   // Bootloaders for release.
   // NOTE: Must match make_release.py
-  ["K64F", "configs/kvstore_and_fw_candidate_on_sd.json", "GCC_ARM"],
-  ["K64F", "configs/internal_flash_no_rot.json",          "GCC_ARM"],
-  ["K64F", "configs/internal_kvstore_with_sd.json",       "GCC_ARM"],
-  ["K66F", "configs/internal_flash_no_rot.json",          "GCC_ARM"],
-  ["NRF52840_DK",         "configs/internal_kvstore_with_qspif.json",    "GCC_ARM"],
-  ["NUCLEO_L4R5ZI",       "configs/internal_flash_no_rot.json",          "GCC_ARM"],
-  ["NUCLEO_F429ZI",       "configs/internal_flash_no_rot.json",          "GCC_ARM"],
-  ["NUCLEO_F411RE",       "configs/kvstore_and_fw_candidate_on_sd.json", "GCC_ARM"],
-  ["DISCO_L475VG_IOT01A", "configs/internal_kvstore_with_qspif.json",    "GCC_ARM"],
+  // ["K64F", "configs/kvstore_and_fw_candidate_on_sd.json", "GCC_ARM"],
+  // ["K64F", "configs/internal_flash_no_rot.json",          "GCC_ARM"],
+  // ["K64F", "configs/internal_kvstore_with_sd.json",       "GCC_ARM"],
+  // ["K66F", "configs/internal_flash_no_rot.json",          "GCC_ARM"],
+  // ["NRF52840_DK",         "configs/internal_kvstore_with_qspif.json",    "GCC_ARM"],
+  // ["NUCLEO_L4R5ZI",       "configs/internal_flash_no_rot.json",          "GCC_ARM"],
+  // ["NUCLEO_F429ZI",       "configs/internal_flash_no_rot.json",          "GCC_ARM"],
+  // ["NUCLEO_F411RE",       "configs/kvstore_and_fw_candidate_on_sd.json", "GCC_ARM"],
+  // ["DISCO_L475VG_IOT01A", "configs/internal_kvstore_with_qspif.json",    "GCC_ARM"],
   // LPC55S69_NS is disabled for now in mbed-os
   //["LPC55S69_NS",         "configs/psa.json",                            "GCC_ARM"],
-  ["NUCLEO_F303RE",       "configs/internal_kvstore_with_spif.json",     "GCC_ARM"],
-  ["DISCO_F769NI",        "configs/internal_flash_no_rot.json",          "GCC_ARM"],
+  // ["NUCLEO_F303RE",       "configs/internal_kvstore_with_spif.json",     "GCC_ARM"],
+  // ["DISCO_F769NI",        "configs/internal_flash_no_rot.json",          "GCC_ARM"],
 ]
 
 
@@ -199,8 +199,8 @@ def greenteaTestStep(step_name,
 // Those are already tested in Mbed OS, and therefore we use minimal number of targets here
 // for testing the ARM_UC_cryptoHMACSHA256().
 def greentea_test_config = [
-  "K64F":           ["toolchains": ["GCC_ARM"], "raas": "https://eeva.mbedcloudtesting.com"],
-  "NUCLEO_F429ZI":  ["toolchains": ["GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com"],
+  "K64F":           ["toolchains": ["GCC_ARM"], "raas": "https://eeva.mbedcloudtesting.com"]
+  // "NUCLEO_F429ZI":  ["toolchains": ["GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com"],
 ]
 
 for (target in greentea_test_config.keySet()) {
@@ -253,10 +253,10 @@ def SmokeTestStep(step_name,
 def smoke_test_config = [
   "DISCO_L475VG_IOT01A": ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"],
   "K64F":           ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
-  "NRF52840_DK":    ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"],
-  "NUCLEO_F303RE":  ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"],
-  "NUCLEO_F411RE":  ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
-  "NUCLEO_F429ZI":  ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
+  "NRF52840_DK":    ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"]
+// "NUCLEO_F303RE":  ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"],
+//  "NUCLEO_F411RE":  ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
+//  "NUCLEO_F429ZI":  ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
 // Disabled until dual-bank configuration enabled.
 //  "DISCO_F769NI":   ["toolchains": [ "GCC_ARM"], "raas": "https://rauni.mbedcloudtesting.com:443"],
 ]
