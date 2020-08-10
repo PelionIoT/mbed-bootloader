@@ -9,7 +9,15 @@
             "platform.stdio-baud-rate": 115200,
             "target.bootloader_img" : "BOOTLOADER_BIN",
             "target.header_offset" : "HEADER_OFFSET",
-            "target.app_offset"  : "APP_OFFSET"
+            "target.app_offset"  : "APP_OFFSET",
+            "target.header_format": [
+                ["magic", "const", "32le", "0x5c0253a3"],
+                ["firmwareSize", "size", "32le", ["application"]],
+                ["firmwareVersion", "const", "64le", "0x0"],
+                ["firmwareDigest", "digest", "SHA256", "application"],
+                ["precursorDigest", "digest", "SHA256", "application"]
+            ]
         }
     }
 }
+

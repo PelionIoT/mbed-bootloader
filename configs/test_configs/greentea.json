@@ -41,7 +41,14 @@
             "mbed-bootloader.application-start-address" : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE + MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE)",
             "update-client.storage-locations"           : 1,
             "update-client.application-details"         : "(MBED_ROM_START + MBED_BOOTLOADER_SIZE)",
-            "target.extra_labels_remove"                : [ "PSA" ]
+            "target.extra_labels_remove"                : [ "PSA" ],
+            "target.header_format": [
+                ["magic", "const", "32le", "0x5c0253a3"],
+                ["firmwareSize", "size", "32le", ["application"]],
+                ["firmwareVersion", "const", "64le", "0x0"],
+                ["firmwareDigest", "digest", "SHA256", "application"],
+                ["precursorDigest", "digest", "SHA256", "application"]
+            ]
         }
     }
 }
