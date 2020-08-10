@@ -1,9 +1,7 @@
 {
     
 
-    "requires": ["bare-metal",
-                 "rtos-api",
-                 "platform",
+    "requires": ["platform",
                  "mbed-bootloader",
                  "mbed-trace",
                  "mbedtls",
