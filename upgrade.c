@@ -201,9 +201,9 @@ static int install_iterate_handler(fota_candidate_iterate_callback_info *info)
 static int check_and_install_update()
 {
     int ret = FOTA_STATUS_NOT_FOUND;
-    bool validate = true;
-    bool force_encrypt = false;
+    bool validate = true;    
 #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
+    bool force_encrypt = true;
     uint8_t fw_key[FOTA_ENCRYPT_KEY_SIZE];
     ret = fota_nvm_fw_encryption_key_get(fw_key);
     if (ret) {
@@ -211,7 +211,8 @@ static int check_and_install_update()
         return FOTA_STATUS_NOT_FOUND;
     }
     memset(fw_key, 0, sizeof(fw_key));
-    force_encrypt = true;
+#else
+    bool force_encrypt = false;    
 #endif // #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
 
     ret = init_storage();

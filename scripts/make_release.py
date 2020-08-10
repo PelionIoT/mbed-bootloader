@@ -197,7 +197,7 @@ if __name__ == '__main__':
         profile = args.profile
 
     # write SHA1 into mbed_bootloader_info.h
-    patch_version()
+    # patch_version()
 
     if args.patch:
         sys.exit(0)

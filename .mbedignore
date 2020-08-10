@@ -23,10 +23,3 @@ mbed-os/targets/TARGET_STM/TARGET_STM32WB/TARGET_STM32WB55xx/TOOLCHAIN_GCC_ARM/*
 mbed-os/usb/device/USBAudio/*
 mbed-os/drivers/I2CSlave.cpp
 mbed-os/storage/kvstore/source/kvstore_global_api.cpp
-fota/fota_source.c
-fota/fota_manifest_v1.c
-fota/fota_manifest_v3.c
-fota/fota.c
-fota/fota_app_ifs.c
-fota/fota_delta.c
-fota/fota_event_handler.c

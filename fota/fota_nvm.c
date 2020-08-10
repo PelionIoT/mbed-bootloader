@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright 2018-2019 ARM Ltd.
+// Copyright 2018-2020 ARM Ltd.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -27,6 +27,7 @@
 #include "fota/fota_nvm_int.h"
 #include "fota/fota_crypto.h"
 #include "fota/fota_component.h"
+#include "fota/fota_crypto_defs.h"
 #include "mbed_error.h"
 #include "mbed-trace/mbed_trace.h"
 #include <stdlib.h>
@@ -135,15 +136,9 @@ int fota_nvm_update_cert_set(void)
 
     int ret = fota_nvm_get_update_certificate(buffer_fota_certificate, FOTA_CERT_MAX_SIZE, &bytes_read);
 
-    if (ret == FOTA_STATUS_NOT_FOUND) {
+    if ((ret == FOTA_STATUS_NOT_FOUND) ||
+            (ret == FOTA_STATUS_SUCCESS && 0 != memcmp(buffer_fota_certificate, arm_uc_default_certificate, arm_uc_default_certificate_size))) {
         ret = fota_nvm_set(UPDATE_CERTIFICATE, buffer_fota_certificate, FOTA_CERT_MAX_SIZE);
-        free(buffer_fota_certificate);
-        return ret;
-    } else if (ret == FOTA_STATUS_SUCCESS && 0 != memcmp(buffer_fota_certificate, arm_uc_default_certificate, arm_uc_default_certificate_size)) {
-
-        ret = fota_nvm_set(UPDATE_CERTIFICATE, buffer_fota_certificate, FOTA_CERT_MAX_SIZE);
-        free(buffer_fota_certificate);
-        return ret;
     }
 
     free(buffer_fota_certificate);
@@ -181,10 +176,24 @@ int fota_nvm_get_update_public_key(uint8_t buffer[FOTA_UPDATE_RAW_PUBLIC_KEY_SIZ
 }
 #else
 // implement setter functions that will be called from fota_dev_init()
-
 int fota_nvm_set_update_public_key(void)
 {
-    int ret = fota_nvm_set(UPDATE_PUBKEY, buffer, FOTA_UPDATE_RAW_PUBLIC_KEY_SIZE);
+    uint8_t *buffer_raw_key = malloc(FOTA_UPDATE_RAW_PUBLIC_KEY_SIZE);
+    if (!buffer_raw_key) {
+        FOTA_TRACE_ERROR("FOTA buffer_raw_key - allocation failed");
+        return FOTA_STATUS_OUT_OF_MEMORY;
+    }
+
+    memcpy(buffer_raw_key, arm_uc_update_public_key, FOTA_UPDATE_RAW_PUBLIC_KEY_SIZE);
+
+    int ret = fota_nvm_get_update_public_key(buffer_raw_key);
+
+    if ((ret == FOTA_STATUS_NOT_FOUND) ||
+            (ret == FOTA_STATUS_SUCCESS && 0 != memcmp(buffer_raw_key, arm_uc_update_public_key, FOTA_UPDATE_RAW_PUBLIC_KEY_SIZE))) {
+        ret = fota_nvm_set(UPDATE_PUBKEY, buffer_raw_key, FOTA_UPDATE_RAW_PUBLIC_KEY_SIZE);
+    }
+
+    free(buffer_raw_key);
     return ret;
 }
 #endif  // defined(FOTA_USE_EXTERNAL_UPDATE_RAW_PUBLIC_KEY)
