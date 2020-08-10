@@ -202,6 +202,7 @@ static int check_and_install_update()
 {
     int ret = FOTA_STATUS_NOT_FOUND;
     bool validate = true;
+    bool force_encrypt = false;
 #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
     uint8_t fw_key[FOTA_ENCRYPT_KEY_SIZE];
     ret = fota_nvm_fw_encryption_key_get(fw_key);
@@ -210,6 +211,7 @@ static int check_and_install_update()
         return FOTA_STATUS_NOT_FOUND;
     }
     memset(fw_key, 0, sizeof(fw_key));
+    force_encrypt = true;
 #endif // #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
 
     ret = init_storage();
@@ -220,7 +222,7 @@ static int check_and_install_update()
     
     flash_page_size = flash_get_page_size(&flash_obj);
 
-    ret = fota_candidate_iterate_image(validate, false, FOTA_COMPONENT_MAIN_COMPONENT_NAME, flash_page_size,
+    ret = fota_candidate_iterate_image(validate, force_encrypt, FOTA_COMPONENT_MAIN_COMPONENT_NAME, flash_page_size,
                                        install_iterate_handler);
     if (ret) {                                       
 #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 0)
@@ -319,6 +321,7 @@ fail:
 
 int main(void)
 {
+    bool is_new_firmware = false;
     pr_info("Bootloader build at: " __DATE__ " " __TIME__);
     volatile int ret = FOTA_STATUS_INTERNAL_ERROR, installed_fw_status = FOTA_STATUS_INTERNAL_ERROR;
 #if MBED_BOOTLOADER_TRACE
@@ -347,6 +350,7 @@ int main(void)
     ret = check_and_install_update();
     pr_debug("Searching for candidate image...%d, ret");
     if (ret == FOTA_STATUS_SUCCESS) {
+        is_new_firmware = true;
         read_installed_fw_header();
     }
 
@@ -367,6 +371,10 @@ int main(void)
     installed_fw_status = validate_installed_fw();
     FOTA_FI_SAFE_COND(installed_fw_status == FOTA_STATUS_SUCCESS,
                       installed_fw_status, "Validating installed firmware failed");
+    if (is_new_firmware && installed_fw_status == FOTA_STATUS_SUCCESS ) {
+        pr_info("New active firmware is valid\r\n");
+    }
+
 #if MBED_BOOTLOADER_TRACE
     ret = fota_component_version_int_to_semver(installed_header.version, semver);
     if (ret) {

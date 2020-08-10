@@ -61,7 +61,7 @@
 		 "fota"
     ],
     "macros": [
-        "MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE=1024",
+        "MBED_BOOTLOADER_FLASH_BANK_SIZE=MBED_ROM_SIZE/2",
         "MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION=3",
         "FOTA_HEADER_HAS_CANDIDATE_READY=1",        
         "MBED_CLOUD_CLIENT_FOTA_ENABLE=1"
@@ -88,18 +88,18 @@
             "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0x8200)",
             "mbed-bootloader.debug"                     : false,
             "mbed-bootloader.external-traces-enabled"   : false,
-            "mbed-bootloader.storage-type"               : "KVSTORE",
-            "fota.storage-size"                         : "(512*1024)",
+            "mbed-bootloader.storage-type"              : "KVSTORE",
+            "fota.storage-size"                         : "MBED_BOOTLOADER_FLASH_BANK_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
             "fota.candidate-block-size"                 : "1024",
             "fota.encryption-support"                   : false,
             "fota.trace-enable"                         : false,
             "target.components_remove"                  : ["QSPIF", "BlueNRG_MS"],
             "storage.storage_type"                      : "TDB_INTERNAL",
             "fota.block-device-type"                    : "FOTA_INTERNAL_FLASH_BD",
-            "fota.storage-start-address"                : "MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE - 512*1024",
+            "fota.storage-start-address"                : "MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE + MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
             "storage_tdb_internal.internal_size"        : "(32*1024)",
             "platform.crash-capture-enabled"            : false,
-            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)"
+            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE)"
         },
         "K64F": {
             "target.extra_labels_remove": [ "PSA" ],
@@ -107,18 +107,18 @@
             "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0x8200)",
             "mbed-bootloader.debug"                     : false,
             "mbed-bootloader.external-traces-enabled"   : false,
-            "mbed-bootloader.storage-type"               : "KVSTORE",
-            "fota.storage-size"                         : "(512*1024)",
+            "mbed-bootloader.storage-type"              : "KVSTORE",
+            "fota.storage-size"                         : "MBED_BOOTLOADER_FLASH_BANK_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
             "fota.candidate-block-size"                 : "1024",
             "fota.encryption-support"                   : false,
             "fota.trace-enable"                         : false,
             "target.components_remove"                  : ["SD"],
             "storage.storage_type"                      : "TDB_INTERNAL",
             "fota.block-device-type"                    : "FOTA_INTERNAL_FLASH_BD",
-            "fota.storage-start-address"                : "MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE - 512*1024",
+            "fota.storage-start-address"                : "MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE + MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
             "storage_tdb_internal.internal_size"        : "(32*1024)",
             "platform.crash-capture-enabled"            : false,
-            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)"
+            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE)"
         },
         "NRF52840_DK": {
             "target.static_memory_defines"     : true,
@@ -129,17 +129,17 @@
             "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0x8200)",
             "mbed-bootloader.debug"                     : false,
             "mbed-bootloader.external-traces-enabled"   : false,
-            "mbed-bootloader.storage-type"               : "KVSTORE",
-            "fota.storage-size"                         : "(512*1024)",
+            "mbed-bootloader.storage-type"              : "KVSTORE",
+            "fota.storage-size"                         : "MBED_BOOTLOADER_FLASH_BANK_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
             "fota.candidate-block-size"                 : "1024",
             "fota.encryption-support"                   : false,
             "fota.trace-enable"                         : false,
             "storage.storage_type"                      : "TDB_INTERNAL",
             "fota.block-device-type"                    : "FOTA_INTERNAL_FLASH_BD",
-            "fota.storage-start-address"                : "MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE - 512*1024",
+            "fota.storage-start-address"                : "MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE + MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
             "storage_tdb_internal.internal_size"        : "(32*1024)",
             "platform.crash-capture-enabled"            : false,
-            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)"
+            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE)"
         }
     }
 }
