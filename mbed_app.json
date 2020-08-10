@@ -44,9 +44,9 @@
         "system-storage",
         "storage",
         "storage_tdb_internal",
-        "flashiap-block-device",         
-        "drivers",        
-		"storage_filesystem",
+        "flashiap-block-device",
+        "drivers",
+        "storage_filesystem",
         "SecureStore",
         "filesystem",
         "filesystemstore",
@@ -58,7 +58,7 @@
         "kv-global-api",
         "kv-map",
         "device_key",
-		 "fota"
+        "fota"
     ],
     "macros": [
         "MBED_BOOTLOADER_FLASH_BANK_SIZE=MBED_ROM_SIZE/2",
