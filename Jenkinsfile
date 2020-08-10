@@ -253,7 +253,7 @@ def SmokeTestStep(step_name,
 def smoke_test_config = [
   "DISCO_L475VG_IOT01A": ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"],
   "K64F":           ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
-  "NRF52840_DK":    ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"],
+  "NRF52840_DK":    ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"]
 // "NUCLEO_F303RE":  ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"],
 //  "NUCLEO_F411RE":  ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
 //  "NUCLEO_F429ZI":  ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],

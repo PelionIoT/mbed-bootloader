@@ -27,6 +27,9 @@ bootloader_configs = {
     "kvstore_and_fw_candidate_on_sd": (
         "configs/kvstore_and_fw_candidate_on_sd.json", "block-device", "fake-rot"
     ),
+    "internal_flash": (
+        "mbed_app.json", "internal-flash", "no-rot"
+    ),
     "internal_flash_no_rot": (
         "configs/internal_flash_no_rot.json", "internal-flash", "no-rot"
     ),
@@ -45,9 +48,9 @@ bootloader_configs = {
 }
 # format: ("target", "config_name")
 targets = [
-    ("K64F", "internal_flash_no_rot"),  # clound client lite
-    ("NRF52840_DK", "internal_flash_no_rot"), # clound client lite
-    ("DISCO_L475VG_IOT01A", "internal_flash_no_rot") # clound client lite
+    ("K64F", "internal_flash"),  # clound client lite
+    ("NRF52840_DK", "internal_flash"), # clound client lite
+    ("DISCO_L475VG_IOT01A", "internal_flash") # clound client lite
 
     # ("K64F", "kvstore_and_fw_candidate_on_sd"),
     # ("K64F", "internal_kvstore_with_sd"),  # cloud client
