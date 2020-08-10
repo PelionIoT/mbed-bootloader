@@ -45,19 +45,23 @@ bootloader_configs = {
 }
 # format: ("target", "config_name")
 targets = [
-    ("K64F", "kvstore_and_fw_candidate_on_sd"),
-    ("K64F", "internal_flash_no_rot"),  # cloud client
-    ("K64F", "internal_kvstore_with_sd"),  # cloud client
-    ("K66F", "internal_flash_no_rot"),  # cloud client
-    ("NUCLEO_L4R5ZI", "internal_flash_no_rot"),  # cloud client
-    ("NUCLEO_F429ZI", "internal_flash_no_rot"),  # cloud client
-    ("NRF52840_DK", "internal_kvstore_with_qspif"),
-    ("NUCLEO_F411RE", "kvstore_and_fw_candidate_on_sd"),  # cloud client
-    ("DISCO_L475VG_IOT01A", "internal_kvstore_with_qspif"),  # cloud client
+    ("K64F", "internal_flash_no_rot"),  # clound client lite
+    ("NRF52840_DK", "internal_flash_no_rot"), # clound client lite
+    ("DISCO_L475VG_IOT01A", "internal_flash_no_rot") # clound client lite
+
+    # ("K64F", "kvstore_and_fw_candidate_on_sd"),
+    # ("K64F", "internal_kvstore_with_sd"),  # cloud client
+    # ("K66F", "internal_flash_no_rot"),  # cloud client
+    # ("NUCLEO_L4R5ZI", "internal_flash_no_rot"),  # cloud client
+    # ("NUCLEO_F429ZI", "internal_flash_no_rot"),  # cloud client
+    # ("NRF52840_DK", "internal_kvstore_with_qspif"),
+    # ("NUCLEO_F411RE", "kvstore_and_fw_candidate_on_sd"),  # cloud client
+    # ("DISCO_L475VG_IOT01A", "internal_kvstore_with_qspif"),  # cloud client
     # LPC55S69_NS is disabled for now in mbed-os
-    #("LPC55S69_NS", "psa"),  # cloud client
-    ("NUCLEO_F303RE", "internal_kvstore_with_spif"),  # cloud client
-    ("DISCO_F769NI", "internal_flash_no_rot")
+    # ("LPC55S69_NS", "psa"),  # cloud client
+    # ("NUCLEO_F303RE", "internal_kvstore_with_spif"),  # cloud client
+    # ("DISCO_F769NI", "internal_flash_no_rot")
+    
 ]
 toolchain = "GCC_ARM"
 profile = "release"  # default value, changed via command line arg --profile

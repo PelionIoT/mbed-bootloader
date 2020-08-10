@@ -199,8 +199,8 @@ def greenteaTestStep(step_name,
 // Those are already tested in Mbed OS, and therefore we use minimal number of targets here
 // for testing the ARM_UC_cryptoHMACSHA256().
 def greentea_test_config = [
-  "K64F":           ["toolchains": ["GCC_ARM"], "raas": "https://eeva.mbedcloudtesting.com"],
-  "NUCLEO_F429ZI":  ["toolchains": ["GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com"],
+  "K64F":           ["toolchains": ["GCC_ARM"], "raas": "https://eeva.mbedcloudtesting.com"]
+  // "NUCLEO_F429ZI":  ["toolchains": ["GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com"],
 ]
 
 for (target in greentea_test_config.keySet()) {
@@ -254,9 +254,9 @@ def smoke_test_config = [
   "DISCO_L475VG_IOT01A": ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"],
   "K64F":           ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
   "NRF52840_DK":    ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"],
-  "NUCLEO_F303RE":  ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"],
-  "NUCLEO_F411RE":  ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
-  "NUCLEO_F429ZI":  ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
+// "NUCLEO_F303RE":  ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"],
+//  "NUCLEO_F411RE":  ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
+//  "NUCLEO_F429ZI":  ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
 // Disabled until dual-bank configuration enabled.
 //  "DISCO_F769NI":   ["toolchains": [ "GCC_ARM"], "raas": "https://rauni.mbedcloudtesting.com:443"],
 ]
