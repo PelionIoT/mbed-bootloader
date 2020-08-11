@@ -303,6 +303,7 @@ def ReleaseStep() {
 timestamps {
   parallel "deploy_bootloader": deployBootloaderRepoStep()
   parallel buildStepsForParallel
-  parallel smokeTests + runStepsForParallel
+  // parallel smokeTests + runStepsForParallel
+  parallel runStepsForParallel
   parallel "release_bootloader": ReleaseStep()
 }
