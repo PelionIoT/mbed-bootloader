@@ -73,7 +73,7 @@
                     "+--------------------------+ <-+ update-client.storage-address (1024 * 1024)",
                     "|                          |",
                     "|     External KVStore     |",
-                    "|      Size: 1MB           |",
+                    "|      Size: 128KiB        |",
                     "|                          |",
                     "+--------------------------+ <-+ Start of QSPIF block device (i.e. 0x0); "
             ]
@@ -97,9 +97,8 @@
             "platform.default-serial-baud-rate"         : 115200,
             "platform.stdio-flush-at-exit"              : false,
             "update-client.firmware-header-version"     : "2",
-            "target.restrict_size"                      : "0x8000",
-            "kvstore-size"                              : "2*16*1024",
-            "mbed-bootloader.bootloader-size"           : "(64*1024)",
+            "kvstore-size"                              : "32*1024",
+            "mbed-bootloader.bootloader-size"           : "(32*1024)",
             "storage.storage_type"                      : "TDB_EXTERNAL",
             "storage_tdb_external.blockdevice"          : "QSPIF",
             "storage_tdb_external.external_size"        : "(128 * 1024)",
@@ -115,7 +114,7 @@
         },
         "DISCO_F746NG": {
             "target.restrict_size"                  : "0x10000",
-            "kvstore-size"                          : "2*32*1024",
+            "kvstore-size"                          : "64*1024",
             "mbed-bootloader.bootloader-size"       : "(64*1024)",
             "storage_tdb_external.rbp_internal_size": "(KVSTORE_SIZE)"
         }
