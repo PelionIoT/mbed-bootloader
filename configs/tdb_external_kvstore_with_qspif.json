@@ -108,9 +108,9 @@
             "update-client.application-details"         : "(MBED_CONF_STORAGE_TDB_EXTERNAL_INTERNAL_BASE_ADDRESS + MBED_CONF_STORAGE_TDB_EXTERNAL_RBP_INTERNAL_SIZE)",
             "mbed-bootloader.application-start-address" : "(MBED_CONF_UPDATE_CLIENT_APPLICATION_DETAILS + MBED_BOOTLOADER_ACTIVE_HEADER_REGION_SIZE)",
             "target.components_add"                     : ["QSPIF"],
-            "update-client.storage-address"             : "(MBED_CONF_STORAGE_TDB_EXTERNAL_INTERNAL_BASE_ADDRESS + MBED_CONF_STORAGE_TDB_EXTERNAL_RBP_INTERNAL_SIZE)",
-            "update-client.storage-size"                : "((MBED_ROM_START + MBED_ROM_SIZE - MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS) * MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS)",
-            "update-client.storage-locations"           : 1
+            "update-client.storage-address"             : "(MBED_CONF_STORAGE_TDB_EXTERNAL_EXTERNAL_BASE_ADDRESS + MBED_CONF_STORAGE_TDB_EXTERNAL_EXTERNAL_SIZE)",
+            "update-client.storage-locations"           : 1,
+            "update-client.storage-size"                : "((MBED_ROM_START + MBED_ROM_SIZE - APPLICATION_ADDR) * MBED_CONF_UPDATE_CLIENT_STORAGE_LOCATIONS)"
         },
         "DISCO_F746NG": {
             "target.restrict_size"                  : "0x10000",
