@@ -28,6 +28,7 @@
 #include "mbed_trace.h"
 #include "platform/mbed_application.h"
 #include "platform/mbed_toolchain.h"
+#include "platform/mbed_power_mgmt.h"
 #include "mbedtls/sha256.h"
 #include "mbedtls/platform_util.h"
 
@@ -48,6 +49,7 @@ uint32_t flash_page_size;
 #define INTERNAL_HEADER_SIZE offsetof(fota_header_info_t, internal_header_barrier)
 
 fota_header_info_t installed_header = {0};
+volatile bool check_version = true;
 
 static int erase_flash(uint32_t start_addr, uint32_t end_addr)
 {
@@ -109,13 +111,20 @@ static int install_start(fota_candidate_iterate_callback_info *info)
 {
     int ret;
     const fota_header_info_t *cand_header = info->header_info;
+    size_t volatile loop_check;
 
-    FOTA_FI_SAFE_MEMCMP(installed_header.digest, cand_header->precursor, FOTA_CRYPTO_HASH_SIZE,
+    FOTA_FI_SAFE_COND((!check_version ||
+                        ((installed_header.magic == FOTA_FW_HEADER_MAGIC) &&
+                        (!fota_fi_memcmp(installed_header.digest, cand_header->precursor,
+                        FOTA_CRYPTO_HASH_SIZE, &loop_check) &&
+                        (loop_check == FOTA_CRYPTO_HASH_SIZE)))),
                         FOTA_STATUS_MANIFEST_PRECURSOR_MISMATCH, "Precursor doesn't match installed digest");
 
-    FOTA_FI_SAFE_COND(installed_header.version < cand_header->version,
-                      FOTA_STATUS_MANIFEST_VERSION_REJECTED,
-                      "Candidate version is not newer than installed");
+    FOTA_FI_SAFE_COND((!check_version ||
+                        ((installed_header.magic == FOTA_FW_HEADER_MAGIC) &&
+                        (installed_header.version < cand_header->version))),
+                        FOTA_STATUS_MANIFEST_VERSION_REJECTED,
+                        "Candidate version is not newer than installed");
 
     pr_info("Candidate verification successful. Starting installation to flash...");
 
@@ -152,6 +161,13 @@ static int install_program_fragment(fota_candidate_iterate_callback_info *info)
         pr_error("flash program failed");
         return FOTA_STATUS_STORAGE_WRITE_FAILED;
     }
+
+    if (memcmp((uint8_t *)MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS + info->frag_pos,
+               info->frag_buf, info->frag_size)) {
+        pr_error("flash readback verification failed");
+        return FOTA_STATUS_STORAGE_WRITE_FAILED;
+    }
+
     return FOTA_STATUS_SUCCESS;
 }
 
@@ -257,6 +273,7 @@ static int read_installed_fw_header()
     }
 
     if (installed_header.magic != FOTA_FW_HEADER_MAGIC) {
+        memset(&installed_header, 0, sizeof(installed_header));
         return FOTA_STATUS_INVALID_DATA;
     }
 
@@ -270,9 +287,15 @@ static int validate_installed_fw()
     uint8_t digest[FOTA_CRYPTO_HASH_SIZE] = { 0 };
     int ret = FOTA_STATUS_INTERNAL_ERROR;
     uint32_t addr = MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS;
-    uint32_t size = installed_header.fw_size;
-
+    
     pr_info("Validating image on flash...");
+
+    ret = read_installed_fw_header();
+    if (ret) {
+        return ret;
+    }
+
+    uint32_t size = installed_header.fw_size;
 
     pr_debug("FW addr=0x%08X size=0x%X", addr, size);
     tmp_ret = fota_hash_start(&digest_ctx);
@@ -320,23 +343,32 @@ fail:
     return ret;
 }
 
+MBED_NORETURN void mbed_die(void)
+{
+    while (true) {
+        __WFI();
+    }
+}
+
 int main(void)
 {
     bool is_new_firmware = false;
     pr_info("Bootloader build at: " __DATE__ " " __TIME__);
     volatile int ret = FOTA_STATUS_INTERNAL_ERROR, installed_fw_status = FOTA_STATUS_INTERNAL_ERROR;
+    volatile int install_update_status = FOTA_STATUS_INTERNAL_ERROR;
+#if MBED_BOOTLOADER_RESET_ON_PANIC
+    bool reset = true;
+#else
+    bool reset = false;
+#endif
+
 #if MBED_BOOTLOADER_TRACE
     char semver[FOTA_COMPONENT_MAX_SEMVER_STR_SIZE];
 #endif
 
-
     if (flash_init(&flash_obj) != 0) {
         pr_error("Flash initialization failed!");
         goto fail;
-    }
-
-    if (read_installed_fw_header()) {
-        pr_error("Reading header of installed firmware failed");
     }
 
     pr_info("Searching for candidate image...");
@@ -348,21 +380,43 @@ int main(void)
     }
 #endif // #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
 
-    ret = check_and_install_update();
-    pr_debug("Searching for candidate image...%d, ret");
-    if (ret == FOTA_STATUS_SUCCESS) {
-        is_new_firmware = true;
+    do {
         read_installed_fw_header();
-    }
+        // First try check and install with version checks on (set to true by default)
+        install_update_status = check_and_install_update();
+        if (install_update_status == FOTA_STATUS_NOT_FOUND) {
+            break;
+        }
+
+        // Always reset after any failure in install firmware flow.
+        // Guarantees that glitches in installation are recovered next time.
+        reset = true;
+
+        if (install_update_status == FOTA_STATUS_SUCCESS) {
+            is_new_firmware = true;
+            break;
+        }
+
+        // Unsuccessful installation. Might have damaged the installed firmware.
+        // Check first if this is indeed the case. If so, reinstall update, now with version checks off.
+
+        installed_fw_status = validate_installed_fw();
+        if (installed_fw_status == FOTA_STATUS_SUCCESS) {
+            break;
+        }
+
+        check_version = false;
+        install_update_status = check_and_install_update();
+        if (install_update_status == FOTA_STATUS_SUCCESS) {
+            is_new_firmware = true;
+        }
+
+    } while (0);
 
 #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
     nvm_storage_deinit();
 #endif // #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
 
-    if (installed_header.magic != FOTA_FW_HEADER_MAGIC) {
-        pr_error("Invalid header of current firmware");
-        goto fail;
-    }
 
     // Prevent FI on hash digest (so it won't be equal to 0 in both places)
 #if FOTA_FI_MITIGATION_ENABLE
@@ -390,13 +444,11 @@ int main(void)
     mbed_start_application(MBED_CONF_MBED_BOOTLOADER_APPLICATION_JUMP_ADDRESS);
 
 fail:
-    FOTA_ASSERT(!"PANIC");
+    pr_error("PANIC!");
+    if (reset) {
+        system_reset();        
+    } else {
+       mbed_die();
+    }        
     return 0;
-}
-
-MBED_NORETURN void mbed_die(void)
-{
-    while (true) {
-        __WFI();
-    }
 }

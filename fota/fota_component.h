@@ -57,8 +57,6 @@ typedef int (*fota_component_post_install_handler_t)(const char *new_sem_ver);
 /**
  * Component description info
  *
- * name component name.
- * factory_version initial version installed on factory in SemVer format.
  * install_alignment If set to non-zero, fragment sizes returned to the user will be aligned to this value.
  * candidate_iterate_cb callback to candidate iterate firmware function.
  * support_delta if delta update supported for component.
@@ -68,8 +66,6 @@ typedef int (*fota_component_post_install_handler_t)(const char *new_sem_ver);
  * need_reboot if reboot required after installation.
  */
 typedef struct {
-    char name[FOTA_COMPONENT_MAX_NAME_SIZE];
-    char factory_version[FOTA_COMPONENT_MAX_SEMVER_STR_SIZE];
     uint32_t install_alignment;
     fota_candidate_iterate_handler_t candidate_iterate_cb;
     fota_component_post_install_handler_t component_post_install_cb;
@@ -77,16 +73,26 @@ typedef struct {
     fota_component_curr_fw_read curr_fw_read;
     fota_component_curr_fw_get_digest curr_fw_get_digest;
     bool need_reboot;
-} fota_component_desc_t;
+} fota_component_desc_info_t;
 
 /**
  * Component registration, adding to component database.
  * Component description should reside in text section to prevent unnecessary allocations and memory copies.
  *
- * \param[in] comp_desc component description with required information.
+ * \param[in] comp_desc component description info with required information.
+ * \param[in] comp_name component name to add.
+ * \param[in] comp_semver component semver.
  * \return FOTA_STATUS_SUCCESS on success.
  */
-int fota_component_add(const fota_component_desc_t *comp_desc);
+int fota_component_add(const fota_component_desc_info_t *comp_desc, const char *comp_name, const char *comp_semver);
+
+/**
+ * Convert internal FOTA library semantic version representation to human readable string.
+ * 
+ * The version in internal FOTA library representation passed to fota_app_on_download_authorization() and 
+ * candidate callback APIs.
+ */
+int fota_component_version_int_to_semver(fota_component_version_t version, char *sem_ver);
 
 #ifdef __cplusplus
 }

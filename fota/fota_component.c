@@ -29,13 +29,8 @@
 #include <stdlib.h>
 #include <inttypes.h>
 
-typedef struct {
-    fota_component_desc_t desc;
-    fota_component_version_t version;
-} comp_entry_t;
-
 static unsigned int num_components = 0;
-static comp_entry_t comp_table[FOTA_NUM_COMPONENTS];
+static fota_component_desc_t comp_table[FOTA_NUM_COMPONENTS];
 
 #define MAJOR_NUM_BITS 24
 #define MINOR_NUM_BITS 24
@@ -48,12 +43,14 @@ void fota_component_clean(void)
     memset(comp_table, 0, sizeof(comp_table));
 }
 
-int fota_component_add(const fota_component_desc_t *comp_desc)
+int fota_component_add(const fota_component_desc_info_t *comp_desc_info, const char *comp_name, const char *comp_semver)
 {
     FOTA_ASSERT(num_components < FOTA_NUM_COMPONENTS);
-    FOTA_ASSERT(!(comp_desc->support_delta && (!comp_desc->curr_fw_get_digest || !comp_desc->curr_fw_read)));
+    FOTA_ASSERT(!(comp_desc_info->support_delta && (!comp_desc_info->curr_fw_get_digest || !comp_desc_info->curr_fw_read)));
 
-    memcpy(&comp_table[num_components].desc, comp_desc, sizeof(fota_component_desc_t));
+    memcpy(&comp_table[num_components].desc_info, comp_desc_info, sizeof(*comp_desc_info));
+    strncpy(comp_table[num_components].name, comp_name, FOTA_COMPONENT_MAX_NAME_SIZE);
+    fota_component_version_semver_to_int(comp_semver, &comp_table[num_components].version);
 
     num_components++;
     return FOTA_STATUS_SUCCESS;
@@ -67,7 +64,7 @@ unsigned int fota_component_num_components(void)
 void fota_component_get_desc(unsigned int comp_id, const fota_component_desc_t * *comp_desc)
 {
     FOTA_ASSERT(comp_id < num_components)
-    *comp_desc = &comp_table[comp_id].desc;
+    *comp_desc = &comp_table[comp_id];
 }
 
 void fota_component_get_curr_version(unsigned int comp_id, fota_component_version_t *version)
@@ -88,7 +85,7 @@ int fota_component_name_to_id(const char *name, unsigned int *comp_id)
 
     // One or more components
     do {
-        if (!strcmp(name, comp_table[num_components - i].desc.name)) {
+        if (!strncmp(name, comp_table[num_components - i].name, FOTA_COMPONENT_MAX_NAME_SIZE)) {
             *comp_id = num_components - i;
             return FOTA_STATUS_SUCCESS;
         }

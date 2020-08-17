@@ -106,6 +106,12 @@ do { \
 #define FOTA_FI_SAFE_MEMCMP(PTR1, PTR2, NUM, RET, MSG, ...) \
     FOTA_FI_SAFE_COND(!memcmp((PTR1), (PTR2), (NUM)), RET, MSG, ##__VA_ARGS__)
 
+static inline int fota_fi_memcmp(const uint8_t *ptr1, const uint8_t *ptr2, size_t num, volatile size_t *loop_check)
+{
+    *loop_check = num;
+    return memcmp(ptr1, ptr2, num);
+}
+
 #endif // #if FOTA_FI_MITIGATION_ENABLE
 
 int fota_verify_signature(

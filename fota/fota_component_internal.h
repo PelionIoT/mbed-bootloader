@@ -26,6 +26,12 @@
 extern "C" {
 #endif
 
+typedef struct {
+    fota_component_desc_info_t desc_info;
+    fota_component_version_t version;
+    char name[FOTA_COMPONENT_MAX_NAME_SIZE];
+} fota_component_desc_t;
+
 // Component access APIs
 void fota_component_clean(void);
 unsigned int fota_component_num_components(void);
@@ -36,7 +42,6 @@ void fota_component_set_curr_version(unsigned int comp_id, fota_component_versio
 int fota_component_name_to_id(const char *name, unsigned int *comp_id);
 
 // Semantic version translation
-int fota_component_version_int_to_semver(fota_component_version_t version, char *sem_ver);
 int fota_component_version_semver_to_int(const char *sem_ver, fota_component_version_t *version);
 
 #ifdef __cplusplus
