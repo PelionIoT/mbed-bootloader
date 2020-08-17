@@ -24,6 +24,18 @@
 // skip this include in Bootloader and unittest builds as the configurations are delivered by other means
 #include "MbedCloudClientConfig.h"
 
+#else  // external configuration - unit tests
+
+#if !defined(MBED_CLOUD_CLIENT_FOTA_STORAGE_START_ADDR)
+#define MBED_CLOUD_CLIENT_FOTA_STORAGE_START_ADDR 0
+#endif
+
+#if !defined(MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE)
+#define MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE (1)
+#endif
+
+#endif // defined(FOTA_UNIT_TEST)
+
 #ifdef MBED_CLOUD_CLIENT_FOTA_ENABLE
 
 #ifndef MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE
@@ -33,20 +45,6 @@
 #if !defined(MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE) || (MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE == 0)
 #error Storage size should be defined and have a nonzero value
 #endif
-
-#endif // MBED_CLOUD_CLIENT_FOTA_ENABLE
-
-#else  // external configuration - unit tests
-
-#if !defined(MBED_CLOUD_CLIENT_FOTA_STORAGE_START_ADDR)
-#define MBED_CLOUD_CLIENT_FOTA_STORAGE_START_ADDR 0
-#endif
-
-#if !defined(MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE)
-#define MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE 0
-#endif
-
-#endif // defined(FOTA_UNIT_TEST)
 
 #if !defined(FOTA_MANIFEST_SCHEMA_VERSION)
 #define FOTA_MANIFEST_SCHEMA_VERSION        3
@@ -144,5 +142,7 @@
 #endif
 
 #endif  // (MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION >= 3)
+
+#endif  // MBED_CLOUD_CLIENT_FOTA_ENABLE
 
 #endif  // __FOTA_CONFIG_H_
