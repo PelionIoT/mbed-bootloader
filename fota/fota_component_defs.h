@@ -21,6 +21,12 @@
 
 #include "fota/fota_base.h"
 
+#ifdef __linux__
+#ifndef FOTA_NUM_COMPONENTS
+#define FOTA_NUM_COMPONENTS 5
+#endif
+#endif // __linux__
+
 #define FOTA_COMPONENT_MAX_NAME_SIZE       9
 #define FOTA_COMPONENT_MAX_SEMVER_STR_SIZE 12
 #define FOTA_COMPONENT_MAIN_COMPONENT_NAME "MAIN"

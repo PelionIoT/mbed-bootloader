@@ -67,13 +67,11 @@ int fota_platform_abort_update_hook(const char *comp_name);
 
 #else
 
-#ifdef __MBED__
 // Default platform hooks
 static inline int fota_platform_init_hook(bool after_upgrade)
 {
     return FOTA_STATUS_SUCCESS;
 }
-#endif
 
 static inline int fota_platform_start_update_hook(const char *comp_name)
 {

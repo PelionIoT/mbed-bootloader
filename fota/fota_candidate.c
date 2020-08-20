@@ -310,11 +310,14 @@ static int fota_candidate_extract_fragment(uint8_t **buf, uint32_t *actual_size,
 
     FOTA_DBG_ASSERT(ctx);
 
-    *ignore = false;
 
     // Move extra bytes from last time from end to beginning of buffer
-    memcpy(ctx->fragment_buf, ctx->fragment_buf + *actual_size, ctx->frag_extra_bytes);
+    if (!*ignore) {
+        memcpy(ctx->fragment_buf, ctx->fragment_buf + *actual_size, ctx->frag_extra_bytes);
+    }
     *buf = ctx->fragment_buf + ctx->frag_extra_bytes;
+
+    *ignore = false;
 
     *actual_size = MIN(ctx->header_info.fw_size - ctx->bytes_completed, ctx->effective_block_size);
     if (!*actual_size) {
@@ -456,6 +459,10 @@ int fota_candidate_iterate_image(bool validate, bool force_encrypt, const char *
     }
 
     // Start iteration phase
+
+    actual_size = 0;
+    ctx->frag_extra_bytes = 0;
+    ignore = false;
 
     ret = fota_candidate_extract_start(force_encrypt, expected_comp_name, install_alignment);
     if (ret) {
