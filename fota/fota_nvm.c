@@ -28,7 +28,6 @@
 #include "fota/fota_crypto.h"
 #include "fota/fota_component.h"
 #include "fota/fota_crypto_defs.h"
-#include "mbed_error.h"
 #include "mbed-trace/mbed_trace.h"
 #include <stdlib.h>
 

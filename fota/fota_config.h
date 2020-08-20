@@ -106,12 +106,6 @@
 #define MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION 3
 #endif
 
-#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE != FOTA_EXTERNAL_BD)
-#ifndef __MBED__
-#error This type of block device is only supported in mbed-os
-#endif
-#endif
-
 #if (MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION >= 3)
 
 #define FOTA_HEADER_HAS_CANDIDATE_READY 1
