@@ -318,7 +318,11 @@ bool hwResetReason(void) {
 #if DEVICE_RESET_REASON
     reset_reason_t  reason = hal_reset_reason_get();
 
-    if(reason < RESET_REASON_WATCHDOG) {
+    if ((reason == RESET_REASON_POWER_ON) ||
+        (reason == RESET_REASON_PIN_RESET) ||
+        (reason == RESET_REASON_BROWN_OUT) ||
+        (reason == RESET_REASON_SOFTWARE) ||
+        (reason == RESET_REASON_WAKE_LOW_POWER)) {
         return true;
     }
     else {
