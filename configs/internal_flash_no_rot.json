@@ -144,6 +144,13 @@
             "mbed-bootloader.bootloader-size"  : "(64*1024)",
             "update-client.storage-page"       : 1
         },
+        "GR_MANGO": {
+            "target.bootloader_supported"      : true,
+            "kvstore-size"                     : "(2*24*1024)",
+            "target.restrict_size"             : "0x10000",
+            "mbed-bootloader.bootloader-size"  : "(64*1024)",
+            "update-client.storage-page"       : 1
+        },
         "UHURU_RAVEN": {
             "target.components_remove"                 : ["SPIF"],
             "mbed-bootloader.bootloader-size"          : "(32*1024)",
