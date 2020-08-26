@@ -171,7 +171,11 @@ bool upgradeApplicationFromStorage(void)
     /* default to a fresh boot */
     uint8_t localCounter = 0;
 
-    if (!hwResetReason() && heapVersion && bootCounter) {
+    /* Only update counters if the active application's integrity is valid
+     * since we won't be jumping to a firmware we know is corrupt.
+     */
+    if ((activeApplicationStatus == RESULT_SUCCESS) &&
+        !hwResetReason() && heapVersion && bootCounter) {
         /* fresh boot */
         if (*heapVersion != imageDetails.version) {
             /* copy version to heap */
@@ -239,10 +243,16 @@ bool upgradeApplicationFromStorage(void)
                active image and with a different hash. This prevents rollbacks
                and hash checks of old images. If the active image is not valid,
                bestStoredFirmwareImageDetails.version equals 0.
+
+               Also, if the active image fails the hash check or the slot is empty,
+               consider the candidate image even if it is identical. This allows
+               a failed copy to be retried but prevents a buggy image to be copied
+               again and bypass the boot counter logic.
             */
             if ((imageDetails.version > bestStoredFirmwareImageDetails.version) &&
                     (imageDetails.size > 0) &&
-                    (firmwareDifferentFromActive || !activeFirmwareValid)) {
+                    (firmwareDifferentFromActive ||
+                        (activeApplicationStatus != RESULT_SUCCESS))) {
 
                 /* Validate candidate firmware body. */
                 bool firmwareValid = checkStoredApplication(index,
