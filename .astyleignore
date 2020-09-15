@@ -2,6 +2,6 @@
 .astylerc
 .git
 BUILD
-scripts
+presets
 mbed-os
 

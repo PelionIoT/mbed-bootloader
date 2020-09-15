@@ -25,3 +25,6 @@
 *.exe
 *.out
 *.app
+
+presets/TARGET_*/*/mbed-bootloader-*.*
+presets/TARGET_*/*/mbed_lib.json
