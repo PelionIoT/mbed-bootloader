@@ -172,8 +172,6 @@ def greenteaTestStep(step_name,
             # build greentea tests
             mbed test --compile -m ${target} -t ${toolchain} -n '*bootloader-hmac*' --app-config configs/test_configs/greentea.json
           """)
-          env.RAAS_USERNAME = "ci"
-          env.RAAS_PASSWORD = "ci"
           env.RAAS_PYCLIENT_FORCE_REMOTE_ALLOCATION = 1
           env.RAAS_PYCLIENT_ALLOCATION_QUEUE_TIMEOUT = raas_timeout
 
@@ -199,8 +197,8 @@ def greenteaTestStep(step_name,
 // Those are already tested in Mbed OS, and therefore we use minimal number of targets here
 // for testing the ARM_UC_cryptoHMACSHA256().
 def greentea_test_config = [
-  "K64F":           ["toolchains": ["GCC_ARM"], "raas": "https://eeva.mbedcloudtesting.com"],
-  "NUCLEO_F429ZI":  ["toolchains": ["GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com"],
+  "K64F":           ["toolchains": ["GCC_ARM"], "raas": "https://10.6.54.131"],
+  "NUCLEO_F429ZI":  ["toolchains": ["GCC_ARM"], "raas": "https://10.6.54.131"],
 ]
 
 for (target in greentea_test_config.keySet()) {
@@ -226,8 +224,6 @@ def SmokeTestStep(step_name,
     stage(step_name) {
       node("all-in-one-build-slave") {
         dir(repo_name) {
-          env.RAAS_USERNAME = "ci"
-          env.RAAS_PASSWORD = "ci"
           env.RAAS_PYCLIENT_FORCE_REMOTE_ALLOCATION = 1
           env.RAAS_PYCLIENT_ALLOCATION_QUEUE_TIMEOUT = raas_timeout
 
@@ -251,12 +247,10 @@ def SmokeTestStep(step_name,
 }
 
 def smoke_test_config = [
-  "DISCO_L475VG_IOT01A": ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"],
-  "K64F":           ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
-  "NRF52840_DK":    ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"],
-  "NUCLEO_F303RE":  ["toolchains": [ "GCC_ARM"], "raas": "https://auli.mbedcloudtesting.com:443"],
-  "NUCLEO_F411RE":  ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
-  "NUCLEO_F429ZI":  ["toolchains": [ "GCC_ARM"], "raas": "https://ruka.mbedcloudtesting.com:443"],
+  "DISCO_L475VG_IOT01A": ["toolchains": [ "GCC_ARM"], "raas": "https://10.6.54.131:443"],
+  "K64F":           ["toolchains": [ "GCC_ARM"], "raas": "https://10.6.54.131:443"],
+  "NRF52840_DK":    ["toolchains": [ "GCC_ARM"], "raas": "https://10.6.54.131:443"],
+  "NUCLEO_F429ZI":  ["toolchains": [ "GCC_ARM"], "raas": "https://10.6.54.131:443"],
 // Disabled until dual-bank configuration enabled.
 //  "DISCO_F769NI":   ["toolchains": [ "GCC_ARM"], "raas": "https://rauni.mbedcloudtesting.com:443"],
 ]
