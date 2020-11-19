@@ -18,10 +18,10 @@
                  "sd",
                  "flashiap-block-device",
                  "direct-access-devicekey",
+                 "kvstore",
                  "tdbstore",
                  "kv-config",
                  "kv-global-api",
-                 "kv-map",
                  "device_key",
                  "mbed-trace"
     ],
