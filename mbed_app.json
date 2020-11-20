@@ -16,6 +16,7 @@
                  "spif",
                  "qspif",
                  "sd",
+                 "blockdevice",
                  "flashiap-block-device",
                  "direct-access-devicekey",
                  "tdbstore",
