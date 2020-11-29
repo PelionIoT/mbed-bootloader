@@ -42,6 +42,7 @@
         "mbed-trace",
         "mbedtls",
         "system-storage",
+        "blockdevice",
         "storage",
         "storage_tdb_internal",
         "flashiap-block-device",
@@ -68,6 +69,7 @@
     ],
     "target_overrides": {
         "*": {
+            "target.components_add"                    : ["FLASHIAP"],
             "target.console-uart"                      : true,
             "target.c_lib"                             : "small",
             "platform.use-mpu"                         : false,

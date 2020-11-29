@@ -42,6 +42,7 @@
         "mbed-trace",
         "mbedtls",
         "system-storage",
+        "blockdevice",
         "storage",
         "storage_tdb_internal",
         "flashiap-block-device",

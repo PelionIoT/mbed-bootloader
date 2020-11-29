@@ -8,8 +8,10 @@ mbed-os/features/nanostack/*
 mbed-os/features/netsocket/*
 mbed-os/components/802.15.4_RF/*
 mbed-os/components/storage/blockdevice/COMPONENT_SD/util/*
+mbed-os/features/storage/kvstore/global_api/kvstore_global_api.cpp
 mbed-os/components/wifi/*
 mbed-os/features/frameworks/mbed-trace/*
+mbed-os/platform/mbed-trace/*
 mbed-os/features/frameworks/mbed-client-cli/*
 mbed-os/features/frameworks/mbed-client-randlib/*
 mbed-os/features/frameworks/nanostack-libservice/source/*
