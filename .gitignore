@@ -28,3 +28,4 @@
 
 presets/TARGET_*/*/mbed-bootloader-*.*
 presets/TARGET_*/*/mbed_lib.json
+.idea/
