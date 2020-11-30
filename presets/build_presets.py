@@ -54,8 +54,13 @@ def main():
     script_dir = Path(__file__).resolve().parent
     root_dir = script_dir.parent
     tag = get_tag(root_dir)
+    user_target = None
+    if len(sys.argv) > 1:
+        user_target = sys.argv[1]
     for target in script_dir.iterdir():
         target_name = target.name.lstrip('TARGET_')
+        if user_target and user_target != target_name:
+            continue
         if not target.is_dir():
             continue
         for preset in target.iterdir():
