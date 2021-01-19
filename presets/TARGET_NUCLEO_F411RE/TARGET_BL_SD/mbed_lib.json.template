@@ -1,0 +1,31 @@
+{{
+    "name": "mbed-bootloader-{target}-{preset}",
+    "target_overrides": {{
+        "*": {{
+            "target.macros_add": [
+                "MBED_CONF_STORAGE_STORAGE_TYPE=FILESYSTEM",
+                "MBED_CONF_STORAGE_FILESYSTEM_FILESYSTEM=LITTLE",
+                "MBED_CONF_STORAGE_FILESYSTEM_BLOCKDEVICE=SD",
+                "MBED_CONF_STORAGE_FILESYSTEM_EXTERNAL_BASE_ADDRESS=0x0",
+                "MBED_CONF_STORAGE_FILESYSTEM_EXTERNAL_SIZE=(1024*1024*64)",
+                "MBED_CONF_STORAGE_FILESYSTEM_INTERNAL_BASE_ADDRESS=(MBED_ROM_START+32*1024)",
+                "MBED_CONF_STORAGE_FILESYSTEM_RBP_INTERNAL_SIZE=(32*1024)",
+                "MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_BASE_ADDRESS=0",
+                "MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE=0",
+                "MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE=FOTA_CUSTOM_BD",
+                "MBED_CLOUD_CLIENT_FOTA_STORAGE_START_ADDR=(MBED_CONF_STORAGE_FILESYSTEM_EXTERNAL_SIZE)",
+                "MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE=(MBED_ROM_START + MBED_ROM_SIZE - APPLICATION_ADDR)" 
+            ],
+            "target.bootloader_img": "mbed-bootloader-{tag}.bin",
+            "target.header_offset" : "0x10000",
+            "target.app_offset"    : "0x10400",
+            "target.header_format": [
+                ["magic", "const", "32le", "0x5c0253a3"],
+                ["firmwareSize", "size", "32le", ["application"]],
+                ["firmwareVersion", "const", "64le", "0x0"],
+                ["firmwareDigest", "digest", "SHA256", "application"],
+                ["reserved", "digest", "SHA256", "application"]
+            ]
+        }}
+    }}
+}}

@@ -1,0 +1,108 @@
+{
+    "config": {
+        "documentation": {
+            "options": [
+                    "This configuration takes advantage of the fact that most MCUs have 2 banks of flash",
+                    "which can be read from and written to independently of each other. Hence we put all",
+                    "executables on the first bank, and all storage on the second bank such that reading",
+                    "and writing storage does not halt execution. The regions are as follows:",
+                    "1. Bootloader - 32kb from the beginning of flash",
+                    "2. Active App Metadata Header - 1kb from the end of Bootloader",
+                    "3. Active App - From end of header to the end of first bank of flash",
+                    "4. Firmware Candidate Storage - from the beginning of the second bank of flash",
+                    "+--------------------------+",
+                    "|                          |",
+                    "|                          |",
+                    "|                          |",
+                    "|Firmware Candidate Storage|",
+                    "|                          |",
+                    "|                          |",
+                    "|                          |",
+                    "+--------------------------+ <-+ update-client.storage-address",
+                    "|                          |",
+                    "|        Active App        |",
+                    "|                          |",
+                    "+--------------------------+ <-+ mbed-bootloader.application-start-address",
+                    "|Active App Metadata Header|",
+                    "+--------------------------+ <-+ update-client.application-details",
+                    "|                          |",
+                    "|        Bootloader        |",
+                    "|                          |",
+                    "+--------------------------+ <-+ 0",
+                    "",
+                    "",
+                    "NRF52840_DK: setting `target.static_memory_defines` as `true` is an alternative for the workaround",
+                    "https://github.com/ARMmbed/mbed-os/pull/11510 . The PR in question is waiting for approval"
+            ]
+        }
+    },
+    "requires": [     
+        "platform",
+        "mbed-bootloader",
+        "mbed-trace",
+        "mbedtls",
+        "system-storage",
+        "blockdevice",
+        "storage",
+        "storage_tdb_internal",
+        "flashiap-block-device",
+        "drivers",
+        "storage_filesystem",
+        "SecureStore",
+        "filesystem",
+        "filesystemstore",
+        "littlefs",
+        "fat_chan",
+        "direct-access-devicekey",
+        "tdbstore",
+        "kv-config",
+        "kv-global-api",
+        "kv-map",
+        "device_key",
+        "fota"
+    ],
+    "macros": [
+        "MBED_BOOTLOADER_FLASH_BANK_SIZE=MBED_ROM_SIZE/2",
+        "MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION=3",
+        "FOTA_HEADER_HAS_CANDIDATE_READY=1",        
+        "MBED_CLOUD_CLIENT_FOTA_ENABLE=1"
+    ],
+    "target_overrides": {
+        "*": {
+            "target.console-uart"                      : true,
+            "target.c_lib"                             : "small",
+            "platform.use-mpu"                         : false,
+            "platform.stdio-baud-rate"                 : 115200,
+            "target.restrict_size"                     : "0xF7C00",
+            "fota.is-bootloader"                       : true,
+            "target.header_format": [
+                ["magic", "const", "32le", "0x5c0253a3"],
+                ["firmwareSize", "size", "32le", ["application"]],
+                ["firmwareVersion", "const", "64le", "0x0"],
+                ["firmwareDigest", "digest", "SHA256", "application"],
+                ["precursorDigest", "digest", "SHA256", "application"]
+            ],                                            
+            "fota.fi-mitigation-enable"                 : false,
+            "mbed-bootloader.application-header-address": "(MBED_ROM_START+0x8000)",
+            "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0x8400)",
+            "fota.storage-size"                         : "(1024*1024-MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)",
+            "fota.candidate-block-size"                 : "1024",
+            "fota.encryption-support"                   : false,
+            "fota.trace-enable"                         : false,
+            "mbed-bootloader.debug"                     : false,
+            "mbed-bootloader.external-traces-enabled"   : false,
+            "mbed-bootloader.storage-type"              : "KVSTORE",
+            "storage.storage_type"                      : "TDB_INTERNAL",
+            "fota.block-device-type"                    : "FOTA_INTERNAL_FLASH_BD",
+            "fota.storage-start-address"                : "(MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_BASE_ADDRESS+MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)",
+            "storage_tdb_internal.internal_size"        : "(2*64*1024)",
+            "platform.crash-capture-enabled"            : false,
+            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE)"
+        },
+        "NUCLEO_F429ZI": {
+            "target.extra_labels_remove": [ "PSA" ],
+            "target.components_remove"  : ["SD"]
+        }
+
+    }
+}
