@@ -93,7 +93,7 @@
             "mbed-bootloader.external-traces-enabled"   : false,
             "mbed-bootloader.storage-type"              : "KVSTORE",
             "storage.storage_type"                      : "TDB_INTERNAL",
-            "fota.block-device-type"                    : "FOTA_INTERNAL_FLASH_BD",
+            "fota.block-device-type"                    : "FOTA_INTERNAL_FLASH_MBED_OS_BD",
             "fota.storage-start-address"                : "MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE + MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
             "storage_tdb_internal.internal_size"        : "(2*16*1024)",
             "platform.crash-capture-enabled"            : false,
