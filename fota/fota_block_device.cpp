@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright 2018-2020 ARM Ltd.
+// Copyright 2021 Pelion.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -33,29 +33,34 @@ static bool initialized = false;
 
 #include "BlockDevice.h"
 
-#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_BD)
+#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_MBED_OS_BD)
 #if COMPONENT_FLASHIAP
 #include "FlashIAPBlockDevice.h"
 #else
 #error FlashIAP component should be defined in case of an internal flash block device configuration
 #endif
-#endif // (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_BD)
+#endif // (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_MBED_OS_BD)
 
 #include <string.h>
 
 static mbed::BlockDevice *bd = 0;
 
-#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_BD)
+#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_CUSTOM_MBED_OS_BD)
+// Should be supplied by application
+mbed::BlockDevice *fota_bd_get_custom_bd();
+#else //FOTA_INTERNAL_FLASH_MBED_OS_BD or FOTA_DEFAULT_MBED_OS_BD
 mbed::BlockDevice *fota_bd_get_custom_bd()
 {
+#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_MBED_OS_BD)
     if (!bd) {
         bd = new FlashIAPBlockDevice(MBED_ROM_START, MBED_ROM_SIZE);
     }
     return bd;
+
+#elif (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_DEFAULT_MBED_OS_BD)
+    return mbed::BlockDevice::get_default_instance();
+#endif
 }
-#else // FOTA_CUSTOM_BD
-// Should be supplied by application
-mbed::BlockDevice *fota_bd_get_custom_bd();
 #endif
 
 // This ifdef is here (always true) to prevent astyle from indenting enclosed functions
@@ -98,7 +103,7 @@ int fota_bd_deinit(void)
     }
 
     int ret = bd->deinit();
-#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_BD)
+#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_MBED_OS_BD)
     delete bd;
 #endif
     bd = 0;
@@ -186,9 +191,9 @@ int fota_bd_get_erase_value(int *erase_value)
 
 static bool is_internal_flash_bd()
 {
-#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_BD)
+#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_MBED_OS_BD)
     return true;
-#elif (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_CUSTOM_BD)
+#elif (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_CUSTOM_MBED_OS_BD)
     FOTA_ASSERT(bd);
     const char *bd_type = bd->get_type();
     if (strcmp("FLASHIAP", bd_type) == 0) {

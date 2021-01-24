@@ -8,9 +8,9 @@
             "value": null           
         },
         "block-device-type": {
-            "help": "Type of block device: Internal flash, custom (supply a block device instance) or external (implement all FOTA block device C APIs)",
+            "help": "Type of block device: mbed-os internal flash, mbed-os default block device, custom (supply a block device instance) or external (implement all FOTA block device C APIs)",
             "macro_name": "MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE",
-            "accepted_values": ["FOTA_INTERNAL_FLASH_BD", "FOTA_CUSTOM_BD", "FOTA_EXTERNAL_BD"],
+            "accepted_values": ["FOTA_INTERNAL_FLASH_MBED_OS_BD", "FOTA_CUSTOM_MBED_OS_BD", "FOTA_EXTERNAL_BD", "FOTA_DEFAULT_MBED_OS_BD"],
             "value": null
         },
         "storage-start-address": {
