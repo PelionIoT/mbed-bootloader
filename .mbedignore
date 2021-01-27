@@ -1,5 +1,4 @@
 */test/*
-mbed-os/rtos/*
 mbed-os/features/FEATURE_LWIP/*
 mbed-os/features/unsupported/*
 mbed-os/features/cellular/*
