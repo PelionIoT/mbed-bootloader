@@ -20,6 +20,9 @@
 #define __FOTA_CRYPTO_H_
 
 #include "fota/fota_base.h"
+
+#if defined(MBED_CLOUD_CLIENT_FOTA_ENABLE)
+
 #include "fota/fota_crypto_defs.h"
 
 #ifdef __cplusplus
@@ -128,5 +131,7 @@ int fota_verify_signature_prehashed(
 #ifdef __cplusplus
 }
 #endif
+
+#endif // defined(MBED_CLOUD_CLIENT_FOTA_ENABLE)
 
 #endif // __FOTA_CRYPTO_H_

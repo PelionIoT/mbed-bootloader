@@ -38,7 +38,7 @@ declare -a FOTA_FILES=(
         "$CLOUD_CLIENT/fota/fota_crypto_defs.h"
         "$CLOUD_CLIENT/fota/fota_crypto.h"
         "$CLOUD_CLIENT/fota/fota_header_info.h"
-        "$CLOUD_CLIENT/fota/fota_header_info_v2.c"
+        "$CLOUD_CLIENT/fota/fota_header_info_v2.cpp"
         "$CLOUD_CLIENT/fota/fota_header_info_v3.c"
         "$CLOUD_CLIENT/fota/fota_internal.h"
         "$CLOUD_CLIENT/fota/fota_nvm.c"

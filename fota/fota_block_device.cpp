@@ -45,10 +45,7 @@ static bool initialized = false;
 
 static mbed::BlockDevice *bd = 0;
 
-#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_CUSTOM_BD)
-// In custom BD case, the user code should supply this function, returning the desired block device
-mbed::BlockDevice *fota_bd_get_custom_bd();
-#elif (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_BD)
+#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_BD)
 mbed::BlockDevice *fota_bd_get_custom_bd()
 {
     if (!bd) {
@@ -56,6 +53,9 @@ mbed::BlockDevice *fota_bd_get_custom_bd()
     }
     return bd;
 }
+#else // FOTA_CUSTOM_BD
+// Should be supplied by application
+mbed::BlockDevice *fota_bd_get_custom_bd();
 #endif
 
 // This ifdef is here (always true) to prevent astyle from indenting enclosed functions
@@ -63,13 +63,11 @@ mbed::BlockDevice *fota_bd_get_custom_bd()
 extern "C" {
 #endif
 
-int fota_bd_size(uint32_t *size)
+int fota_bd_size(size_t *size)
 {
-    if (!initialized) {
-        return FOTA_STATUS_NOT_INITIALIZED;
-    }
+    FOTA_ASSERT(bd);
 
-    *size = (uint32_t) bd->size();
+    *size = (size_t) bd->size();
     return FOTA_STATUS_SUCCESS;
 }
 
@@ -90,7 +88,7 @@ int fota_bd_init(void)
         return FOTA_STATUS_SUCCESS;
     }
     FOTA_TRACE_ERROR("Failed to initialize BlockDevice. error %d", ret);
-    return FOTA_STATUS_NOT_INITIALIZED;
+    return FOTA_STATUS_STORAGE_WRITE_FAILED;
 }
 
 int fota_bd_deinit(void)
@@ -112,7 +110,7 @@ int fota_bd_deinit(void)
     return FOTA_STATUS_INTERNAL_ERROR;
 }
 
-int fota_bd_read(void *buffer, uint32_t addr, uint32_t size)
+int fota_bd_read(void *buffer, size_t addr, size_t size)
 {
     int ret;
     FOTA_ASSERT(bd);
@@ -124,7 +122,7 @@ int fota_bd_read(void *buffer, uint32_t addr, uint32_t size)
     return FOTA_STATUS_SUCCESS;
 }
 
-int fota_bd_program(const void *buffer, uint32_t addr, uint32_t size)
+int fota_bd_program(const void *buffer, size_t addr, size_t size)
 {
     int ret;
     FOTA_ASSERT(bd);
@@ -136,7 +134,7 @@ int fota_bd_program(const void *buffer, uint32_t addr, uint32_t size)
     return FOTA_STATUS_SUCCESS;
 }
 
-int fota_bd_erase(uint32_t addr, uint32_t size)
+int fota_bd_erase(size_t addr, size_t size)
 {
     int ret;
     FOTA_ASSERT(bd);
@@ -148,27 +146,27 @@ int fota_bd_erase(uint32_t addr, uint32_t size)
     return FOTA_STATUS_SUCCESS;
 }
 
-int fota_bd_get_read_size(uint32_t *read_size)
+int fota_bd_get_read_size(size_t *read_size)
 {
     FOTA_ASSERT(bd);
 
-    *read_size = (uint32_t) bd->get_read_size();
+    *read_size = (size_t) bd->get_read_size();
     return FOTA_STATUS_SUCCESS;
 }
 
-int fota_bd_get_program_size(uint32_t *prog_size)
+int fota_bd_get_program_size(size_t *prog_size)
 {
     FOTA_ASSERT(bd);
 
-    *prog_size = (uint32_t)bd->get_program_size();
+    *prog_size = (size_t)bd->get_program_size();
     return FOTA_STATUS_SUCCESS;
 }
 
-int fota_bd_get_erase_size(uint32_t addr, uint32_t *erase_size)
+int fota_bd_get_erase_size(size_t addr, size_t *erase_size)
 {
     FOTA_ASSERT(bd);
 
-    *erase_size = (uint32_t) bd->get_erase_size(addr);
+    *erase_size = (size_t) bd->get_erase_size(addr);
     return FOTA_STATUS_SUCCESS;
 }
 
@@ -202,7 +200,7 @@ static bool is_internal_flash_bd()
 #endif
 }
 
-extern "C" uint32_t fota_bd_physical_addr_to_logical_addr(uint32_t phys_addr)
+extern "C" size_t fota_bd_physical_addr_to_logical_addr(size_t phys_addr)
 {
 #ifdef __MBED__
     if (is_internal_flash_bd()) {

@@ -12,7 +12,7 @@
                 "MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE=(MBED_BOOTLOADER_FLASH_BANK_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE)"
 
             ],
-            "target.bootloader_img": "mbed-bootloader-{tag}.bin",
+            "target.bootloader_img": "mbed-bootloader-{tag}.hex",
             "target.header_offset" : "0x8000",
             "target.app_offset"    : "0x8200",
             "target.restrict_size" : "0x77E00",

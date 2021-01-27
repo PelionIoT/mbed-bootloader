@@ -19,11 +19,14 @@
 #ifndef __FOTA_NVM_H_
 #define __FOTA_NVM_H_
 
+#include "fota/fota_base.h"
+#if defined(MBED_CLOUD_CLIENT_FOTA_ENABLE)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "fota/fota_base.h"
+
 #include "fota/fota_crypto_defs.h"
 #include "fota/fota_component.h"
 
@@ -162,5 +165,5 @@ int fota_nvm_set_update_public_key(void);
 #ifdef __cplusplus
 }
 #endif
-
+#endif // defined(MBED_CLOUD_CLIENT_FOTA_ENABLE)
 #endif //__FOTA_NVM_H_
