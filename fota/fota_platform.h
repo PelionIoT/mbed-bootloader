@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright 2018-2020 ARM Ltd.
+// Copyright 2018-2021 ARM Ltd.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -20,48 +20,57 @@
 #define __FOTA_PLATFORM_H_
 
 #include "fota/fota_base.h"
+
+#if defined(MBED_CLOUD_CLIENT_FOTA_ENABLE)
+
 #include "fota/fota_status.h"
-#include "fota/fota_block_device.h"
-#include "fota/fota_candidate.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * @file fota_platform.h
+ *  \brief Platform hooks that the platform can implement if the target requires more complex FOTA initialization and teardown steps.
+ * By default, Pelion FOTA provides an empty implementation for these hooks.
+ * An application developer can override these hooks by injecting the ::FOTA_CUSTOM_PLATFORM macro to the build and implementing all the callback functions listed below.
+ */
 
 #if defined(FOTA_CUSTOM_PLATFORM) && (FOTA_CUSTOM_PLATFORM)
 
-// Hooks that need to be supplied by platform specific code
-
 /**
- * Platform init hook, called at FOTA module initialization.
+ * Platform init hook.
+ * Called when the FOTA module is initialized.
  *
- * \param[in] after_upgrade Indicates that hook was called after an upgrade.
- * \return FOTA_STATUS_SUCCESS on success.
+ * \param[in] after_upgrade Indicates that the hook is called after a successful upgrade of the installed image.
+ * \return ::FOTA_STATUS_SUCCESS on success.
  */
 int fota_platform_init_hook(bool after_upgrade);
 
 /**
- * Platform start update hook, called when update is started.
+ * Platform start update hook.
+ * Called when the download of the update candidate begins.
  *
  * \param[in] comp_name Component name.
- * \return FOTA_STATUS_SUCCESS on success.
+ * \return ::FOTA_STATUS_SUCCESS on success.
  */
 int fota_platform_start_update_hook(const char *comp_name);
 
 /**
- * Platform finish update hook, called when update is finished.
+ * Platform finish update hook.
+ * Called when the download of the update candidate ends.
  *
  * \param[in] comp_name Component name.
- * \return FOTA_STATUS_SUCCESS on success.
+ * \return ::FOTA_STATUS_SUCCESS on success.
  */
 int fota_platform_finish_update_hook(const char *comp_name);
 
 /**
- * Platform start update hook, called when update is aborted.
+ * Platform abort update hook.
+ * Called when the download of the update candidate is aborted.
  *
- * \param[in] comp_name Component name.
- * \return FOTA_STATUS_SUCCESS on success.
+ * \param[in] comp_name  Component name.
+  * \return ::FOTA_STATUS_SUCCESS on success.
  */
 int fota_platform_abort_update_hook(const char *comp_name);
 
@@ -94,4 +103,5 @@ static inline int fota_platform_abort_update_hook(const char *comp_name)
 }
 #endif
 
+#endif // defined(MBED_CLOUD_CLIENT_FOTA_ENABLE)
 #endif // __FOTA_PLATFORM_H_

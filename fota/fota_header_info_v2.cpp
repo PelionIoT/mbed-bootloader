@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright 2018-2020 ARM Ltd.
+// Copyright 2021 Pelion.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -24,7 +24,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <inttypes.h>
+#include <stdlib.h>
 
 #if (MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION == 2)
 
@@ -61,6 +61,16 @@
 #define ARM_UC_DEVICE_HMAC_KEY "StorageEnc256HMACSHA256SIGNATURE"
 #define ARM_UC_DEVICE_HMAC_KEY_SIZE (sizeof(ARM_UC_DEVICE_HMAC_KEY) - 1)
 
+
+#ifdef __MBED__
+#include "KVMap.h"
+#include "TDBStore.h"
+using namespace mbed;
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 size_t arm_uc_crc32(const uint8_t *buffer, size_t length)
 {
@@ -151,7 +161,40 @@ static int fota_hmac_sha256(const uint8_t *key, size_t key_size,
     return ret;
 }
 
-int fota_get_device_key_256Bit(uint8_t key_buf_hmac[ARM_UC_DEVICE_KEY_SIZE])
+#if (MBED_CLOUD_CLIENT_FOTA_FW_HEADER_EXTERNAL == 1)
+
+#ifdef __MBED__
+static int mbed_cloud_client_get_rot_128bit(uint8_t * key, size_t keyLenBytes)
+{
+    KVMap &kv_map = KVMap::get_instance();
+    KVStore *inner_store = kv_map.get_internal_kv_instance(NULL);
+
+
+    //Check key buffer
+    if (key == NULL) {
+        return FOTA_STATUS_INTERNAL_ERROR;
+    }
+    //Check key buffer size
+    if (keyLenBytes != ARM_UC_ROT_SIZE) {
+        return FOTA_STATUS_INTERNAL_ERROR;
+    }
+    //Check internal instance 
+    if (inner_store == NULL) {
+        return FOTA_STATUS_INTERNAL_ERROR;
+    }
+
+    //Read ROT
+    int error = ((TDBStore *)inner_store)->reserved_data_get(key, keyLenBytes);
+    if (error != 0) {
+        return FOTA_STATUS_INTERNAL_ERROR;
+    }
+
+    return FOTA_STATUS_SUCCESS;
+
+}
+#endif
+
+static int fota_get_device_key_256Bit(uint8_t key_buf_hmac[ARM_UC_DEVICE_KEY_SIZE])
 {
     int ret = FOTA_STATUS_INTERNAL_ERROR;
 
@@ -171,8 +214,6 @@ int fota_get_device_key_256Bit(uint8_t key_buf_hmac[ARM_UC_DEVICE_KEY_SIZE])
                             key_buf_hmac);
     return ret;
 }
-
-#if (MBED_CLOUD_CLIENT_FOTA_FW_HEADER_EXTERNAL == 1)
 
 static int serialize_header_v2_external(const fota_header_info_t *header_info, uint8_t *header_buf, size_t header_buf_size)
 {
@@ -360,6 +401,10 @@ int fota_deserialize_header(const uint8_t *buffer, size_t buffer_size, fota_head
 
 }
 
-#endif
+#ifdef __cplusplus
+}
+#endif //__cplusplus
 
-#endif  // MBED_CLOUD_CLIENT_FOTA_ENABLE
+#endif //MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION == 2 
+
+#endif // MBED_CLOUD_CLIENT_FOTA_ENABLE

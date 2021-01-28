@@ -53,8 +53,8 @@ volatile bool check_version = true;
 
 static int erase_flash(uint32_t start_addr, uint32_t end_addr)
 {
-    uint32_t aligned_start_addr = fota_align_down(start_addr, flash_get_sector_size(&flash_obj, start_addr));
-    uint32_t aligned_end_addr = fota_align_up(end_addr, flash_get_sector_size(&flash_obj, end_addr));
+    uint32_t aligned_start_addr = FOTA_ALIGN_DOWN(start_addr, flash_get_sector_size(&flash_obj, start_addr));
+    uint32_t aligned_end_addr = FOTA_ALIGN_UP(end_addr, flash_get_sector_size(&flash_obj, end_addr));
 
     if (aligned_start_addr != start_addr) {
         pr_warning("WARNING: header address is not aligned to a sector boundary");
@@ -174,7 +174,7 @@ static int install_program_fragment(fota_candidate_iterate_callback_info *info)
 static int install_finish(const fota_candidate_iterate_callback_info *info)
 {
     int ret;
-    uint32_t header_buf_size = fota_align_up(INTERNAL_HEADER_SIZE, flash_page_size);
+    uint32_t header_buf_size = FOTA_ALIGN_UP(INTERNAL_HEADER_SIZE, flash_page_size);
     uint8_t *header_buf = (uint8_t *) malloc(header_buf_size);
     if (!header_buf) {
         pr_error("Unable to allocate header");
@@ -274,7 +274,7 @@ static int read_installed_fw_header()
 
     if (installed_header.magic != FOTA_FW_HEADER_MAGIC) {
         memset(&installed_header, 0, sizeof(installed_header));
-        return FOTA_STATUS_INVALID_DATA;
+        return FOTA_STATUS_NOT_FOUND;
     }
 
     return FOTA_STATUS_SUCCESS;
@@ -326,13 +326,13 @@ static int validate_installed_fw()
                         );
     FOTA_FI_SAFE_COND(
         (sig_verify_status == FOTA_STATUS_SUCCESS),
-        FOTA_STATUS_INVALID_DATA,
+        FOTA_STATUS_MANIFEST_SIGNATURE_INVALID,
         "FW image is not authentic"
     );
 #else
     pr_debug("check hash");
     FOTA_FI_SAFE_MEMCMP(digest, installed_header.digest, FOTA_CRYPTO_HASH_SIZE,
-                        FOTA_STATUS_INVALID_DATA, "Hash mismatch!");
+                        FOTA_STATUS_MANIFEST_PAYLOAD_CORRUPTED, "Hash mismatch!");
 
 #endif
     pr_debug("validate success");

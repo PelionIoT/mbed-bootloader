@@ -68,7 +68,7 @@ extern "C" {
 #endif  // !FOTA_TRACE_ENABLE
 #endif  // !MBED_CONF_MBED_TRACE_ENABLE
 
-#if FOTA_APP_DEFAULT_CB_NO_PRINT
+#if FOTA_APP_DEFAULT_CB_NO_PRINT || MBED_DISABLE_PRINTFS
 #define FOTA_APP_PRINT FOTA_TRACE_INFO
 #else
 #define FOTA_APP_PRINT(fmt, ...)  printf("[FOTA] " fmt "\n", ##__VA_ARGS__)
@@ -91,16 +91,9 @@ extern "C" {
 #define FOTA_DBG_ASSERT FOTA_ASSERT
 #endif
 
-static inline uint32_t fota_align_up(uint32_t val, uint32_t size)
-{
-    return (((val - 1) / size) + 1) * size;
-}
+#define FOTA_ALIGN_UP(val, size)  (((((val) - 1) / (size)) + 1) * (size))
 
-static inline uint32_t fota_align_down(uint32_t val, uint32_t size)
-{
-    return val / size * size;
-}
-
+#define FOTA_ALIGN_DOWN(val, size)  ((val) / (size) * (size))
 
 #ifdef __cplusplus
 }

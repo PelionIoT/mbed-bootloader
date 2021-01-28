@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright 2020 ARM Ltd.
+// Copyright 2020 Pelion Ltd.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -20,30 +20,149 @@
 #define __FOTA_CONFIG_H_
 
 #if !defined(FOTA_UNIT_TEST)
-
-// skip this include in Bootloader and unittest builds as the configurations are delivered by other means
 #include "MbedCloudClientConfig.h"
-
-#else  // external configuration - unit tests
-
-#if !defined(MBED_CLOUD_CLIENT_FOTA_STORAGE_START_ADDR)
-#define MBED_CLOUD_CLIENT_FOTA_STORAGE_START_ADDR 0
+#else
+#include "fota_unittest_config.h"
 #endif
-
-#if !defined(MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE)
-#define MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE (1)
-#endif
-
-#endif // defined(FOTA_UNIT_TEST)
 
 #ifdef MBED_CLOUD_CLIENT_FOTA_ENABLE
 
-#ifndef MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE
-#error Block device type must be defined
+#if defined (__ICCARM__)
+#define fota_deprecated
+#else
+#define fota_deprecated __attribute__ ((deprecated))
 #endif
 
+#define FOTA_RESUME_UNSUPPORTED     0
+#define FOTA_RESUME_SUPPORT_RESTART 1
+#define FOTA_RESUME_SUPPORT_RESUME  2
+
+#define FOTA_INTERNAL_FLASH_BD      1
+#define FOTA_CUSTOM_BD              2
+#define FOTA_EXTERNAL_BD            3
+
+#define FOTA_MULTICAST_UNSUPPORTED  0
+#define FOTA_MULTICAST_NODE_MODE    1
+#define FOTA_MULTICAST_BR_MODE      2
+
+#if defined(MBED_CLOUD_CLIENT_SUPPORT_UPDATE)
+
+#define FOTA_SHIM_LAYER
+#define FOTA_MANIFEST_SCHEMA_VERSION 1
+
+
+#undef  MBED_CLOUD_CLIENT_FOTA_RESUME_SUPPORT
+#define MBED_CLOUD_CLIENT_FOTA_RESUME_SUPPORT FOTA_RESUME_UNSUPPORTED
+
+#define MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION 2
+
+#define ARM_UCP_FLASHIAP_BLOCKDEVICE 10101
+#define ARM_UCP_FLASHIAP             10110
+
+#if MBED_CLOUD_CLIENT_UPDATE_STORAGE == ARM_UCP_FLASHIAP
+
+#define MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE FOTA_INTERNAL_FLASH_BD
+#define MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE MBED_CONF_UPDATE_CLIENT_STORAGE_SIZE
+#define MBED_CLOUD_CLIENT_FOTA_STORAGE_START_ADDR MBED_CONF_UPDATE_CLIENT_STORAGE_ADDRESS + MBED_ROM_START
+
+#elif MBED_CLOUD_CLIENT_UPDATE_STORAGE == ARM_UCP_FLASHIAP_BLOCKDEVICE
+#define MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE FOTA_CUSTOM_BD
+#define MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE MBED_CONF_UPDATE_CLIENT_STORAGE_SIZE
+#define MBED_CLOUD_CLIENT_FOTA_STORAGE_START_ADDR MBED_CONF_UPDATE_CLIENT_STORAGE_ADDRESS
+#define MBED_CLOUD_CLIENT_FOTA_FW_HEADER_EXTERNAL 1  // v2 external header
+
+#endif // MBED_CLOUD_CLIENT_UPDATE_STORAGE == ARM_UCP_FLASHIAP
+#endif //defined(MBED_CLOUD_CLIENT_SUPPORT_UPDATE)
+
+// Right now, PAL support has a one to one relation with client profile.
+// This can change in the future.
+#if MBED_CLOUD_CLIENT_PROFILE == MBED_CLOUD_CLIENT_PROFILE_LITE
+#ifndef MBED_CLOUD_CLIENT_FOTA_SUPPORT_PAL
+#define MBED_CLOUD_CLIENT_FOTA_SUPPORT_PAL 0
+#endif
+#elif MBED_CLOUD_CLIENT_PROFILE == MBED_CLOUD_CLIENT_PROFILE_FULL
+#ifndef MBED_CLOUD_CLIENT_FOTA_SUPPORT_PAL
+#define MBED_CLOUD_CLIENT_FOTA_SUPPORT_PAL 1
+#endif
+#else
+#error Client profile not defined
+#endif
+
+#if defined(TARGET_LIKE_LINUX)
+
+#if !defined(MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE)
+#define MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE 0x100000000UL
+#endif
+
+// Following files are preceded by mbed client config directory, which defaults to the one used by storage
+// It can be overridden by defining MBED_CLOUD_CLIENT_FOTA_LINUX_CONFIG_DIR
+
+#if !defined(MBED_CLOUD_CLIENT_FOTA_LINUX_HEADER_FILENAME)
+#define MBED_CLOUD_CLIENT_FOTA_LINUX_HEADER_FILENAME "fota_fw_metadata"
+#endif
+
+#define MBED_CLOUD_CLIENT_FOTA_LINUX_TEMP_HEADER_FILENAME MBED_CLOUD_CLIENT_FOTA_LINUX_HEADER_FILENAME ".tmp"
+
+#if !defined(MBED_CLOUD_CLIENT_FOTA_LINUX_UPDATE_STORAGE_FILENAME)
+#define MBED_CLOUD_CLIENT_FOTA_LINUX_UPDATE_STORAGE_FILENAME "fota_update_storage"
+#endif
+
+#if !defined(MBED_CLOUD_CLIENT_FOTA_LINUX_CANDIDATE_FILENAME)
+#define MBED_CLOUD_CLIENT_FOTA_LINUX_CANDIDATE_FILENAME "fota_candidate"
+#endif
+
+#if defined(FOTA_UNIT_TEST)
+// Unit tests don't actually replace the current running app, but use a test file
+extern char *unitest_curr_fw_filename;
+#define MBED_CLOUD_CLIENT_FOTA_LINUX_CURR_FW_FILENAME unitest_curr_fw_filename
+#else
+// Real application - replace real exe file
+#include <errno.h>
+extern char *program_invocation_name;
+#define MBED_CLOUD_CLIENT_FOTA_LINUX_CURR_FW_FILENAME program_invocation_name
+#endif
+
+#if defined(FOTA_CUSTOM_CURR_FW_STRUCTURE) && FOTA_CUSTOM_CURR_FW_STRUCTURE
+#error Custom current firmware structure should not be defined in Linux targets
+#endif
+
+// No legacy bootloader here - force up to date header
+#undef MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION
+#define MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION 3
+
+#endif // defined(TARGET_LIKE_LINUX)
+
+
+#if !defined(FOTA_CUSTOM_CURR_FW_STRUCTURE) && !defined(__MBED__) && !defined(FOTA_UNIT_TEST) && !defined(TARGET_LIKE_LINUX)
+#define FOTA_CUSTOM_CURR_FW_STRUCTURE 1
+#endif
+
+#ifndef MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE
+#define MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE FOTA_EXTERNAL_BD // if not defined - fall back to an external configuration
+#endif
+
+#ifndef MBED_CLOUD_CLIENT_FOTA_MULTICAST_SUPPORT
+#define MBED_CLOUD_CLIENT_FOTA_MULTICAST_SUPPORT FOTA_MULTICAST_UNSUPPORTED
+#endif
+
+#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_BD) || (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_CUSTOM_BD)
+
+// on Mbed-OS port, when using internal flash or custom BlockDevices - it is expected for configuration to
+//  provide storage start address and size
 #if !defined(MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE) || (MBED_CLOUD_CLIENT_FOTA_STORAGE_SIZE == 0)
 #error Storage size should be defined and have a nonzero value
+#endif
+
+#if !defined(MBED_CLOUD_CLIENT_FOTA_STORAGE_START_ADDR)
+#error "MBED_CLOUD_CLIENT_FOTA_STORAGE_START_ADDR must be set"
+#endif
+
+#endif  // (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_BD) || (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_CUSTOM_BD)
+
+#if MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_EXTERNAL_BD
+#ifndef MBED_CLOUD_CLIENT_FOTA_STORAGE_START_ADDR
+#define MBED_CLOUD_CLIENT_FOTA_STORAGE_START_ADDR 0
+#endif
 #endif
 
 #if !defined(FOTA_MANIFEST_SCHEMA_VERSION)
@@ -58,6 +177,12 @@
 #define FOTA_MANIFEST_VENDOR_DATA_SIZE    0
 #endif
 
+#if (FOTA_MANIFEST_VENDOR_DATA_SIZE > 0)  // asn.1 (TLV) overhead 
+#define __FOTA_VENDOR_DATA_OVERHEAD 4
+#else
+#define __FOTA_VENDOR_DATA_OVERHEAD 0
+#endif
+
 #if !defined(FOTA_CERT_MAX_SIZE)
 #define FOTA_CERT_MAX_SIZE 600
 #endif
@@ -66,37 +191,47 @@
 #define MBED_CLOUD_CLIENT_FOTA_CANDIDATE_BLOCK_SIZE 1024
 #endif
 
-#if !(FOTA_MANIFEST_SCHEMA_VERSION == 1)
-// Mainfest schema version #1 requires public key in  x509 form
-// Other cases require defaults to uncompressed elliptic curve
-//  point format (X9.62)
+#if defined(FOTA_USE_EXTERNAL_UPDATE_RAW_PUBLIC_KEY) && !defined(FOTA_USE_UPDATE_RAW_PUBLIC_KEY)
 #define FOTA_USE_UPDATE_RAW_PUBLIC_KEY
-#else
-#define FOTA_USE_UPDATE_X509
 #endif
 
+#if !(FOTA_MANIFEST_SCHEMA_VERSION == 1)
+// manifest schema V3 (and newer) support public key in both
+// uncompressed elliptic curve point format (X9.62) and x509
+// x509 is used by default. x9.62 is used for optimizations
+// but requires integration with FCU tool and crypto backend.
+#if !defined(FOTA_USE_UPDATE_RAW_PUBLIC_KEY)
+#define FOTA_USE_UPDATE_X509
+#endif
+#else  // (FOTA_MANIFEST_SCHEMA_VERSION == 1)
+// manifest schema V1 only supports public key in x.509 format
+#define FOTA_USE_UPDATE_X509
+#endif  //!(FOTA_MANIFEST_SCHEMA_VERSION == 1)
+
 #if (FOTA_MANIFEST_SCHEMA_VERSION < 3)
+
 #define FOTA_SOURCE_LEGACY_OBJECTS_REPORT 1
 
-#if !defined(FOTA_MANIFEST_MAX_SIZE)
-#define FOTA_MANIFEST_MAX_SIZE           650
+#if defined(FOTA_DISABLE_DELTA)
+#define __FOTA_MANIFEST_BASE_SIZE 286
+#else
+#define __FOTA_MANIFEST_BASE_SIZE 361
 #endif
 
 #else  // (FOTA_MANIFEST_SCHEMA_VERSION < 3)
 #define FOTA_SOURCE_LEGACY_OBJECTS_REPORT 0
+
+#if defined(FOTA_DISABLE_DELTA)
+#define __FOTA_MANIFEST_BASE_SIZE 172
+#else
+#define __FOTA_MANIFEST_BASE_SIZE 247
+#endif
+
 #endif  // (FOTA_MANIFEST_SCHEMA_VERSION < 3)
 
 #if !defined(FOTA_MANIFEST_MAX_SIZE)
-#define FOTA_MANIFEST_MAX_SIZE           580
+#define FOTA_MANIFEST_MAX_SIZE (__FOTA_MANIFEST_BASE_SIZE + FOTA_MANIFEST_URI_SIZE + __FOTA_VENDOR_DATA_OVERHEAD + FOTA_MANIFEST_VENDOR_DATA_SIZE)
 #endif
-
-#define FOTA_RESUME_UNSUPPORTED     0
-#define FOTA_RESUME_SUPPORT_RESTART 1
-#define FOTA_RESUME_SUPPORT_RESUME  2
-
-#define FOTA_INTERNAL_FLASH_BD      1
-#define FOTA_CUSTOM_BD              2
-#define FOTA_EXTERNAL_BD            3
 
 #ifndef MBED_CLOUD_CLIENT_FOTA_RESUME_SUPPORT
 #define MBED_CLOUD_CLIENT_FOTA_RESUME_SUPPORT FOTA_RESUME_SUPPORT_RESUME
@@ -106,22 +241,49 @@
 #define MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION 3
 #endif
 
+#undef FOTA_INTERNAL_COMPONENTS_SUPPORT
+#if (MBED_CLOUD_CLIENT_FOTA_MULTICAST_SUPPORT == FOTA_MULTICAST_BR_MODE)
+#if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1) || (MBED_CLOUD_CLIENT_FOTA_RESUME_SUPPORT == FOTA_RESUME_SUPPORT_RESUME)
+#error Multicast border router mode does not support encryption or full resume
+#endif
+#define FOTA_INTERNAL_COMPONENTS_SUPPORT 1
+#endif
+
+#if (MBED_CLOUD_CLIENT_FOTA_MULTICAST_SUPPORT == FOTA_MULTICAST_NODE_MODE)
+#if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1) || (MBED_CLOUD_CLIENT_FOTA_RESUME_SUPPORT == FOTA_RESUME_SUPPORT_RESUME)
+#error Multicast node mode does not support encryption or full resume
+#endif
+#endif
+
+#undef FOTA_COMPONENT_SUPPORT
+#if (FOTA_NUM_COMPONENTS > 1) || defined(FOTA_INTERNAL_COMPONENTS_SUPPORT) || defined(TARGET_LIKE_LINUX)
+#define FOTA_COMPONENT_SUPPORT 1
+#endif
+
 #if (MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION >= 3)
 
 #define FOTA_HEADER_HAS_CANDIDATE_READY 1
 
 #if !defined(MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT)
 // set candidate encryption flag to false by default for internal flash
-#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_BD)
+#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_BD) || (MBED_CLOUD_CLIENT_FOTA_MULTICAST_SUPPORT != FOTA_MULTICAST_UNSUPPORTED)
 #define MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT 0
 #else
 #define MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT 1
 #endif
-#endif
+
+#endif  // !defined(MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT)
 
 #else  // LEGACY profile (MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION == 2)
 
+#if (FOTA_NUM_COMPONENTS > 1) || defined(FOTA_INTERNAL_COMPONENTS_SUPPORT)
+// Special case: support component update on legacy devices.
+// Here main component won't have the candidate ready header, but all other components will.
+#define FOTA_HEADER_HAS_CANDIDATE_READY 1
+#else
+// Regular legacy case
 #define FOTA_HEADER_HAS_CANDIDATE_READY 0
+#endif
 
 #if !defined(MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT)
 #define MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT 0
@@ -135,7 +297,35 @@
 #define MBED_CLOUD_CLIENT_FOTA_RESUME_SUPPORT FOTA_RESUME_SUPPORT_RESTART
 #endif
 
-#endif  // (MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION >= 3)
+#endif // (MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION >= 3)
+
+#define MBED_CLOUD_CLIENT_FOTA_COAP_DOWNLOAD 1
+#define MBED_CLOUD_CLIENT_FOTA_CURL_HTTP_DOWNLOAD 2
+
+#if !defined(MBED_CLOUD_CLIENT_FOTA_DOWNLOAD)
+#if defined(TARGET_LIKE_LINUX)
+#define MBED_CLOUD_CLIENT_FOTA_DOWNLOAD MBED_CLOUD_CLIENT_FOTA_CURL_HTTP_DOWNLOAD
+#else
+#define MBED_CLOUD_CLIENT_FOTA_DOWNLOAD MBED_CLOUD_CLIENT_FOTA_COAP_DOWNLOAD
+#endif // defined(TARGET_LIKE_LINUX)
+#endif // !defined(MBED_CLOUD_CLIENT_FOTA_DOWNLOAD)
+
+#if (MBED_CLOUD_CLIENT_FOTA_DOWNLOAD == MBED_CLOUD_CLIENT_FOTA_CURL_HTTP_DOWNLOAD)
+#if !defined(TARGET_LIKE_LINUX)
+#error curl http download available only for linux
+#endif
+
+#if !defined(MBED_CLOUD_CLIENT_FOTA_CURL_PAYLOAD_SIZE)
+#define MBED_CLOUD_CLIENT_FOTA_CURL_PAYLOAD_SIZE 0x4000L
+#endif
+
+#endif  // (MBED_CLOUD_CLIENT_FOTA_DOWNLOAD == MBED_CLOUD_CLIENT_FOTA_CURL_HTTP_DOWNLOAD)
+
+#if (FOTA_SOURCE_LEGACY_OBJECTS_REPORT == 1)
+#define FOTA_MCCP_PROTOCOL_VERSION 3
+#else
+#define FOTA_MCCP_PROTOCOL_VERSION 4
+#endif
 
 #endif  // MBED_CLOUD_CLIENT_FOTA_ENABLE
 

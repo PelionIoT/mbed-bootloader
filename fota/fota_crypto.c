@@ -60,8 +60,6 @@
 
 #include <stdlib.h>
 
-#define HASH_KEY ((uint8_t *) "FotaHashMainKey.")
-
 #if !defined(MBEDTLS_SSL_CONF_RNG)
 static bool random_initialized = false;
 static mbedtls_entropy_context entropy_ctx;
@@ -78,12 +76,60 @@ typedef struct fota_encrypt_context_s {
 
 #define FOTA_TRACE_TLS_ERR(err) FOTA_TRACE_DEBUG("mbedTLS error %d", err)
 
+#define FOTA_DERIVE_KEY_BITS 128
+
+#if FOTA_KEY_FORCE_DERIVATION
+
+static int derive_key(uint8_t *key)
+{
+    int ret;
+    int flow_control = 0;
+    FOTA_DBG_ASSERT(key);
+
+    // We will only be using 128 bits secret key for key derivation.
+    // Larger input keys will be truncated to 128 bit length
+    mbedtls_aes_context ctx = {0};
+    mbedtls_aes_init(&ctx);
+    ret = mbedtls_aes_setkey_enc(&ctx, key, FOTA_DERIVE_KEY_BITS);
+    if (ret) {
+        FOTA_TRACE_TLS_ERR(ret);
+        mbedtls_aes_free(&ctx);
+        return FOTA_STATUS_INTERNAL_CRYPTO_ERROR;
+    }
+
+    flow_control++;
+    // Encrypting only first 128 bits, the reset is discarded, using precalculated hash
+    ret = mbedtls_aes_crypt_ecb(&ctx, MBEDTLS_AES_ENCRYPT, (const unsigned char*)"36CCD50EA09710CDDC9967E307FF0D6B", key);
+    mbedtls_aes_free(&ctx);
+    if (ret) {
+        FOTA_TRACE_TLS_ERR(ret);
+        return FOTA_STATUS_INTERNAL_CRYPTO_ERROR;
+    }
+
+    flow_control++;	
+    return (flow_control == 2) ? FOTA_STATUS_SUCCESS : FOTA_STATUS_INTERNAL_ERROR;
+}
+
+#endif // FOTA_KEY_FORCE_DERIVATION
+
 int fota_encrypt_decrypt_start(fota_encrypt_context_t **ctx, const uint8_t *key, uint32_t key_size)
 {
     FOTA_DBG_ASSERT(ctx);
     int ret;
 
     *ctx = NULL;
+
+    const uint8_t* key_to_use = key;
+
+#if FOTA_KEY_FORCE_DERIVATION
+    uint8_t derived_key[key_size];
+    memcpy(derived_key, key_to_use, key_size);
+    ret = derive_key(derived_key);
+    if (ret) {
+        return ret;
+    }
+    key_to_use = derived_key;
+#endif
 
     fota_encrypt_context_t *enc_ctx = (fota_encrypt_context_t *) malloc(sizeof(fota_encrypt_context_t));
     if (!enc_ctx) {
@@ -93,7 +139,7 @@ int fota_encrypt_decrypt_start(fota_encrypt_context_t **ctx, const uint8_t *key,
     mbedtls_ccm_init(&enc_ctx->ccm_ctx);
     enc_ctx->iv = 0;
 
-    ret = mbedtls_ccm_setkey(&enc_ctx->ccm_ctx, MBEDTLS_CIPHER_ID_AES, key, key_size * 8);
+    ret = mbedtls_ccm_setkey(&enc_ctx->ccm_ctx, MBEDTLS_CIPHER_ID_AES, key_to_use, FOTA_DERIVE_KEY_BITS);
     if (ret) {
         FOTA_TRACE_TLS_ERR(ret);
         mbedtls_ccm_free(&enc_ctx->ccm_ctx);
@@ -129,22 +175,21 @@ int fota_encrypt_data(
     FOTA_DBG_ASSERT(tag);
 
     int ret;
-
+    int flow_control = 0;
     ret = mbedtls_ccm_encrypt_and_tag(
               &ctx->ccm_ctx, buf_size,
               (const unsigned char *) &ctx->iv, sizeof(ctx->iv),
               NULL, 0,
               in_buf, out_buf,
               tag, FOTA_ENCRYPT_TAG_SIZE);
-
+    flow_control++;
     if (ret) {
         FOTA_TRACE_TLS_ERR(ret);
         return FOTA_STATUS_INTERNAL_CRYPTO_ERROR;
     }
-
+    flow_control++;
     fota_encryption_iv_increment(ctx);
-
-    return FOTA_STATUS_SUCCESS;
+    return (2 == flow_control) ? FOTA_STATUS_SUCCESS : FOTA_STATUS_INTERNAL_ERROR;
 }
 
 int fota_decrypt_data(
@@ -310,24 +355,26 @@ int fota_verify_signature_prehashed(
     const uint8_t *sig, size_t sig_len
 )
 {
+    int flow_control = 0;
     uint8_t public_key[FOTA_UPDATE_RAW_PUBLIC_KEY_SIZE];
     int ret = fota_nvm_get_update_public_key(public_key);
+
     if (ret) {
         FOTA_TRACE_ERROR("Failed to get public key");
         return ret;
     }
-
+    flow_control++;
     ret = uECC_verify(
               public_key + 1, // +1 for dropping the compression byte
               data_digest, FOTA_CRYPTO_HASH_SIZE,
               sig
           );
-
-    FOTA_FI_SAFE_COND(!ret, FOTA_STATUS_MANIFEST_SIGNATURE_INVALID, "Failed to uECC_verify");
-
+    flow_control++;
+    FOTA_FI_SAFE_COND(ret == UECC_SUCCESS, FOTA_STATUS_MANIFEST_SIGNATURE_INVALID, "Failed to uECC_verify");
+    flow_control++;
     FOTA_TRACE_DEBUG("uECC_verify passed");
 
-    return FOTA_STATUS_SUCCESS;
+    return (3 == flow_control) ? FOTA_STATUS_SUCCESS : FOTA_STATUS_INTERNAL_ERROR;
 
 fail:
 
@@ -341,6 +388,7 @@ int fota_verify_signature_prehashed(
     const uint8_t *sig, size_t sig_len
 )
 {
+    int flow_control = 0;
     uint8_t public_key[FOTA_UPDATE_RAW_PUBLIC_KEY_SIZE];
     int ret = FOTA_STATUS_INTERNAL_ERROR;
     int tmp_ret = fota_nvm_get_update_public_key(public_key);
@@ -354,6 +402,7 @@ int fota_verify_signature_prehashed(
     size_t curve_bytes;
     mbedtls_mpi r, s;
 
+    flow_control++;
     mbedtls_mpi_init(&r);
     mbedtls_mpi_init(&s);
     mbedtls_ecp_point_init(&Q);
@@ -408,19 +457,20 @@ int fota_verify_signature_prehashed(
         ret = FOTA_STATUS_INTERNAL_CRYPTO_ERROR;
         goto fail;
     }
-
+    flow_control++;
     tmp_ret = mbedtls_ecdsa_verify(
                   &ecp_group,
                   data_digest, FOTA_CRYPTO_HASH_SIZE,
                   &Q,
                   &r, &s
               );
-
+    flow_control++;
     FOTA_FI_SAFE_COND(!tmp_ret, FOTA_STATUS_MANIFEST_SIGNATURE_INVALID, "Failed to verify signature");
+    flow_control++;
 
     FOTA_TRACE_DEBUG("mbedtls_ecdsa_verify passed");
 
-    ret = FOTA_STATUS_SUCCESS;
+    ret = (4 == flow_control) ? FOTA_STATUS_SUCCESS : FOTA_STATUS_INTERNAL_ERROR;
 
 fail:
 
@@ -441,14 +491,16 @@ int fota_verify_signature_prehashed(
 )
 {
     int ret;
+    int flow_control = 0;
     int fota_status = FOTA_STATUS_INTERNAL_ERROR;
     uint8_t *update_crt_data;
-    mbedtls_pk_context *pk_ctx_ptr;
+    mbedtls_pk_context *pk_ctx_ptr = NULL;
     size_t update_crt_size;
     mbedtls_x509_crt crt;
 #if defined(MBEDTLS_X509_ON_DEMAND_PARSING)
     mbedtls_pk_context pk_ctx;
 #endif
+    flow_control++;
     update_crt_data = (uint8_t *)malloc(FOTA_CERT_MAX_SIZE);
     if (!update_crt_data) {
         FOTA_TRACE_ERROR("Failed to allocate storage for update certificate");
@@ -495,19 +547,21 @@ int fota_verify_signature_prehashed(
 #else
     pk_ctx_ptr = &crt.pk;
 #endif
-
+    flow_control++;
     ret = mbedtls_pk_verify(
               pk_ctx_ptr, MBEDTLS_MD_SHA256,
               data_digest, FOTA_CRYPTO_HASH_SIZE,
               sig, sig_len
           );
+    flow_control++;
     // todo FI check
     if (ret) {
         FOTA_TRACE_ERROR("Manifest signature verification failed (%d)", ret);
         fota_status = FOTA_STATUS_MANIFEST_SIGNATURE_INVALID;
         goto fail;
     }
-    fota_status = FOTA_STATUS_SUCCESS;
+    flow_control++;
+    fota_status = (4 == flow_control) ? FOTA_STATUS_SUCCESS : FOTA_STATUS_INTERNAL_ERROR;
 
 fail:
 
@@ -526,6 +580,7 @@ int fota_verify_signature(
     const uint8_t *sig, size_t sig_len
 )
 {
+    int flow_control = 0;
     uint8_t digest[FOTA_CRYPTO_HASH_SIZE] = {0};
     mbedtls_sha256_context sha256_ctx = {0};
     mbedtls_sha256_init(&sha256_ctx);
@@ -537,31 +592,31 @@ int fota_verify_signature(
     if (status) {
         goto fail;
     }
-
+    flow_control++;
     status = mbedtls_sha256_update_ret(&sha256_ctx, signed_data, signed_data_size);
     if (status) {
         mbedtls_sha256_free(&sha256_ctx);
         goto fail;
     }
-
+    flow_control++;
     status = mbedtls_sha256_finish_ret(&sha256_ctx, digest);
     mbedtls_sha256_free(&sha256_ctx);
     if (status) {
         goto fail;
     }
-
+    flow_control++;
     ret = fota_verify_signature_prehashed(
               digest,
               sig, sig_len
           );
-
+    flow_control++;
     FOTA_FI_SAFE_COND(
         ret == FOTA_STATUS_SUCCESS,
         ret,
         "Manifest signature verification failed"
     );
-
-    ret = FOTA_STATUS_SUCCESS;
+    flow_control++;
+    ret = (5 == flow_control) ? FOTA_STATUS_SUCCESS : FOTA_STATUS_INTERNAL_ERROR;
 
 fail:
     return ret;

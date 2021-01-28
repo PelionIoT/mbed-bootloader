@@ -20,6 +20,9 @@
 #define __FOTA_CANDIDATE_H_
 
 #include "fota/fota_base.h"
+
+#if defined(MBED_CLOUD_CLIENT_FOTA_ENABLE)
+
 #include "fota/fota_header_info.h"
 #include "fota/fota_crypto_defs.h"
 
@@ -53,8 +56,8 @@ typedef uint16_t fota_candidate_block_checksum_t;
  */
 typedef struct {
     fota_candidate_iterate_status status;
-    uint32_t frag_size;
-    uint32_t frag_pos;
+    size_t frag_size;
+    size_t frag_pos;
     uint8_t  *frag_buf;
     fota_header_info_t *header_info;
     void *user_ctx;
@@ -67,8 +70,8 @@ typedef struct {
  * storage_start_addr storage start address for candidate.
  */
 typedef struct {
-    uint32_t    storage_size;
-    uint32_t    storage_start_addr;
+    size_t    storage_size;
+    size_t    storage_start_addr;
 } fota_candidate_config_t;
 
 /**
@@ -94,6 +97,8 @@ const fota_candidate_config_t *fota_candidate_get_config(void);
  */
 typedef int (*fota_candidate_iterate_handler_t)(fota_candidate_iterate_callback_info *info);
 
+#define FOTA_CANDIDATE_SKIP_VALIDATION 0x27
+
 /**
  * Iterate on candidate image.
  *
@@ -104,7 +109,7 @@ typedef int (*fota_candidate_iterate_handler_t)(fota_candidate_iterate_callback_
  * \param[in] handler callback called on iteration start, each fragment and finish.
  * \return FOTA_STATUS_SUCCESS on success.
  */
-int fota_candidate_iterate_image(bool validate, bool force_encrypt, const char *expected_comp_name,
+int fota_candidate_iterate_image(uint8_t validate, bool force_encrypt, const char *expected_comp_name,
                                  uint32_t install_alignment, fota_candidate_iterate_handler_t handler);
 
 /**
@@ -116,7 +121,7 @@ int fota_candidate_iterate_image(bool validate, bool force_encrypt, const char *
  * \param[out] header candidate ready header.
  * \return FOTA_STATUS_SUCCESS if found.
  */
-int fota_candidate_read_candidate_ready_header(uint32_t *addr, uint32_t bd_read_size, uint32_t bd_prog_size,
+int fota_candidate_read_candidate_ready_header(size_t *addr, uint32_t bd_read_size, uint32_t bd_prog_size,
                                                fota_candidate_ready_header_t *header);
 
 /**
@@ -128,7 +133,7 @@ int fota_candidate_read_candidate_ready_header(uint32_t *addr, uint32_t bd_read_
  * \param[out] header image header info.
  * \return FOTA_STATUS_SUCCESS if found.
  */
-int fota_candidate_read_header(uint32_t *addr, uint32_t bd_read_size, uint32_t bd_prog_size, fota_header_info_t *header);
+int fota_candidate_read_header(size_t *addr, uint32_t bd_read_size, uint32_t bd_prog_size, fota_header_info_t *header);
 
 /**
  * Erase current candidate.
@@ -140,5 +145,7 @@ int fota_candidate_erase(void);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // defined(MBED_CLOUD_CLIENT_FOTA_ENABLE)
 
 #endif // __FOTA_CANDIDATE_H_
