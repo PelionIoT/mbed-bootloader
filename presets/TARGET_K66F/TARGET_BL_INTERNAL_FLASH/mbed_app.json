@@ -7,9 +7,9 @@
                 "executables on the first bank, and all storage on the second bank such that reading",
                 "and writing storage does not halt execution. The regions are as follows:",
                 "1. Bootloader - 32kb from the beginning of flash",
-                "2. Active App Metadata Header - 512B from the end of Bootloader",
+                "2. Active App Metadata Header - 1KB from the end of Bootloader",
                 "3. Active App - From end of header to the end of first bank of flash",
-                "4. TDB internal storage - 32kb from the beginning of the second bank of the flash",
+                "4. TDB internal storage - 96KB from the beginning of the second bank of the flash",
                 "5. Firmware Candidate Storage - from the end of the TDB internal storage",
                 "+--------------------------+",
                 "|                          |",
@@ -87,7 +87,7 @@
             ],                                            
             "fota.fi-mitigation-enable"                 : false,
             "mbed-bootloader.application-header-address": "(MBED_ROM_START+0x8000)",
-            "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0x8200)",
+            "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0x8400)",
             "fota.storage-size"                         : "MBED_BOOTLOADER_FLASH_BANK_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
             "fota.candidate-block-size"                 : "1024",
             "fota.encryption-support"                   : false,
@@ -98,15 +98,13 @@
             "storage.storage_type"                      : "TDB_INTERNAL",
             "fota.block-device-type"                    : "FOTA_INTERNAL_FLASH_MBED_OS_BD",
             "fota.storage-start-address"                : "MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE + MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
-            "storage_tdb_internal.internal_size"        : "(2*16*1024)",
+            "storage_tdb_internal.internal_size"        : "(2*48*1024)",
             "platform.crash-capture-enabled"            : false,
             "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE)"
         },
-        "NRF52840_DK": {
-            "target.static_memory_defines"     : true,
-            "target.features_remove"           : ["CRYPTOCELL310"],
-            "target.macros_remove"             : ["MBEDTLS_CONFIG_HW_SUPPORT"],
-            "target.macros_add"                : ["NRFX_RNG_ENABLED=1", "RNG_ENABLED=1", "NRF_QUEUE_ENABLED=1"]
+        "K66F": {
+            "target.extra_labels_remove": [ "PSA" ],
+            "target.components_remove"                  : ["SD"]
         }
 
     }

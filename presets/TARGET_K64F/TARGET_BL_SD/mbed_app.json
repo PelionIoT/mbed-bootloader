@@ -2,34 +2,28 @@
     "config": {
         "documentation": {
             "options": [
-                "This configuration takes advantage of the fact that most MCUs have 2 banks of flash",
-                "which can be read from and written to independently of each other. Hence we put all",
-                "executables on the first bank, and all storage on the second bank such that reading",
-                "and writing storage does not halt execution. The regions are as follows:",
+                " The regions are as follows:",
                 "1. Bootloader - 32kb from the beginning of flash",
-                "2. Active App Metadata Header - 512B from the end of Bootloader",
-                "3. Active App - From end of header to the end of first bank of flash",
-                "4. TDB internal storage - 32kb from the beginning of the second bank of the flash",
-                "5. Firmware Candidate Storage - from the end of the TDB internal storage",
-                "+--------------------------+",
-                "|                          |",
-                "|                          |",
+                "2. TDB internal storage - 8kb from the beginning of the second bank of the flash",
+                "3. Active App Metadata Header - 1KB from the end of TDB internal storage",
+                "4. Active App - From end of header to the end of the flash",
+                "5. Firmware Candidate Storage - Starting from 64MB offset in the SD card",
+
+                "|--------------------------|",
                 "|                          |",
                 "|Firmware Candidate Storage|",
                 "|                          |",
-                "|                          |",
-                "|                          |",
-                "|--------------------------| <-+ fota.storage-start-address",
-                "|                          |",
-                "|    storage_tdb_internal  |",
-                "|                          |",
-                "+--------------------------+ <-+storage_tdb_internal.internal_base_address",
+                "|--------------------------| <-+ fota.storage-start-address (SD card)",
+                "|--------------------------|",
                 "|                          |",
                 "|        Active App        |",
                 "|                          |",
+                "|                          |",
                 "+--------------------------+ <-+ mbed-bootloader.application-start-address",
                 "|Active App Metadata Header|",
-                "+--------------------------+ <-+ mbed-bootloader.application-header-address",
+                "+--------------------------+ <-+ mbed-bootloader.application-start-address",
+                "|       TDB internal       |",
+                "+--------------------------+ <-+storage_tdb_internal.internal_base_address",
                 "|                          |",
                 "|        Bootloader        |",
                 "|                          |",
@@ -39,7 +33,8 @@
             ]
         }
     },
-    "requires": [     
+    "requires": [
+        "rtos-api",
         "platform",
         "mbed-bootloader",
         "mbed-trace",
@@ -62,10 +57,10 @@
         "kv-global-api",
         "kv-map",
         "device_key",
-        "fota"
+        "fota",
+        "sd"
     ],
     "macros": [
-        "MBED_BOOTLOADER_FLASH_BANK_SIZE=MBED_ROM_SIZE/2",
         "MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION=3",
         "FOTA_HEADER_HAS_CANDIDATE_READY=1",        
         "MBED_CLOUD_CLIENT_FOTA_ENABLE=1"
@@ -76,7 +71,6 @@
             "target.c_lib"                             : "small",
             "platform.use-mpu"                         : false,
             "platform.stdio-baud-rate"                 : 115200,
-            "target.restrict_size"                     : "0x8000",
             "fota.is-bootloader"                       : true,
             "target.header_format": [
                 ["magic", "const", "32le", "0x5c0253a3"],
@@ -86,9 +80,9 @@
                 ["precursorDigest", "digest", "SHA256", "application"]
             ],                                            
             "fota.fi-mitigation-enable"                 : false,
-            "mbed-bootloader.application-header-address": "(MBED_ROM_START+0x8000)",
-            "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0x8200)",
-            "fota.storage-size"                         : "MBED_BOOTLOADER_FLASH_BANK_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
+            "mbed-bootloader.application-header-address": "(MBED_ROM_START+0xa000)",
+            "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0xa400)",
+            "fota.storage-size"                         : "(MBED_ROM_START + MBED_ROM_SIZE - APPLICATION_ADDR)",
             "fota.candidate-block-size"                 : "1024",
             "fota.encryption-support"                   : false,
             "fota.trace-enable"                         : false,
@@ -96,17 +90,15 @@
             "mbed-bootloader.external-traces-enabled"   : false,
             "mbed-bootloader.storage-type"              : "KVSTORE",
             "storage.storage_type"                      : "TDB_INTERNAL",
-            "fota.block-device-type"                    : "FOTA_INTERNAL_FLASH_MBED_OS_BD",
-            "fota.storage-start-address"                : "MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE + MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
-            "storage_tdb_internal.internal_size"        : "(2*16*1024)",
+            "fota.block-device-type"                    : "FOTA_DEFAULT_MBED_OS_BD",
+            "fota.storage-start-address"                : "(1024*1024*64)",
             "platform.crash-capture-enabled"            : false,
-            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE)"
+            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START+32*1024)",
+            "storage_tdb_internal.internal_size"        : "(8*1024)"
         },
-        "NRF52840_DK": {
-            "target.static_memory_defines"     : true,
-            "target.features_remove"           : ["CRYPTOCELL310"],
-            "target.macros_remove"             : ["MBEDTLS_CONFIG_HW_SUPPORT"],
-            "target.macros_add"                : ["NRFX_RNG_ENABLED=1", "RNG_ENABLED=1", "NRF_QUEUE_ENABLED=1"]
+        "K64F": {
+            "target.components_add": ["SD"],
+            "target.extra_labels_remove": [ "PSA" ]
         }
 
     }
