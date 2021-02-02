@@ -73,6 +73,7 @@
     "target_overrides": {
         "*": {
             "target.console-uart"                      : true,
+            "target.components_remove"                 : ["QSPIF"],
             "target.c_lib"                             : "small",
             "platform.use-mpu"                         : false,
             "platform.stdio-baud-rate"                 : 115200,

@@ -73,6 +73,7 @@
     "target_overrides": {
         "*": {
             "target.components_add"                    : ["FLASHIAP"],
+            "target.components_remove"                 : ["QSPIF"],
             "target.console-uart"                      : true,
             "target.c_lib"                             : "small",
             "platform.use-mpu"                         : false,
