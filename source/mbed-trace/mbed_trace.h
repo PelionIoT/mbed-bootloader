@@ -57,13 +57,13 @@ extern "C" {
 #else
 #define pr_debug(...)
 
-#define pr_info(fmt, ...)    direct_serial_output_process("[BOOT] " fmt "\r\n")
+#define pr_info(fmt, ...)    direct_serial_output_process("[BOOT] " fmt "\r\n", ##__VA_ARGS__)
 
-#define pr_warning(fmt, ...) direct_serial_output_process("[WARN] " fmt "\r\n")
+#define pr_warning(fmt, ...) direct_serial_output_process("[WARN] " fmt "\r\n", ##__VA_ARGS__)
 
-#define pr_error(fmt, ...)   direct_serial_output_process("[ERR ] " fmt "\r\n")
+#define pr_error(fmt, ...)   direct_serial_output_process("[ERR ] " fmt "\r\n", ##__VA_ARGS__)
 
-#define pr_trace(fmt, ...)   direct_serial_output_process(fmt)
+#define pr_trace(fmt, ...)   direct_serial_output_process(fmt), ##__VA_ARGS__)
 
 #define pr_flush(x)
 

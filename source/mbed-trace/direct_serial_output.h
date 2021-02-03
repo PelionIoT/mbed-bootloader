@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright 2020 ARM Ltd.
+// Copyright 2020 Pelion Ltd.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -25,7 +25,17 @@
 #define USE_DIRECT_SERIAL_OUTPUT 5556
 
 #if (MBED_CONF_MBED_BOOTLOADER_TRACE == USE_DIRECT_SERIAL_OUTPUT)
-void direct_serial_output_process(const char *s);
+
+#ifdef __cplusplus
+extern "C" {
 #endif
+
+void direct_serial_output_process(const char *format, ...);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // (MBED_CONF_MBED_BOOTLOADER_TRACE == USE_DIRECT_SERIAL_OUTPUT)
 
 #endif // DIRECT_SERIAL_OUTPUT_H
