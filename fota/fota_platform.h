@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright 2018-2021 ARM Ltd.
+// Copyright 2019-2021 Pelion Ltd.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -36,7 +36,6 @@ extern "C" {
  * An application developer can override these hooks by injecting the ::FOTA_CUSTOM_PLATFORM macro to the build and implementing all the callback functions listed below.
  */
 
-#if defined(FOTA_CUSTOM_PLATFORM) && (FOTA_CUSTOM_PLATFORM)
 
 /**
  * Platform init hook.
@@ -74,30 +73,6 @@ int fota_platform_finish_update_hook(const char *comp_name);
  */
 int fota_platform_abort_update_hook(const char *comp_name);
 
-#else
-
-// Default platform hooks
-static inline int fota_platform_init_hook(bool after_upgrade)
-{
-    return FOTA_STATUS_SUCCESS;
-}
-
-static inline int fota_platform_start_update_hook(const char *comp_name)
-{
-    return FOTA_STATUS_SUCCESS;
-}
-
-static inline int fota_platform_finish_update_hook(const char *comp_name)
-{
-    return FOTA_STATUS_SUCCESS;
-}
-
-static inline int fota_platform_abort_update_hook(const char *comp_name)
-{
-    return FOTA_STATUS_SUCCESS;
-}
-
-#endif // !defined(FOTA_CUSTOM_PLATFORM) || (!FOTA_CUSTOM_PLATFORM)
 
 #ifdef __cplusplus
 }

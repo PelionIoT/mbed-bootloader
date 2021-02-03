@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright 2019-2021 Pelion Ltd.
+// Copyright 2021 Pelion Ltd.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -16,18 +16,17 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------
 
-#ifndef __FOTA_CRYPTO_ASN_EXTRA_H_
-#define __FOTA_CRYPTO_ASN_EXTRA_H_
+#ifndef FOTA_DEVICE_KEY
+#define FOTA_DEVICE_KEY
 
-#include <stdint.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#define MBEDTLS_ASN1_ENUMERATED              0x0A
+int8_t fota_get_device_key_128bit(uint8_t *key_buf, uint32_t length);
 
-int mbedtls_asn1_get_enumerated_value(unsigned char **p,
-                                      const unsigned char *end,
-                                      int *val);
-int mbedtls_asn1_get_int64(unsigned char **p,
-                           const unsigned char *end,
-                           int64_t *val);
+#ifdef __cplusplus
+}
+#endif
 
-#endif  // __FOTA_CRYPTO_ASN_EXTRA_H_
+#endif // FOTA_DEVICE_KEY

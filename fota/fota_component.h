@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright 2018-2021 Pelion Ltd.
+// Copyright 2019-2021 Pelion Ltd.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -26,6 +26,7 @@
 #include "fota/fota_component_defs.h"
 #include "fota/fota_crypto_defs.h"
 #include "fota/fota_candidate.h"
+#include "fota/fota_header_info.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,15 +62,15 @@ typedef int (*fota_component_curr_fw_read)(uint8_t *buf, size_t offset, size_t s
 typedef int (*fota_component_curr_fw_get_digest)(uint8_t *buf);
 
 /**
- * A callback function for the post-install handler.
- * Executed after reboot for handling post-install tasks.
+ * A callback function to verify component installation success.
+ * Executed after component installation.
  *
  * \param[in] component_name Name of the installed component. The same name that was specified as an argument to ::fota_component_add().
- * \param[in] new_sem_ver New semantic version of the installed component.
+ * \param[in] expected_header_info Header with expected values for installed components.
  *
  * \return ::FOTA_STATUS_SUCCESS on success.
  */
-typedef int (*fota_component_post_install_handler_t)(const char *component_name, const char *new_sem_ver);
+typedef int (*fota_component_verify_install_handler_t)(const char *comp_name, const fota_header_info_t *expected_header_info);
 
 
 /**
@@ -81,7 +82,7 @@ typedef int (*fota_component_post_install_handler_t)(const char *component_name,
  * @param candidate_iterate_cb A callback function the FOTA client calls for installing the candidate.
  *                             The FOTA client calls the callback iteratively with a firmware fragment buffer pointer as an argument.
  *                             Note: For Linux systems, this iterative callback is replaced by ::fota_app_on_install_candidate().
- * @param component_post_install_cb A callback function to be executed after reboot for handling post-install tasks.
+ * @param component_verify_install_cb A callback function to be executed after installation, verifying installation.
  * @param curr_fw_read Only required if ::support delta is set to true.
  *                     A helper function for reading the currently installed firmware of the component.
  *                     A callback to read the current firmware.
@@ -96,7 +97,7 @@ typedef struct {
 #if !defined(TARGET_LIKE_LINUX)
     fota_candidate_iterate_handler_t candidate_iterate_cb;
 #endif
-    fota_component_post_install_handler_t component_post_install_cb;
+    fota_component_verify_install_handler_t component_verify_install_cb;
     fota_component_curr_fw_read curr_fw_read;
     fota_component_curr_fw_get_digest curr_fw_get_digest;
 } fota_component_desc_info_t;

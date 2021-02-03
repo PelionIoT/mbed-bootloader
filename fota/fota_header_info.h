@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright 2018-2020 ARM Ltd.
+// Copyright 2019-2021 Pelion Ltd.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -86,6 +86,8 @@ typedef struct {
     uint16_t block_size;                            /*< Block size. Encryption block size if encrypted,
                                                         validated block size if unencrypted and block validation turned on */
     uint8_t precursor[FOTA_CRYPTO_HASH_SIZE];       /*< contains previously installed FW SHA256 digest */
+    uint8_t vendor_data[FOTA_MANIFEST_VENDOR_DATA_SIZE];
+    /*< Vendor custom data as received in Pelion FOTA manifest. */
     uint32_t footer;
 } fota_header_info_t;
 
