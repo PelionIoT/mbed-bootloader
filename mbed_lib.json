@@ -18,9 +18,9 @@
             "value": "DEFAULT_MAX_APPLICATION_SIZE"
         },
         "trace": {
-            "help": "Show boot status and progress on serial output. Disable output to save space on headless devices.",
-            "value": true,
-            "macro_name": "MBED_BOOTLOADER_TRACE"
+            "help": "Show boot status and progress on serial output. Use USE_DIRECT_SERIAL_OUTPUT to save space.",
+            "accepted_values": ["USE_PRINTF", "USE_DIRECT_SERIAL_OUTPUT"],
+            "value": "USE_DIRECT_SERIAL_OUTPUT"
         },
         "default-max-application-size":{
             "help": "The max application size",

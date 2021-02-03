@@ -22,6 +22,7 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #include <stdio.h>
+#include "direct_serial_output.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,8 +36,8 @@ extern "C" {
 #undef tr_trace
 #undef tr_flush
 
-#if MBED_BOOTLOADER_TRACE
 
+#if (MBED_CONF_MBED_BOOTLOADER_TRACE == USE_PRINTF)
 #if MBED_BOOTLOADER_DEBUG_PRINTS_ENABLED
 #define pr_debug(fmt, ...)   printf("[DBG ] " fmt "\r\n", ##__VA_ARGS__)
 #else
@@ -55,13 +56,18 @@ extern "C" {
 
 #else
 #define pr_debug(...)
-#define pr_info(...)
-#define pr_warning(...)
-#define pr_warn(...)
-#define pr_error(...)
-#define pr_trace(...)
-#define pr_flush(...)
-#endif // !MBED_BOOTLOADER_TRACE
+
+#define pr_info(fmt, ...)    direct_serial_output_process("[BOOT] " fmt "\r\n")
+
+#define pr_warning(fmt, ...) direct_serial_output_process("[WARN] " fmt "\r\n")
+
+#define pr_error(fmt, ...)   direct_serial_output_process("[ERR ] " fmt "\r\n")
+
+#define pr_trace(fmt, ...)   direct_serial_output_process(fmt)
+
+#define pr_flush(x)
+
+#endif
 
 #if MBED_BOOTLOADER_EXTERNAL_TRACES_ENABLED
 #define tr_debug    pr_debug
