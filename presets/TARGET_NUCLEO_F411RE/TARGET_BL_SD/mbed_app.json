@@ -68,10 +68,11 @@
     ],
     "target_overrides": {
         "*": {
-            "target.console-uart"                      : false,
+            "target.console-uart"                      : true,
             "target.c_lib"                             : "small",
             "platform.use-mpu"                         : false,
             "platform.stdio-baud-rate"                 : 115200,
+            "platform.stdio-flush-at-exit"             : false,
             "fota.is-bootloader"                       : true,
             "target.header_format": [
                 ["magic", "const", "32le", "0x5c0253a3"],
