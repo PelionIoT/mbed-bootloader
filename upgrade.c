@@ -150,7 +150,7 @@ static int install_program_fragment(fota_candidate_iterate_callback_info *info)
     uint32_t prev_progress = info->frag_pos * 100 / info->header_info->fw_size;
 
     if (info->frag_pos == 0 || ((progress / print_range_percent) > (prev_progress / print_range_percent))) {
-        pr_info("Flashing. %" PRIu32 "%c complete", progress, '%');
+        pr_cmd("Flashing. %" PRIu32 "%c complete", progress, '%');
     }
 
     // Would need to check that info->frag_buf is aligned to 8 bytes, as HAL flash driver won't accept it
@@ -252,7 +252,7 @@ static int check_and_install_update()
         goto end;
     }
 
-    pr_info("Installation to flash finished.");
+    pr_cmd("Installation finished.");
 
 end:
     deinit_storage();
@@ -353,7 +353,7 @@ MBED_NORETURN void mbed_die(void)
 int main(void)
 {
     bool is_new_firmware = false;
-    pr_info("Bootloader build at: " __DATE__ " " __TIME__);
+    pr_cmd("Bootloader build at: " __DATE__ " " __TIME__);
     volatile int ret = FOTA_STATUS_INTERNAL_ERROR, installed_fw_status = FOTA_STATUS_INTERNAL_ERROR;
     volatile int install_update_status = FOTA_STATUS_INTERNAL_ERROR;
 #if MBED_BOOTLOADER_RESET_ON_PANIC
@@ -362,7 +362,7 @@ int main(void)
     bool reset = false;
 #endif
 
-#if MBED_BOOTLOADER_TRACE
+#if (MBED_CONF_MBED_BOOTLOADER_TRACE == USE_PRINTF)
     char semver[FOTA_COMPONENT_MAX_SEMVER_STR_SIZE];
 #endif
 
@@ -430,15 +430,15 @@ int main(void)
         pr_info("New active firmware is valid\r\n");
     }
 
-#if MBED_BOOTLOADER_TRACE
+#if (MBED_CONF_MBED_BOOTLOADER_TRACE == USE_PRINTF)
     ret = fota_component_version_int_to_semver(installed_header.version, semver);
     if (ret) {
-        pr_info("Current FW version is %" PRIu64, installed_header.version);
+        pr_cmd("Current FW version is %" PRIu64, installed_header.version);
     } else {
-        pr_info("Current FW version is %s", semver);
+        pr_cmd("Current FW version is %s", semver);
     }
 #endif
-    pr_info("All clear. Jumping to application (at address 0x%x).\n\n\n",
+    pr_cmd("All clear. Jumping to application (at address 0x%x).\n\n\n",
             MBED_CONF_MBED_BOOTLOADER_APPLICATION_JUMP_ADDRESS);
 
     mbed_start_application(MBED_CONF_MBED_BOOTLOADER_APPLICATION_JUMP_ADDRESS);

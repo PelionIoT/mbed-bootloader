@@ -44,28 +44,46 @@ extern "C" {
 #define pr_debug(...)
 #endif
 
-#define pr_info(fmt, ...)    printf("[BOOT] " fmt "\r\n", ##__VA_ARGS__)
+#define pr_info(fmt, ...)    printf("[INFO] " fmt "\r\n", ##__VA_ARGS__)
 
 #define pr_warning(fmt, ...) printf("[WARN] " fmt "\r\n", ##__VA_ARGS__)
 
 #define pr_error(fmt, ...)   printf("[ERR ] " fmt "\r\n", ##__VA_ARGS__)
 
+#define pr_cmd(fmt, ...)     printf("[BOOT] " fmt "\r\n", ##__VA_ARGS__)
+
 #define pr_trace(fmt, ...)   printf(fmt, ##__VA_ARGS__)
 
 #define pr_flush(x)
 
-#else
+#elif (MBED_CONF_MBED_BOOTLOADER_TRACE == USE_DIRECT_SERIAL_OUTPUT)
 #define pr_debug(...)
 
-#define pr_info(fmt, ...)    direct_serial_output_process("[BOOT] " fmt "\r\n", ##__VA_ARGS__)
+#define pr_info(fmt, ...)
 
-#define pr_warning(fmt, ...) direct_serial_output_process("[WARN] " fmt "\r\n", ##__VA_ARGS__)
+#define pr_warning(fmt, ...)
 
 #define pr_error(fmt, ...)   direct_serial_output_process("[ERR ] " fmt "\r\n", ##__VA_ARGS__)
 
-#define pr_trace(fmt, ...)   direct_serial_output_process(fmt), ##__VA_ARGS__)
+#define pr_cmd(fmt, ...)     direct_serial_output_process("[BOOT] " fmt "\r\n", ##__VA_ARGS__)
+
+#define pr_trace(fmt, ...)
 
 #define pr_flush(x)
+
+#else // no traces
+
+#define pr_debug(...)
+
+#define pr_info(fmt, ...)
+
+#define pr_warning(fmt, ...)
+
+#define pr_error(fmt, ...)
+
+#define pr_cmd(fmt, ...)
+
+#define pr_trace(fmt, ...)
 
 #endif
 
