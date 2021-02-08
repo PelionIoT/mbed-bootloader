@@ -18,7 +18,7 @@
             "value": "DEFAULT_MAX_APPLICATION_SIZE"
         },
         "trace": {
-            "help": "Show boot status and progress on serial output. Use USE_DIRECT_SERIAL_OUTPUT to save space.",
+            "help": "Show boot status and progress on serial output. Use USE_DIRECT_SERIAL_OUTPUT for minimal prints to save space. Use `null` to disable traces",
             "accepted_values": ["USE_PRINTF", "USE_DIRECT_SERIAL_OUTPUT"],
             "value": "USE_DIRECT_SERIAL_OUTPUT"
         },
