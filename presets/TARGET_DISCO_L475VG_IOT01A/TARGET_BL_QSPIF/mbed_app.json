@@ -1,0 +1,111 @@
+{
+    "config": {
+        "documentation": {
+            "options": [
+                "Fota storage size aligned to QSPIF erase block size 0x1000, to prevent unwanted data loss during candidate erasing",
+                " The regions are as follows:",
+                "1. Bootloader - 36kb from the beginning of flash",
+                "2. TDB internal storage - 32KB from the end of Bootloader",
+                "3. Active App Metadata Header - 512B from the end of TDB internal storage",
+                "4. Active App - From end of header to the end of the flash",
+                "5. Firmware Candidate Storage - Starting from 0 offset in the QSPIF",
+                "+--------------------------+",
+                "|                          |",
+                "|                          |",
+                "|                          |",
+                "|Firmware Candidate Storage|",
+                "|                          |",
+                "|                          |",
+                "|                          |",
+                "|--------------------------| <-+ fota.storage-start-address (QSPIF)",
+                "|--------------------------|",
+                "|                          |",
+                "|        Active App        |",
+                "|                          |",
+                "|                          |",
+                "+--------------------------+ <-+ mbed-bootloader.application-start-address",
+                "|Active App Metadata Header|",
+                "+--------------------------+ <-+ mbed-bootloader.application-header-address",
+                "|       TDB internal       |",
+                "+--------------------------+ <-+storage_tdb_internal.internal_base_address",
+                "|                          |",
+                "|        Bootloader        |",
+                "|                          |",
+                "+--------------------------+ <-+ 0",
+                "",
+                ""
+            ]
+        }
+    },
+    "requires": [
+        "rtos-api",
+        "platform",
+        "mbed-bootloader",
+        "mbed-trace",
+        "mbedtls",
+        "system-storage",
+        "blockdevice",
+        "storage",
+        "storage_tdb_internal",
+        "flashiap-block-device",
+        "qspif",
+        "drivers",
+        "storage_filesystem",
+        "SecureStore",
+        "filesystem",
+        "filesystemstore",
+        "littlefs",
+        "fat_chan",
+        "direct-access-devicekey",
+        "tdbstore",
+        "kv-config",
+        "kv-global-api",
+        "kv-map",
+        "device_key",
+        "fota"
+    ],
+    "macros": [
+        "MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION=3",
+        "FOTA_HEADER_HAS_CANDIDATE_READY=1",        
+        "MBED_CLOUD_CLIENT_FOTA_ENABLE=1"
+    ],
+    "target_overrides": {
+        "*": {
+            "target.console-uart"                      : true,
+            "target.c_lib"                             : "small",
+            "platform.use-mpu"                         : false,
+            "platform.stdio-baud-rate"                 : 115200,
+            "target.restrict_size"                     : "0x8000",
+            "fota.is-bootloader"                       : true,
+            "target.header_format": [
+                ["magic", "const", "32le", "0x5c0253a3"],
+                ["firmwareSize", "size", "32le", ["application"]],
+                ["firmwareVersion", "const", "64le", "0x0"],
+                ["firmwareDigest", "digest", "SHA256", "application"],
+                ["precursorDigest", "digest", "SHA256", "application"]
+            ],                                            
+            "fota.fi-mitigation-enable"                 : false,
+            "mbed-bootloader.application-header-address": "(MBED_ROM_START+0x11000)",
+            "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0x11200)",
+            "fota.storage-size"                         : "(((MBED_ROM_START + MBED_ROM_SIZE - APPLICATION_ADDR)/0x1000)*0x1000)",
+            "fota.candidate-block-size"                 : "1024",
+            "fota.encryption-support"                   : false,
+            "fota.trace-enable"                         : false,
+            "mbed-bootloader.debug"                     : false,
+            "mbed-bootloader.external-traces-enabled"   : false,
+            "mbed-bootloader.storage-type"              : "KVSTORE",
+            "storage.storage_type"                      : "TDB_INTERNAL",
+            "fota.block-device-type"                    : "FOTA_DEFAULT_MBED_OS_BD",
+            "fota.storage-start-address"                : "0",
+            "platform.crash-capture-enabled"            : false,
+            "storage_tdb_internal.internal_size"        : "(2*16*1024)",
+            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START+36*1024)"
+        },
+        "DISCO_L475VG_IOT01A": {
+            "target.restrict_size"                      : "0x9000",
+            "target.components_remove"                  : ["BlueNRG_MS"],
+            "target.components_add"                     : ["QSPIF"]    
+        }
+
+    }
+}
