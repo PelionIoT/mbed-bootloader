@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright 2021 Pelion Ltd.
+// Copyright 2019-2021 Pelion Ltd.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -168,6 +168,18 @@ extern char *program_invocation_name;
 #define FOTA_CUSTOM_CURR_FW_STRUCTURE 1
 #endif
 
+// Set this flag to 1 to use custom verification logic for main app installation
+#if !defined(FOTA_CUSTOM_MAIN_APP_VERIFY_INSTALL)
+// Use default verification logic otherwise
+#define FOTA_CUSTOM_MAIN_APP_VERIFY_INSTALL 0
+#endif
+
+// Set this flag to 0 to save post upgrade verification code
+#if !defined(FOTA_VERIFY_INSTALLATION_AFTER_UPGRADE)
+// Logic should be enabled by default otherwise
+#define FOTA_VERIFY_INSTALLATION_AFTER_UPGRADE 1
+#endif
+
 #ifndef MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE
 #define MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE FOTA_EXTERNAL_BD // if not defined - fall back to an external configuration
 #endif
@@ -225,6 +237,12 @@ extern char *program_invocation_name;
 #if defined(FOTA_USE_EXTERNAL_UPDATE_RAW_PUBLIC_KEY) && !defined(FOTA_USE_UPDATE_RAW_PUBLIC_KEY)
 #define FOTA_USE_UPDATE_RAW_PUBLIC_KEY
 #endif
+
+#if (FOTA_USE_DEVICE_KEY == 1)
+#if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 0) || !defined(__MBED__)
+#error FOTA_USE_DEVICE_KEY should be used only for with __MBED__ with encryption enabled
+#endif
+#endif  
 
 #if !(FOTA_MANIFEST_SCHEMA_VERSION == 1)
 // manifest schema V3 (and newer) support public key in both
@@ -296,13 +314,7 @@ extern char *program_invocation_name;
 #define FOTA_HEADER_HAS_CANDIDATE_READY 1
 
 #if !defined(MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT)
-// set candidate encryption flag to false by default for internal flash
-#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_MBED_OS_BD) || (MBED_CLOUD_CLIENT_FOTA_MULTICAST_SUPPORT != FOTA_MULTICAST_UNSUPPORTED)
 #define MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT 0
-#else
-#define MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT 1
-#endif
-
 #endif  // !defined(MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT)
 
 #else  // LEGACY profile (MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION == 2)

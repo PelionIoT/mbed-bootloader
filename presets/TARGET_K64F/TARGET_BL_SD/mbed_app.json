@@ -72,6 +72,7 @@
             "platform.use-mpu"                         : false,
             "platform.stdio-flush-at-exit"             : false,
             "platform.stdio-baud-rate"                 : 115200,
+            "target.restrict_size"                     : "0x8000",
             "fota.is-bootloader"                       : true,
             "target.header_format": [
                 ["magic", "const", "32le", "0x5c0253a3"],
@@ -85,7 +86,7 @@
             "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0xa400)",
             "fota.storage-size"                         : "(MBED_ROM_START + MBED_ROM_SIZE - APPLICATION_ADDR)",
             "fota.candidate-block-size"                 : "1024",
-            "fota.encryption-support"                   : false,
+            "fota.encryption-support"                   : true,
             "fota.trace-enable"                         : false,
             "mbed-bootloader.debug"                     : false,
             "mbed-bootloader.external-traces-enabled"   : false,

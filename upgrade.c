@@ -1,19 +1,20 @@
-/* mbed Microcontroller Library
- * Copyright (c) 2019 ARM Limited
- * SPDX-License-Identifier: Apache-2.0
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// ----------------------------------------------------------------------------
+// Copyright 2019-2021 ARM Ltd.
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------
 
 #include "fota/fota_block_device.h"
 #include "fota/fota_crypto_defs.h"
@@ -31,18 +32,14 @@
 #include "platform/mbed_power_mgmt.h"
 #include "mbedtls/sha256.h"
 #include "mbedtls/platform_util.h"
-
-#if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
-    #include "storage/boot_nvm_storage.h"
-    #include "fota/fota_nvm.h"    
-#endif // #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
+#include "fota_device_key.h"
 
 #include <stdlib.h>
 
 flash_t flash_obj;
 
-uint32_t bd_read_size;
-uint32_t bd_prog_size;
+size_t bd_read_size;
+size_t bd_prog_size;
 uint32_t flash_page_size;
 
 #define FLASH_READ_BUFFER_SIZE 1024
@@ -214,19 +211,17 @@ static int install_iterate_handler(fota_candidate_iterate_callback_info *info)
     return 0;
 }
 
+int fota_nvm_fw_encryption_key_get(uint8_t buffer[FOTA_ENCRYPT_KEY_SIZE])
+{
+    return fota_get_device_key_128bit(buffer, FOTA_ENCRYPT_KEY_SIZE);        
+}
+
 static int check_and_install_update()
 {
     int ret = FOTA_STATUS_NOT_FOUND;
     bool validate = true;    
 #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
     bool force_encrypt = true;
-    uint8_t fw_key[FOTA_ENCRYPT_KEY_SIZE];
-    ret = fota_nvm_fw_encryption_key_get(fw_key);
-    if (ret) {
-        pr_info("Candidate not found");
-        return FOTA_STATUS_NOT_FOUND;
-    }
-    memset(fw_key, 0, sizeof(fw_key));
 #else
     bool force_encrypt = false;    
 #endif // #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
@@ -236,19 +231,17 @@ static int check_and_install_update()
         pr_error("Storage initialization failed!");
         return ret;
     }
-    
+
     flash_page_size = flash_get_page_size(&flash_obj);
 
     ret = fota_candidate_iterate_image(validate, force_encrypt, FOTA_COMPONENT_MAIN_COMPONENT_NAME, flash_page_size,
                                        install_iterate_handler);
     if (ret) {                                       
-#if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 0)
         if(ret == FOTA_STATUS_NOT_FOUND) {
             deinit_storage();
             pr_info("Candidate not found");
             return ret;
         }
-#endif
         goto end;
     }
 
@@ -292,6 +285,7 @@ static int validate_installed_fw()
 
     ret = read_installed_fw_header();
     if (ret) {
+        pr_error("failed read_installed_fw_header...");
         return ret;
     }
 
@@ -373,13 +367,6 @@ int main(void)
 
     pr_info("Searching for candidate image...");
 
-#if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
-    if (nvm_storage_init()) {
-        pr_error("NVM storage init failed");
-        goto fail;
-    }
-#endif // #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
-
     do {
         read_installed_fw_header();
         // First try check and install with version checks on (set to true by default)
@@ -412,11 +399,6 @@ int main(void)
         }
 
     } while (0);
-
-#if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
-    nvm_storage_deinit();
-#endif // #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
-
 
     // Prevent FI on hash digest (so it won't be equal to 0 in both places)
 #if FOTA_FI_MITIGATION_ENABLE

@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright 2019-2021 Pelion Ltd.
+// Copyright 2021 Pelion Ltd.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -15,19 +15,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ----------------------------------------------------------------------------
+#include "fota_platform.h"
 
-#ifndef __FOTA_CRYPTO_ASN_EXTRA_H_
-#define __FOTA_CRYPTO_ASN_EXTRA_H_
+#if defined(MBED_CLOUD_CLIENT_FOTA_ENABLE)
 
-#include <stdint.h>
+#if !defined(FOTA_CUSTOM_PLATFORM) || (!FOTA_CUSTOM_PLATFORM)
 
-#define MBEDTLS_ASN1_ENUMERATED              0x0A
+// Default platform hooks
+int fota_platform_init_hook(bool after_upgrade)
+{
+    return FOTA_STATUS_SUCCESS;
+}
 
-int mbedtls_asn1_get_enumerated_value(unsigned char **p,
-                                      const unsigned char *end,
-                                      int *val);
-int mbedtls_asn1_get_int64(unsigned char **p,
-                           const unsigned char *end,
-                           int64_t *val);
+int fota_platform_start_update_hook(const char *comp_name)
+{
+    return FOTA_STATUS_SUCCESS;
+}
 
-#endif  // __FOTA_CRYPTO_ASN_EXTRA_H_
+int fota_platform_finish_update_hook(const char *comp_name)
+{
+    return FOTA_STATUS_SUCCESS;
+}
+
+int fota_platform_abort_update_hook(const char *comp_name)
+{
+    return FOTA_STATUS_SUCCESS;
+}
+
+#endif // !defined(FOTA_CUSTOM_PLATFORM) || (!FOTA_CUSTOM_PLATFORM)
+
+#endif // defined(MBED_CLOUD_CLIENT_FOTA_ENABLE)
+
