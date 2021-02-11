@@ -238,9 +238,9 @@ extern char *program_invocation_name;
 #define FOTA_USE_UPDATE_RAW_PUBLIC_KEY
 #endif
 
-#if (FOTA_USE_DEVICE_KEY  == 1)
+#if (FOTA_USE_DEVICE_KEY == 1)
 #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 0) || !defined(__MBED__)
-#error FOTA_USE_DEVICE_KEY  should be used only for with __MBED__ with encryption enabled
+#error FOTA_USE_DEVICE_KEY should be used only for with __MBED__ with encryption enabled
 #endif
 #endif  
 
@@ -314,13 +314,7 @@ extern char *program_invocation_name;
 #define FOTA_HEADER_HAS_CANDIDATE_READY 1
 
 #if !defined(MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT)
-// set candidate encryption flag to false by default for internal flash
-#if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_MBED_OS_BD) || (MBED_CLOUD_CLIENT_FOTA_MULTICAST_SUPPORT != FOTA_MULTICAST_UNSUPPORTED)
 #define MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT 0
-#else
-#define MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT 1
-#endif
-
 #endif  // !defined(MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT)
 
 #else  // LEGACY profile (MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION == 2)
