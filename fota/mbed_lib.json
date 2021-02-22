@@ -28,9 +28,9 @@
             "macro_name": "MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT",
             "value": null
         },
-        "use-device-key": {
-            "help": "Use device key for encryption",
-            "macro_name": "FOTA_USE_DEVICE_KEY",
+        "key-encryption": {
+            "help": "Encryption key options",
+            "macro_name": "MBED_CLOUD_CLIENT_FOTA_KEY_ENCRYPTION",
             "value": null
         },
         "multicast-support": {

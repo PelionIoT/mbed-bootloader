@@ -86,6 +86,7 @@ typedef struct {
     bool mc_node_update_activated;
     fota_multicast_node_post_action_callback_t mc_node_post_action_callback;
     uint8_t *mc_node_frag_buf;
+    uint8_t *mc_node_manifest_hash[FOTA_CRYPTO_HASH_SIZE];
 #endif
 } fota_context_t;
 

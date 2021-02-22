@@ -82,6 +82,7 @@
                 ["precursorDigest", "digest", "SHA256", "application"]
             ],                                            
             "fota.fi-mitigation-enable"                 : false,
+            "fota.key-encryption"                       : "FOTA_USE_DEVICE_KEY",
             "mbed-bootloader.application-header-address": "(MBED_ROM_START+0xa000)",
             "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0xa400)",
             "fota.storage-size"                         : "(MBED_ROM_START + MBED_ROM_SIZE - APPLICATION_ADDR)",

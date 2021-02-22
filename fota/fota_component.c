@@ -40,7 +40,7 @@ static unsigned int num_int_components = 0;
 static fota_component_desc_t *int_comp_table;
 #endif
 
-#define MAJOR_NUM_BITS 24
+#define MAJOR_NUM_BITS 23
 #define MINOR_NUM_BITS 24
 #define SPLIT_NUM_BITS 16
 #define MAX_VER 999
@@ -196,26 +196,32 @@ int fota_component_name_to_id(const char *name, unsigned int *comp_id)
 
 int fota_component_version_int_to_semver(fota_component_version_t version, char *sem_ver)
 {
-#if MAJOR_NUM_BITS > 32 || MINOR_NUM_BITS > 32 || SPLIT_NUM_BITS > 32
-#error "Assuming 32-bit version components"
-#endif
     uint32_t major, minor, split;
     uint64_t full_mask = 0xFFFFFFFFFFFFFFFFULL;
     int ret = FOTA_STATUS_SUCCESS;
     char *tmp = sem_ver;
 
-    split = version & ~(full_mask << SPLIT_NUM_BITS);
-    minor = (version & ~(full_mask << (SPLIT_NUM_BITS + MINOR_NUM_BITS))) >> SPLIT_NUM_BITS;
-    major = version >> (SPLIT_NUM_BITS + MINOR_NUM_BITS);
+    if (version & FOTA_COMPONENT_SEMVER_BIT) {
+        split = version & ~(full_mask << SPLIT_NUM_BITS);
+        minor = (version & ~(full_mask << (SPLIT_NUM_BITS + MINOR_NUM_BITS))) >> SPLIT_NUM_BITS;
+        major = (version & ~FOTA_COMPONENT_SEMVER_BIT) >> (SPLIT_NUM_BITS + MINOR_NUM_BITS);
 
-    if ((major > MAX_VER) || (minor > MAX_VER) || (split > MAX_VER)) {
-        ret = FOTA_STATUS_INTERNAL_ERROR;
+        if ((major > MAX_VER) || (minor > MAX_VER) || (split > MAX_VER)) {
+            ret = FOTA_STATUS_INTERNAL_ERROR;
+        }
+
+        //These are only needed if above check fails (unittests only)
+        split = MIN(split, MAX_VER);
+        minor = MIN(minor, MAX_VER);
+        major = MIN(major, MAX_VER);
+
+    } else {
+        // assume client migrate to fota and the version represent v1 timestamp
+        // set default SemVer to 0.0.0
+        split = 0;
+        minor = 0;
+        major = 0;
     }
-
-    //These are only needed if above check fails (unittests only)
-    split = MIN(split, MAX_VER);
-    minor = MIN(minor, MAX_VER);
-    major = MIN(major, MAX_VER);
 
     //ouput is "major.minor.split\0"
     tmp = append_number_to_string(tmp, major, '.');
@@ -251,7 +257,10 @@ int fota_component_version_semver_to_int(const char *sem_ver, fota_component_ver
         minor = MIN(minor, MAX_VER);
         major = MIN(major, MAX_VER);
 
-        *version = ((uint64_t) split) | ((uint64_t) minor << SPLIT_NUM_BITS) | ((uint64_t) major << (SPLIT_NUM_BITS + MINOR_NUM_BITS));
+        *version =  FOTA_COMPONENT_SEMVER_BIT |
+                    ((uint64_t) split) | 
+                    ((uint64_t) minor << SPLIT_NUM_BITS) | 
+                    ((uint64_t) major << (SPLIT_NUM_BITS + MINOR_NUM_BITS));
     }
     return ret;
 }
