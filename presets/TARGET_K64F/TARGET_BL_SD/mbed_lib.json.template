@@ -4,6 +4,7 @@
         "*": {{
             "target.macros_add": [
                 "FOTA_USE_DEVICE_KEY",
+                "FOTA_KEY_FORCE_DERIVATION=(1)",
                 "MBED_CONF_STORAGE_STORAGE_TYPE=FILESYSTEM",
                 "MBED_CONF_STORAGE_FILESYSTEM_FILESYSTEM=LITTLE",
                 "MBED_CONF_STORAGE_FILESYSTEM_BLOCKDEVICE=SD",

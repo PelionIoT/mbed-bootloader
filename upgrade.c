@@ -128,7 +128,7 @@ static int install_start(fota_candidate_iterate_callback_info *info)
     ret = erase_flash(MBED_CONF_MBED_BOOTLOADER_APPLICATION_HEADER_ADDRESS,
                       MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS + cand_header->fw_size);
     if (ret != FOTA_STATUS_SUCCESS) {
-        pr_error("Erase flash failed. ret code %d", ret);
+        pr_error("Erase failed %d", ret);
         return ret;
     }
 
@@ -147,7 +147,7 @@ static int install_program_fragment(fota_candidate_iterate_callback_info *info)
     uint32_t prev_progress = info->frag_pos * 100 / info->header_info->fw_size;
 
     if (info->frag_pos == 0 || ((progress / print_range_percent) > (prev_progress / print_range_percent))) {
-        pr_cmd("Flashing. %" PRIu32 "%c complete", progress, '%');
+        pr_cmd("Flashing %" PRIu32 "%c", progress, '%');
     }
 
     // Would need to check that info->frag_buf is aligned to 8 bytes, as HAL flash driver won't accept it
@@ -155,13 +155,13 @@ static int install_program_fragment(fota_candidate_iterate_callback_info *info)
     ret = flash_program_page(&flash_obj, MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS + info->frag_pos,
                              info->frag_buf, info->frag_size);
     if (ret) {
-        pr_error("flash program failed");
+        pr_error("flashing err");
         return FOTA_STATUS_STORAGE_WRITE_FAILED;
     }
 
     if (memcmp((uint8_t *)MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS + info->frag_pos,
                info->frag_buf, info->frag_size)) {
-        pr_error("flash readback verification failed");
+        pr_error("flash verify err");
         return FOTA_STATUS_STORAGE_WRITE_FAILED;
     }
 
@@ -174,7 +174,7 @@ static int install_finish(const fota_candidate_iterate_callback_info *info)
     uint32_t header_buf_size = FOTA_ALIGN_UP(INTERNAL_HEADER_SIZE, flash_page_size);
     uint8_t *header_buf = (uint8_t *) malloc(header_buf_size);
     if (!header_buf) {
-        pr_error("Unable to allocate header");
+        pr_error("allocation err");
         return FOTA_STATUS_OUT_OF_MEMORY;
     }
     fota_header_info_t *header = (fota_header_info_t *) header_buf;
@@ -186,7 +186,7 @@ static int install_finish(const fota_candidate_iterate_callback_info *info)
     ret = flash_program_page(&flash_obj, MBED_CONF_MBED_BOOTLOADER_APPLICATION_HEADER_ADDRESS,
                              header_buf, header_buf_size);
     if (ret) {
-        pr_error("Programming header failed");
+        pr_error("Flash header err");
         return FOTA_STATUS_STORAGE_WRITE_FAILED;
     }
 
@@ -228,7 +228,7 @@ static int check_and_install_update()
 
     ret = init_storage();
     if (ret != FOTA_STATUS_SUCCESS) {
-        pr_error("Storage initialization failed!");
+        pr_error("Init storage err");
         return ret;
     }
 
@@ -245,7 +245,7 @@ static int check_and_install_update()
         goto end;
     }
 
-    pr_cmd("Installation finished.");
+    pr_cmd("Install done");
 
 end:
     deinit_storage();
@@ -285,7 +285,7 @@ static int validate_installed_fw()
 
     ret = read_installed_fw_header();
     if (ret) {
-        pr_error("failed read_installed_fw_header...");
+        pr_error("failed to read fw header");
         return ret;
     }
 
@@ -326,7 +326,7 @@ static int validate_installed_fw()
 #else
     pr_debug("check hash");
     FOTA_FI_SAFE_MEMCMP(digest, installed_header.digest, FOTA_CRYPTO_HASH_SIZE,
-                        FOTA_STATUS_MANIFEST_PAYLOAD_CORRUPTED, "Hash mismatch!");
+                        FOTA_STATUS_MANIFEST_PAYLOAD_CORRUPTED, "Hash mismatch");
 
 #endif
     pr_debug("validate success");
@@ -347,7 +347,7 @@ MBED_NORETURN void mbed_die(void)
 int main(void)
 {
     bool is_new_firmware = false;
-    pr_cmd("Bootloader build at: " __DATE__ " " __TIME__);
+    pr_cmd("Build at: " __DATE__ " " __TIME__);
     volatile int ret = FOTA_STATUS_INTERNAL_ERROR, installed_fw_status = FOTA_STATUS_INTERNAL_ERROR;
     volatile int install_update_status = FOTA_STATUS_INTERNAL_ERROR;
 #if MBED_BOOTLOADER_RESET_ON_PANIC
@@ -361,7 +361,7 @@ int main(void)
 #endif
 
     if (flash_init(&flash_obj) != 0) {
-        pr_error("Flash initialization failed!");
+        pr_error("Init flash err");
         goto fail;
     }
 
@@ -407,7 +407,7 @@ int main(void)
 
     installed_fw_status = validate_installed_fw();
     FOTA_FI_SAFE_COND(installed_fw_status == FOTA_STATUS_SUCCESS,
-                      installed_fw_status, "Validating installed firmware failed");
+                      installed_fw_status, "Validating installed firmware err");
     if (is_new_firmware && installed_fw_status == FOTA_STATUS_SUCCESS ) {
         pr_info("New active firmware is valid\r\n");
     }
@@ -415,18 +415,18 @@ int main(void)
 #if (MBED_CONF_MBED_BOOTLOADER_TRACE == USE_PRINTF)
     ret = fota_component_version_int_to_semver(installed_header.version, semver);
     if (ret) {
-        pr_cmd("Current FW version is %" PRIu64, installed_header.version);
+        pr_cmd("Current FW ver is %" PRIu64, installed_header.version);
     } else {
-        pr_cmd("Current FW version is %s", semver);
+        pr_cmd("Current FW ver is %s", semver);
     }
 #endif
-    pr_cmd("All clear. Jumping to application (at address 0x%x).\n\n\n",
+    pr_cmd("Jumping to application (at address 0x%x).\n\n\n",
             MBED_CONF_MBED_BOOTLOADER_APPLICATION_JUMP_ADDRESS);
 
     mbed_start_application(MBED_CONF_MBED_BOOTLOADER_APPLICATION_JUMP_ADDRESS);
 
 fail:
-    pr_error("PANIC!");
+    pr_error("PANIC");
     if (reset) {
         system_reset();        
     } else {

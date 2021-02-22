@@ -63,7 +63,8 @@
     "macros": [
         "MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION=3",
         "FOTA_HEADER_HAS_CANDIDATE_READY=1",        
-        "MBED_CLOUD_CLIENT_FOTA_ENABLE=1"
+        "MBED_CLOUD_CLIENT_FOTA_ENABLE=1",
+        "FOTA_KEY_FORCE_DERIVATION=1"
     ],
     "target_overrides": {
         "*": {
