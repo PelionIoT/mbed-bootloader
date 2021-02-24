@@ -19,6 +19,8 @@
 #ifndef FOTA_DEVICE_KEY
 #define FOTA_DEVICE_KEY
 
+#ifdef MBED_CLOUD_CLIENT_FOTA_ENABLE
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -29,4 +31,7 @@ int8_t fota_get_device_key_128bit(uint8_t *key_buf, uint32_t length);
 }
 #endif
 
+#endif
+
 #endif // FOTA_DEVICE_KEY
+

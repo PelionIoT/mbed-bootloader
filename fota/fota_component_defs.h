@@ -27,6 +27,7 @@
 #endif
 #endif
 
+#define FOTA_COMPONENT_SEMVER_BIT         ((uint64_t)1 << 63)
 #define FOTA_COMPONENT_MAX_NAME_SIZE       9
 #define FOTA_COMPONENT_MAX_SEMVER_STR_SIZE 12
 

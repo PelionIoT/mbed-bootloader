@@ -22,6 +22,8 @@
 #include "fota_device_key.h"
 #include "DirectAccessDevicekey.h"
 
+#ifdef MBED_CLOUD_CLIENT_FOTA_ENABLE
+
 /**
 * @brief Function to get the device root of trust
 * @details The device root of trust should be a 128 bit value. It should never leave the device.
@@ -62,3 +64,5 @@ int8_t fota_get_device_key_128bit(uint8_t *key_buf, uint32_t length)
 
     return error;
 }
+
+#endif

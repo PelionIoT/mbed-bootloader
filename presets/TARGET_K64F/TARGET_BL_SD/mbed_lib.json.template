@@ -3,7 +3,6 @@
     "target_overrides": {{
         "*": {{
             "target.macros_add": [
-                "FOTA_USE_DEVICE_KEY",
                 "MBED_CONF_STORAGE_STORAGE_TYPE=FILESYSTEM",
                 "MBED_CONF_STORAGE_FILESYSTEM_FILESYSTEM=LITTLE",
                 "MBED_CONF_STORAGE_FILESYSTEM_BLOCKDEVICE=SD",
