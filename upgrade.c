@@ -155,13 +155,13 @@ static int install_program_fragment(fota_candidate_iterate_callback_info *info)
     ret = flash_program_page(&flash_obj, MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS + info->frag_pos,
                              info->frag_buf, info->frag_size);
     if (ret) {
-        pr_error("flashing err");
+        pr_error("flashing");
         return FOTA_STATUS_STORAGE_WRITE_FAILED;
     }
 
     if (memcmp((uint8_t *)MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS + info->frag_pos,
                info->frag_buf, info->frag_size)) {
-        pr_error("flash verify err");
+        pr_error("flash verify");
         return FOTA_STATUS_STORAGE_WRITE_FAILED;
     }
 
@@ -174,7 +174,7 @@ static int install_finish(const fota_candidate_iterate_callback_info *info)
     uint32_t header_buf_size = FOTA_ALIGN_UP(INTERNAL_HEADER_SIZE, flash_page_size);
     uint8_t *header_buf = (uint8_t *) malloc(header_buf_size);
     if (!header_buf) {
-        pr_debug("allocation err");
+        pr_debug("allocation");
         return FOTA_STATUS_OUT_OF_MEMORY;
     }
     fota_header_info_t *header = (fota_header_info_t *) header_buf;
@@ -186,7 +186,7 @@ static int install_finish(const fota_candidate_iterate_callback_info *info)
     ret = flash_program_page(&flash_obj, MBED_CONF_MBED_BOOTLOADER_APPLICATION_HEADER_ADDRESS,
                              header_buf, header_buf_size);
     if (ret) {
-        pr_error("Flash header err");
+        pr_error("Flash header");
         return FOTA_STATUS_STORAGE_WRITE_FAILED;
     }
 
@@ -228,7 +228,7 @@ static int check_and_install_update()
 
     ret = init_storage();
     if (ret != FOTA_STATUS_SUCCESS) {
-        pr_error("Init storage err");
+        pr_error("Init storage");
         return ret;
     }
 
@@ -361,7 +361,7 @@ int main(void)
 #endif
 
     if (flash_init(&flash_obj) != 0) {
-        pr_debug("Init flash err");
+        pr_debug("Init flash");
         goto fail;
     }
 
@@ -407,9 +407,9 @@ int main(void)
 
     installed_fw_status = validate_installed_fw();
     FOTA_FI_SAFE_COND(installed_fw_status == FOTA_STATUS_SUCCESS,
-                      installed_fw_status, "Validating installed firmware err");
+                      installed_fw_status, "Validating installed firmware");
     if (is_new_firmware && installed_fw_status == FOTA_STATUS_SUCCESS ) {
-        pr_info("New active firmware is valid\r\n");
+        pr_cmd("New active firmware is valid\r\n");
     }
 
 #if (MBED_CONF_MBED_BOOTLOADER_TRACE == USE_PRINTF)
