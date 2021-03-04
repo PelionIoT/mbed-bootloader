@@ -1,6 +1,6 @@
 #!/bin/bash -e
 # ----------------------------------------------------------------------------
-# Copyright 2020 ARM Limited or its affiliates
+# Copyright 2019-2021 Pelion Ltd.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -32,8 +32,6 @@ declare -a FOTA_FILES=(
         "$CLOUD_CLIENT/fota/fota_component.h"
         "$CLOUD_CLIENT/fota/fota_component_internal.h"
         "$CLOUD_CLIENT/fota/fota_config.h"
-        "$CLOUD_CLIENT/fota/fota_crypto_asn_extra.c"
-        "$CLOUD_CLIENT/fota/fota_crypto_asn_extra.h"
         "$CLOUD_CLIENT/fota/fota_crypto.c"
         "$CLOUD_CLIENT/fota/fota_crypto_defs.h"
         "$CLOUD_CLIENT/fota/fota_crypto.h"
@@ -43,7 +41,7 @@ declare -a FOTA_FILES=(
         "$CLOUD_CLIENT/fota/fota_nvm.h"
         "$CLOUD_CLIENT/fota/fota_nvm_int.h"
         "$CLOUD_CLIENT/fota/fota_platform.h"
-        "$CLOUD_CLIENT/fota/fota_platform.c"
+        "$CLOUD_CLIENT/fota/fota_platform_default.c"
         "$CLOUD_CLIENT/fota/fota_status.h"
         "$CLOUD_CLIENT/fota/mbed_lib.json"
 )

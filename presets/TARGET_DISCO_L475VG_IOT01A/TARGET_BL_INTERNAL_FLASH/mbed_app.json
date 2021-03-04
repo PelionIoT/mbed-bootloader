@@ -91,6 +91,7 @@
             "fota.storage-size"                         : "MBED_BOOTLOADER_FLASH_BANK_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
             "fota.candidate-block-size"                 : "1024",
             "fota.encryption-support"                   : false,
+            "fota.public-key-format"                    : "FOTA_PUBLIC_KEY_NOT_SUPPORTED_FORMAT",
             "fota.trace-enable"                         : false,
             "mbed-bootloader.debug"                     : false,
             "mbed-bootloader.external-traces-enabled"   : false,

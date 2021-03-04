@@ -33,8 +33,6 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
-
-
 #define FOTA_GUID_SIZE (128/8)
 
 /*
@@ -55,7 +53,7 @@ int fota_nvm_get_class_id(uint8_t buffer[FOTA_GUID_SIZE]);
  */
 int fota_nvm_get_vendor_id(uint8_t buffer[FOTA_GUID_SIZE]);
 
-#if defined(FOTA_USE_UPDATE_X509)
+#if (MBED_CLOUD_CLIENT_FOTA_PUBLIC_KEY_FORMAT==FOTA_X509_PUBLIC_KEY_FORMAT)
 /*
  * Get FOTA certificate from storage.
  *
@@ -66,11 +64,11 @@ int fota_nvm_get_vendor_id(uint8_t buffer[FOTA_GUID_SIZE]);
  * \return FOTA_STATUS_SUCCESS on success.
  */
 int fota_nvm_get_update_certificate(uint8_t *buffer, size_t size, size_t *bytes_read);
-#endif  // defined(FOTA_USE_UPDATE_X509)
+#endif  // (MBED_CLOUD_CLIENT_FOTA_PUBLIC_KEY_FORMAT==FOTA_X509_PUBLIC_KEY_FORMAT)
 
-#if defined(FOTA_USE_UPDATE_RAW_PUBLIC_KEY)
+#if (MBED_CLOUD_CLIENT_FOTA_PUBLIC_KEY_FORMAT == FOTA_RAW_PUBLIC_KEY_FORMAT)
 int fota_nvm_get_update_public_key(uint8_t buffer[FOTA_UPDATE_RAW_PUBLIC_KEY_SIZE]);
-#endif  // defined(FOTA_USE_UPDATE_RAW_PUBLIC_KEY)
+#endif
 
 /*
  * Get firmware encryption key from storage.
