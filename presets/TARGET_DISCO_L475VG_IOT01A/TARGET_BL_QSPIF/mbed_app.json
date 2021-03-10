@@ -99,7 +99,7 @@
             "fota.storage-start-address"                : "0",
             "platform.crash-capture-enabled"            : false,
             "storage_tdb_internal.internal_size"        : "(2*16*1024)",
-            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START+36*1024)"
+            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START+38*1024)"
         },
         "DISCO_L475VG_IOT01A": {
             "target.restrict_size"                      : "0x9800",
