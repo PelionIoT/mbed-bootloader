@@ -75,7 +75,6 @@
             "target.c_lib"                             : "small",
             "platform.use-mpu"                         : false,
             "platform.stdio-baud-rate"                 : 115200,
-            "target.restrict_size"                     : "0x8000",
             "fota.is-bootloader"                       : true,
             "target.header_format": [
                 ["magic", "const", "32le", "0x5c0253a3"],
@@ -85,11 +84,12 @@
                 ["precursorDigest", "digest", "SHA256", "application"]
             ],                                            
             "fota.fi-mitigation-enable"                 : false,
-            "mbed-bootloader.application-header-address": "(MBED_ROM_START+0x11000)",
-            "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0x11200)",
+            "mbed-bootloader.application-header-address": "(MBED_ROM_START+0x11800)",
+            "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0x11A00)",
             "fota.storage-size"                         : "(((MBED_ROM_START + MBED_ROM_SIZE - APPLICATION_ADDR)/0x1000)*0x1000)",
             "fota.candidate-block-size"                 : "1024",
-            "fota.encryption-support"                   : false,
+            "fota.encryption-support"                   : true,
+            "fota.public-key-format"                    : "FOTA_PUBLIC_KEY_NOT_SUPPORTED_FORMAT",
             "fota.trace-enable"                         : false,
             "mbed-bootloader.debug"                     : false,
             "mbed-bootloader.external-traces-enabled"   : false,
@@ -99,10 +99,10 @@
             "fota.storage-start-address"                : "0",
             "platform.crash-capture-enabled"            : false,
             "storage_tdb_internal.internal_size"        : "(2*16*1024)",
-            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START+36*1024)"
+            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START+38*1024)"
         },
         "DISCO_L475VG_IOT01A": {
-            "target.restrict_size"                      : "0x9000",
+            "target.restrict_size"                      : "0x9800",
             "target.components_remove"                  : ["BlueNRG_MS"],
             "target.components_add"                     : ["QSPIF"]    
         }

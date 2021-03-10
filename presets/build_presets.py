@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ----------------------------------------------------------------------------
-# Copyright 2020 ARM Limited or its affiliates
+# Copyright 2019-2021 Pelion Ltd.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -26,9 +26,8 @@ from pathlib import Path
 log = logging.getLogger('preset-builder')
 
 BUILD_CMD_TEMPLATE = 'mbed compile' \
-            ' -m {target} -t GCC_ARM' \
+            ' -m {target} -t {toolchain}' \
             ' --profile release --app-config {config}'
-
 
 def get_tag(root_dir: Path):
     tag = subprocess.check_output(
@@ -65,15 +64,23 @@ def main():
             continue
         for preset in target.iterdir():
             app_config = preset.joinpath('mbed_app.json').relative_to(root_dir)
-            cmd = BUILD_CMD_TEMPLATE.format(
-                target=target_name, config=app_config.as_posix()).split(' ')
+            # DISCO_L475VG_IOT01A and NUCLEO_F411RE compiled with ARMC6 to decrease the code size
+            if (target_name == "NUCLEO_F411RE" or target_name == "DISCO_L475VG_IOT01A"):
+                cmd = BUILD_CMD_TEMPLATE.format(
+                    target=target_name, toolchain="ARM", config=app_config.as_posix()).split(' ')
+            else:
+                cmd = BUILD_CMD_TEMPLATE.format(
+                    target=target_name, toolchain="GCC_ARM", config=app_config.as_posix()).split(' ')
             log.info(
                 'Building %s with preset %s:\n%s\n%s\n%s',
                 target_name, preset.name,
                 '-' * 80, ' '.join(cmd), '-' * 80
             )
             subprocess.check_call(cmd, cwd=root_dir.as_posix())
-            build_dir = root_dir / 'BUILD' / target_name / 'GCC_ARM-RELEASE'
+            if (target_name == "NUCLEO_F411RE" or target_name == "DISCO_L475VG_IOT01A"):
+                build_dir = root_dir / 'BUILD' / target_name / 'ARM-RELEASE'
+            else:
+                build_dir = root_dir / 'BUILD' / target_name / 'GCC_ARM-RELEASE'
             extensions = ['.bin', '.hex']
             artifacts = filter(
                 lambda p: p.suffix in extensions,

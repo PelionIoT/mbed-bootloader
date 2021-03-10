@@ -158,7 +158,7 @@ extern char *program_invocation_name;
 #endif
 
 #if defined(FOTA_CUSTOM_CURR_FW_STRUCTURE) && FOTA_CUSTOM_CURR_FW_STRUCTURE
-#error Custom current firmware structure should not be defined in Linux targets
+#error Custom current firmware structure should not be defined in Linux targets.
 #endif
 
 // No legacy bootloader here - force up to date header
@@ -186,6 +186,17 @@ extern char *program_invocation_name;
 
 #ifndef MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE
 #define MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE FOTA_EXTERNAL_BD // if not defined - fall back to an external configuration
+#endif
+
+#if MBED_CLOUD_CLIENT_FOTA_EXTERNAL_DOWNLOADER
+// External downloader means that fragments are received externally, just like multicast node mode
+// So this basically imitates the multicast node mode
+#if defined(MBED_CLOUD_CLIENT_FOTA_MULTICAST_SUPPORT) && (MBED_CLOUD_CLIENT_FOTA_MULTICAST_SUPPORT != FOTA_MULTICAST_NODE_MODE)
+#error External downloader mode can only be supported with multicast node mode
+#else
+#undef MBED_CLOUD_CLIENT_FOTA_MULTICAST_SUPPORT
+#define MBED_CLOUD_CLIENT_FOTA_MULTICAST_SUPPORT FOTA_MULTICAST_NODE_MODE
+#endif
 #endif
 
 #ifndef MBED_CLOUD_CLIENT_FOTA_MULTICAST_SUPPORT
@@ -238,18 +249,14 @@ extern char *program_invocation_name;
 #define MBED_CLOUD_CLIENT_FOTA_CANDIDATE_BLOCK_SIZE 1024
 #endif
 
-#if defined(FOTA_USE_EXTERNAL_UPDATE_RAW_PUBLIC_KEY) && !defined(FOTA_USE_UPDATE_RAW_PUBLIC_KEY)
-#define FOTA_USE_UPDATE_RAW_PUBLIC_KEY
-#endif
-
 #define FOTA_USE_ONE_TIME_FW_KEY  0
 #define FOTA_USE_DEVICE_KEY    1
 
 #if !defined(MBED_CLOUD_CLIENT_FOTA_KEY_ENCRYPTION)
 #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1) && defined(__MBED__)
-    #define MBED_CLOUD_CLIENT_FOTA_KEY_ENCRYPTION FOTA_USE_DEVICE_KEY
+#define MBED_CLOUD_CLIENT_FOTA_KEY_ENCRYPTION FOTA_USE_DEVICE_KEY
 #else
-    #define MBED_CLOUD_CLIENT_FOTA_KEY_ENCRYPTION FOTA_USE_ONE_TIME_FW_KEY 
+#define MBED_CLOUD_CLIENT_FOTA_KEY_ENCRYPTION FOTA_USE_ONE_TIME_FW_KEY
 #endif
 #endif
 
@@ -257,20 +264,43 @@ extern char *program_invocation_name;
 #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 0) || !defined(__MBED__)
 #error FOTA_USE_DEVICE_KEY should be used only for with __MBED__ with encryption enabled
 #endif
-#endif  
+#endif
 
-#if !(FOTA_MANIFEST_SCHEMA_VERSION == 1)
+#define FOTA_ENCRYPT_KEY_NO_DERIVATION   0
+#define FOTA_ENCRYPT_KEY_ECB_DERIVATION  1
+#define FOTA_ENCRYPT_KEY_HMAC_DERIVATION 2
+
+#if !defined(MBED_CLOUD_CLIENT_FOTA_KEY_DERIVATION)
+#if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
+#define MBED_CLOUD_CLIENT_FOTA_KEY_DERIVATION FOTA_ENCRYPT_KEY_HMAC_DERIVATION
+#else
+#define MBED_CLOUD_CLIENT_FOTA_KEY_DERIVATION FOTA_ENCRYPT_KEY_NO_DERIVATION
+#endif
+#endif
+
+#define FOTA_PUBLIC_KEY_NOT_SUPPORTED_FORMAT   0
+#define FOTA_RAW_PUBLIC_KEY_FORMAT             1
+#define FOTA_X509_PUBLIC_KEY_FORMAT            2
+
 // manifest schema V3 (and newer) support public key in both
 // uncompressed elliptic curve point format (X9.62) and x509
 // x509 is used by default. x9.62 is used for optimizations
 // but requires integration with FCU tool and crypto backend.
-#if !defined(FOTA_USE_UPDATE_RAW_PUBLIC_KEY)
-#define FOTA_USE_UPDATE_X509
+#if !defined(MBED_CLOUD_CLIENT_FOTA_PUBLIC_KEY_FORMAT)
+#if defined(FOTA_USE_EXTERNAL_UPDATE_RAW_PUBLIC_KEY)
+#define MBED_CLOUD_CLIENT_FOTA_PUBLIC_KEY_FORMAT FOTA_RAW_PUBLIC_KEY_FORMAT
+#else
+#define MBED_CLOUD_CLIENT_FOTA_PUBLIC_KEY_FORMAT FOTA_X509_PUBLIC_KEY_FORMAT
 #endif
-#else  // (FOTA_MANIFEST_SCHEMA_VERSION == 1)
-// manifest schema V1 only supports public key in x.509 format
-#define FOTA_USE_UPDATE_X509
-#endif  //!(FOTA_MANIFEST_SCHEMA_VERSION == 1)
+#endif
+
+#if (MBED_CLOUD_CLIENT_FOTA_PUBLIC_KEY_FORMAT == FOTA_RAW_PUBLIC_KEY_FORMAT) && (FOTA_MANIFEST_SCHEMA_VERSION == 1)
+#error manifest schema V1 only supports public key in x.509 format
+#endif
+
+#if defined(FOTA_USE_EXTERNAL_UPDATE_RAW_PUBLIC_KEY) && (MBED_CLOUD_CLIENT_FOTA_PUBLIC_KEY_FORMAT == FOTA_X509_PUBLIC_KEY_FORMAT)
+#error public key in x.509 format not allowed for external raw public key configuration
+#endif
 
 #if (FOTA_MANIFEST_SCHEMA_VERSION < 3)
 

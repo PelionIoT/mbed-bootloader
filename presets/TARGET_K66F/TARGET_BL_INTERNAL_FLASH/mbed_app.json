@@ -87,7 +87,7 @@
             ],                                            
             "fota.fi-mitigation-enable"                 : false,
             "mbed-bootloader.application-header-address": "(MBED_ROM_START+0x8000)",
-            "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0x8400)",
+            "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0x8200)",
             "fota.storage-size"                         : "MBED_BOOTLOADER_FLASH_BANK_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
             "fota.candidate-block-size"                 : "1024",
             "fota.encryption-support"                   : false,

@@ -31,6 +31,19 @@
         "key-encryption": {
             "help": "Encryption key options",
             "macro_name": "MBED_CLOUD_CLIENT_FOTA_KEY_ENCRYPTION",
+            "accepted_values": ["FOTA_USE_ONE_TIME_FW_KEY", "FOTA_USE_DEVICE_KEY"],
+            "value": null
+        },
+        "key-derivation": {
+            "help": "Encryption key derivation",
+            "macro_name": "MBED_CLOUD_CLIENT_FOTA_KEY_DERIVATION",
+            "accepted_values": ["FOTA_ENCRYPT_KEY_NO_DERIVATION", "FOTA_ENCRYPT_KEY_ECB_DERIVATION", "FOTA_ENCRYPT_KEY_HMAC_DERIVATION"],
+            "value": null
+        },
+        "public-key-format": {
+            "help": "Public key elliptic curve point format",
+            "macro_name": "MBED_CLOUD_CLIENT_FOTA_PUBLIC_KEY_FORMAT",
+            "accepted_values": ["FOTA_PUBLIC_KEY_NOT_SUPPORTED_FORMAT", "FOTA_RAW_PUBLIC_KEY_FORMAT", "FOTA_X509_PUBLIC_KEY_FORMAT"],
             "value": null
         },
         "multicast-support": {
@@ -84,6 +97,11 @@
             "help": "size of bsdiff blocks used to create delta-update",
             "macro_name": "MBED_CLOUD_CLIENT_FOTA_DELTA_BLOCK_SIZE",
             "value": 1024
+        },
+        "default-app-ifs": {
+            "help": " enable default fota implementation callbacks",
+            "macro_name": "FOTA_DEFAULT_APP_IFS",
+            "value": null
         }
     }
 }

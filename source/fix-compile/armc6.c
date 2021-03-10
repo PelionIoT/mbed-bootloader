@@ -16,18 +16,22 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------
 
-#ifndef __FOTA_CRYPTO_ASN_EXTRA_H_
-#define __FOTA_CRYPTO_ASN_EXTRA_H_
+#ifdef __ARMCC_VERSION
 
-#include <stdint.h>
+#ifdef MBED_CLOUD_CLIENT_FOTA_ENABLE
 
-#define MBEDTLS_ASN1_ENUMERATED              0x0A
+// Some fuction we should add a stub in case we compile with ARMC6
+// Feature or ARM compilers. You must satisfy the dependencies of all files, before linker checks if the function is actually needed.
 
-int mbedtls_asn1_get_enumerated_value(unsigned char **p,
-                                      const unsigned char *end,
-                                      int *val);
-int mbedtls_asn1_get_int64(unsigned char **p,
-                           const unsigned char *end,
-                           int64_t *val);
+#include "fota/fota_crypto.h"
 
-#endif  // __FOTA_CRYPTO_ASN_EXTRA_H_
+int fota_verify_signature_prehashed(
+      const uint8_t *data_digest,
+      const uint8_t *sig, size_t sig_len
+)
+{
+      return -1;
+}
+#endif 
+
+#endif // __ARMCC_VERSION

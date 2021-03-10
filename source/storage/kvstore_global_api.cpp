@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ARM Limited. All rights reserved.
+ * Copyright 2019-2021 Pelion Ltd.
  * SPDX-License-Identifier: Apache-2.0
  * Licensed under the Apache License, Version 2.0 (the License); you may
  * not use this file except in compliance with the License.
