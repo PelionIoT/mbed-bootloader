@@ -77,7 +77,10 @@ def main():
                 '-' * 80, ' '.join(cmd), '-' * 80
             )
             subprocess.check_call(cmd, cwd=root_dir.as_posix())
-            build_dir = root_dir / 'BUILD' / target_name / 'GCC_ARM-RELEASE'
+            if (target_name == "NUCLEO_F411RE" or target_name == "DISCO_L475VG_IOT01A"):
+                build_dir = root_dir / 'BUILD' / target_name / 'ARM-RELEASE'
+            else:
+                build_dir = root_dir / 'BUILD' / target_name / 'GCC_ARM-RELEASE'
             extensions = ['.bin', '.hex']
             artifacts = filter(
                 lambda p: p.suffix in extensions,
