@@ -167,8 +167,8 @@ int fota_candidate_read_header(size_t *addr, uint32_t bd_read_size, uint32_t bd_
         goto end;
     }
 
-    if (header_size < header->candidate_header_size + offsetof(fota_header_info_t, candidate_header_size)){
-        *addr += FOTA_ALIGN_UP(header->candidate_header_size + offsetof(fota_header_info_t, candidate_header_size), bd_prog_size);
+    if (header_size < header->external_header_size + offsetof(fota_header_info_t, internal_header_barrier)){
+        *addr += FOTA_ALIGN_UP(header->external_header_size + offsetof(fota_header_info_t, internal_header_barrier), bd_prog_size);
     } else {
         *addr += FOTA_ALIGN_UP(header_size, bd_prog_size);
     }
