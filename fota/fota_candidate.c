@@ -157,7 +157,6 @@ int fota_candidate_read_header(size_t *addr, uint32_t bd_read_size, uint32_t bd_
     }
 
     int ret = fota_bd_read(header_buf, *addr, read_size);
-    *addr += FOTA_ALIGN_UP(header_size, bd_prog_size);
 
     if (ret) {
         goto end;
@@ -168,6 +167,11 @@ int fota_candidate_read_header(size_t *addr, uint32_t bd_read_size, uint32_t bd_
         goto end;
     }
 
+    if (header_size < header->candidate_header_size + offsetof(fota_header_info_t, candidate_header_size)){
+        *addr += FOTA_ALIGN_UP(header->candidate_header_size + offsetof(fota_header_info_t, candidate_header_size), bd_prog_size);
+    } else {
+        *addr += FOTA_ALIGN_UP(header_size, bd_prog_size);
+    }
 end:
     free(header_buf);
     return ret;

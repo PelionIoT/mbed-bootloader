@@ -82,6 +82,7 @@ typedef struct {
     // From this point on, all fields are relevant to candidate only and
     // can be skipped by bootloader if it wishes not to save them internally
     uint8_t internal_header_barrier;
+    uint16_t candidate_header_size;                 /*< Size of candidate header size */
     uint8_t flags;                                  /*< Flags */
     uint16_t block_size;                            /*< Block size. Encryption block size if encrypted,
                                                         validated block size if unencrypted and block validation turned on */
