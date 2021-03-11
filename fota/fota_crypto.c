@@ -82,25 +82,34 @@ typedef struct fota_encrypt_context_s {
 
 #define FOTA_DERIVE_KEY_BITS 128
 
-#if (MBED_CLOUD_CLIENT_FOTA_KEY_DERIVATION == FOTA_ENCRYPT_KEY_HMAC_DERIVATION)
-// Key derivation according to NIST Special Publication 800-108
-// Using KDF in Counter Mode
-// For i = 1 to n, do
-// K(i) := PRF (KI, [i]2 || Label || 0x00 || Context || [L]2)
-// We have only one iteration here, key size is 128 bits
+#if (MBED_CLOUD_CLIENT_FOTA_KEY_DERIVATION == FOTA_ENCRYPT_KEY_ECB_DERIVATION || MBED_CLOUD_CLIENT_FOTA_KEY_DERIVATION == FOTA_ENCRYPT_KEY_HMAC_DERIVATION)
+#if !defined(FOTA_USE_EXTERNAL_SECRET_DERIVATION_STRING)
 // Building the input :
 // 01 - i
 // FOTA - Label
 // 00 - separator
 // ranadom value - Context
 // [L]2 - key lenght
+const unsigned char* fota_get_derivation_string(void)
+{
+    return (const unsigned char*)"01FOTA00563be98a94fd0dc0651c0a80";
+}
+#endif
+#endif
+
+#if (MBED_CLOUD_CLIENT_FOTA_KEY_DERIVATION == FOTA_ENCRYPT_KEY_HMAC_DERIVATION)
+// Key derivation according to NIST Special Publication 800-108
+// Using KDF in Counter Mode
+// For i = 1 to n, do
+// K(i) := PRF (KI, [i]2 || Label || 0x00 || Context || [L]2)
+// We have only one iteration here, key size is 128 bits
 static int derive_key(uint8_t *key)
 {
     uint8_t key_buf_hmac[FOTA_CRYPTO_HASH_SIZE];
 
     if (mbedtls_md_hmac(mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), (const unsigned char *) key, FOTA_ENCRYPT_KEY_SIZE,
-                        (const unsigned char *)"01FOTA00563be98a94fd0dc0651c0a80", 0x10, key_buf_hmac) == 0) {
-        memcpy(key, key_buf_hmac, FOTA_ENCRYPT_KEY_SIZE);
+                        fota_get_derivation_string(), 0x10, key_buf_hmac) == 0) {
+        fota_fi_memcpy(key, key_buf_hmac, FOTA_ENCRYPT_KEY_SIZE);
         return FOTA_STATUS_SUCCESS;
     }
 
@@ -128,7 +137,7 @@ static int derive_key(uint8_t *key)
 
     flow_control++;
     // Encrypting only first 128 bits, the reset is discarded, using precalculated hash
-    ret = mbedtls_aes_crypt_ecb(&ctx, MBEDTLS_AES_ENCRYPT, (const unsigned char *)"36CCD50EA09710CDDC9967E307FF0D6B", key);
+    ret = mbedtls_aes_crypt_ecb(&ctx, MBEDTLS_AES_ENCRYPT, fota_get_derivation_string(), key);
     mbedtls_aes_free(&ctx);
     if (ret) {
         FOTA_TRACE_TLS_ERR(ret);
@@ -151,7 +160,7 @@ int fota_encrypt_decrypt_start(fota_encrypt_context_t **ctx, const uint8_t *key,
 
 #if (MBED_CLOUD_CLIENT_FOTA_KEY_DERIVATION == FOTA_ENCRYPT_KEY_ECB_DERIVATION || MBED_CLOUD_CLIENT_FOTA_KEY_DERIVATION == FOTA_ENCRYPT_KEY_HMAC_DERIVATION)
     uint8_t derived_key[key_size];
-    memcpy(derived_key, key_to_use, key_size);
+    fota_fi_memcpy(derived_key, key_to_use, key_size);
     ret = derive_key(derived_key);
     if (ret) {
         return ret;

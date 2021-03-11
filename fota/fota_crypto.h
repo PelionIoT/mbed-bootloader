@@ -93,6 +93,16 @@ do { \
     FOTA_FI_SAFE_COND((!fota_fi_memcmp((PTR1), (PTR2), (NUM), &loop_check) && (loop_check == (NUM))), RET, MSG, ##__VA_ARGS__); \
 } while (0)
 
+static inline void* fota_fi_memcpy(void *dst, const void *src, size_t num)
+{
+    return mbedtls_platform_memcpy(dst, src, num);
+}
+
+static inline void* fota_fi_memset(void *ptr, int value, size_t num)
+{
+    return mbedtls_platform_memset(ptr, value, num);
+}
+
 #else // no FI support
 
 // No FI mitigation, simple handling
@@ -115,6 +125,16 @@ static inline int fota_fi_memcmp(const uint8_t *ptr1, const uint8_t *ptr2, size_
     return memcmp(ptr1, ptr2, num);
 }
 
+static inline void* fota_fi_memcpy(void *dst, const void *src, size_t num)
+{
+    return memcpy(dst, src, num);
+}
+
+static inline void* fota_fi_memset(void *ptr, int value, size_t num)
+{
+    return memset(ptr, value, num);
+}
+
 #endif // #if FOTA_FI_MITIGATION_ENABLE
 
 int fota_verify_signature(
@@ -127,6 +147,9 @@ int fota_verify_signature_prehashed(
     const uint8_t *sig, size_t sig_len
 );
 
+#if (MBED_CLOUD_CLIENT_FOTA_KEY_DERIVATION == FOTA_ENCRYPT_KEY_ECB_DERIVATION || MBED_CLOUD_CLIENT_FOTA_KEY_DERIVATION == FOTA_ENCRYPT_KEY_HMAC_DERIVATION)
+const unsigned char* fota_get_derivation_string(void);
+#endif
 
 #ifdef __cplusplus
 }
