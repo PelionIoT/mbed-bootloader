@@ -276,7 +276,7 @@ static int fota_candidate_extract_start(bool force_encrypt, const char *expected
                               "Invalid encryption key read");
 
             ret = fota_encrypt_decrypt_start(&ctx->enc_ctx, fw_key, FOTA_ENCRYPT_KEY_SIZE);
-            memset(fw_key, 0, sizeof(fw_key));
+            fota_fi_memset(fw_key, 0, sizeof(fw_key));
             if (ret) {
                 FOTA_TRACE_ERROR("Decrypt start failed. ret %d", ret);
                 goto fail;
