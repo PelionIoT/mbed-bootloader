@@ -21,7 +21,7 @@
                 ["firmwareSize", "size", "32le", ["application"]],
                 ["firmwareVersion", "const", "64le", "0x0"],
                 ["firmwareDigest", "digest", "SHA256", "application"],
-                ["reserved", "digest", "SHA256", "application"]
+                ["precursorDigest", "digest", "SHA256", "application"]
             ]
         }}
     }}
