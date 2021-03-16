@@ -17,7 +17,7 @@ If you use Mbed CLI 1.8.x then two images are created when you compile [Pelion D
 1. A full image `mbed-cloud-client-example-internal.bin` which combines the application with the bootloader and is used for the initial programming of the device
 1. An update image `mbed-cloud-client-example-internal_update.bin` which contains only the application and is used for updating the device over the air
 
-In order for Mbed CLI to pick up the bootloader binary you built, set `"target.bootloader_img": <path to bootloader binary>` in your application's `mbed_app.json` For more details, see [Arm Mbed OS managed bootloader](https://os.mbed.com/docs/v5.10/tutorials/bootloader.html#arm-mbed-os-managed-bootloader).
+In order for Mbed CLI to pick up the bootloader binary you built, set `"target.bootloader_img": <path to bootloader binary>` in your application's `mbed_app.json` For more details, see [Arm Mbed OS managed bootloader](https://os.mbed.com/docs/mbed-os/v6.8/program-setup/creating-and-using-a-bootloader.html#arm-mbed-os-managed-bootloader).
 
 Flash `mbed-cloud-client-example-internal.bin` to your device by drag and drop.
 
