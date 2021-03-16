@@ -54,7 +54,7 @@ static int erase_flash(uint32_t start_addr, uint32_t end_addr)
     uint32_t aligned_end_addr = FOTA_ALIGN_UP(end_addr, flash_get_sector_size(&flash_obj, end_addr));
 
     if (aligned_start_addr != start_addr) {
-        pr_warning("WARNING: header address is not aligned to a sector boundary");
+        pr_error("header address is not aligned");
     }
 
     uint32_t erase_addr = aligned_start_addr;
@@ -239,7 +239,7 @@ static int check_and_install_update()
     if (ret) {                                       
         if(ret == FOTA_STATUS_NOT_FOUND) {
             deinit_storage();
-            pr_info("Candidate not found");
+            pr_cmd("Candidate not found");
             return ret;
         }
         goto end;
@@ -365,7 +365,7 @@ int main(void)
         goto fail;
     }
 
-    pr_info("Searching for candidate image...");
+    pr_cmd("Search for candidate");
 
     do {
         read_installed_fw_header();
