@@ -14,7 +14,6 @@
             "target.bootloader_img": "mbed-bootloader-{tag}.bin",
             "target.header_offset" : "0x11800",
             "target.app_offset"    : "0x11A00",
-            "target.restrict_size" : "0x77E00",
             "target.header_format": [
                 ["magic", "const", "32le", "0x5c0253a3"],
                 ["firmwareSize", "size", "32le", ["application"]],
