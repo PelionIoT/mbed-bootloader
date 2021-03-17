@@ -5,7 +5,7 @@
                 " The regions are as follows:",
                 "1. Bootloader - 32kb from the beginning of flash",
                 "2. TDB internal storage - 32KB from the beginning of the second bank of the flash",
-                "3. Active App Metadata Header - 1KB from the end of TDB internal storage",
+                "3. Active App Metadata Header - 512B from the end of TDB internal storage",
                 "4. Active App - From end of header to the end of the flash",
                 "5. Firmware Candidate Storage - Starting from 64MB offset in the SD card",
 

@@ -4,7 +4,7 @@
             "options": [
                 "Fota storage size aligned to QSPIF erase block size 0x1000, to prevent unwanted data loss during candidate erasing",
                 " The regions are as follows:",
-                "1. Bootloader - 36kb from the beginning of flash",
+                "1. Bootloader - 38KB from the beginning of flash",
                 "2. TDB internal storage - 32KB from the end of Bootloader",
                 "3. Active App Metadata Header - 512B from the end of TDB internal storage",
                 "4. Active App - From end of header to the end of the flash",

@@ -7,7 +7,7 @@
                 "executables on the first bank, and all storage on the second bank such that reading",
                 "and writing storage does not halt execution. The regions are as follows:",
                 "1. Bootloader - 32kb from the beginning of flash",
-                "2. Active App Metadata Header - 1KB from the end of Bootloader",
+                "2. Active App Metadata Header - 512B from the end of Bootloader",
                 "3. Active App - From end of header to the end of first bank of flash",
                 "4. TDB internal storage - 96KB from the beginning of the second bank of the flash",
                 "5. Firmware Candidate Storage - from the end of the TDB internal storage",
