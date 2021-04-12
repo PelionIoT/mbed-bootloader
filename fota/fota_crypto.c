@@ -557,7 +557,13 @@ int fota_verify_signature_prehashed(
 
     mbedtls_x509_crt_init(&crt);
 
+/*mbedtls_x509_crt_parse_der_nocopy not supported for mbedtls 2.16.0 and lower versions,
+ use older version of x509 cert parse function */
+#if  (MBEDTLS_VERSION_NUMBER < 0x02110000)
+    ret = mbedtls_x509_crt_parse_der(
+#else
     ret = mbedtls_x509_crt_parse_der_nocopy(
+#endif
               &crt,
               update_crt_data, update_crt_size
           );

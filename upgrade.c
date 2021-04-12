@@ -344,7 +344,11 @@ MBED_NORETURN void mbed_die(void)
     }
 }
 
+#if defined(MBED_BOOTLOADER_NONSTANDARD_ENTRYPOINT)
+int mbed_bootloader_entrypoint(void)
+#else
 int main(void)
+#endif
 {
     bool is_new_firmware = false;
     pr_cmd("Build at: " __DATE__ " " __TIME__);

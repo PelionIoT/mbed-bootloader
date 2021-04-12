@@ -136,7 +136,7 @@ void fota_component_get_desc(unsigned int comp_id, const fota_component_desc_t *
     comp_id_translate(&comp_id, &comp_table, &num_components);
 #endif
 
-    FOTA_ASSERT(comp_id < num_components)
+    FOTA_ASSERT(comp_id < num_components);
     *comp_desc = &comp_table[comp_id];
 }
 
@@ -148,7 +148,7 @@ void fota_component_get_curr_version(unsigned int comp_id, fota_component_versio
 #ifdef FOTA_INTERNAL_COMPONENTS_SUPPORT
     comp_id_translate(&comp_id, &comp_table, &num_components);
 #endif
-    FOTA_ASSERT(comp_id < num_components)
+    FOTA_ASSERT(comp_id < num_components);
     *version = comp_table[comp_id].version;
 }
 
@@ -160,7 +160,7 @@ void fota_component_set_curr_version(unsigned int comp_id, fota_component_versio
 #ifdef FOTA_INTERNAL_COMPONENTS_SUPPORT
     comp_id_translate(&comp_id, &comp_table, &num_components);
 #endif
-    FOTA_ASSERT(comp_id < num_components)
+    FOTA_ASSERT(comp_id < num_components);
     comp_table[comp_id].version = version;
 }
 
