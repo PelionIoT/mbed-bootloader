@@ -1,0 +1,120 @@
+{
+    "config": {
+        "documentation": {
+            "options": [
+                "This configration is for MIMXRT1050_EVK internal flash",
+                "With the Soc security modules like HAB, BEE, DCP and others,",
+                "the physical external flash can be treated as internal flash",
+                "with the same security feature.",
+
+                "The configration supports MIMXRT1050_EVK 8MB QSPI flash in default.",
+                "With the FLASHIAP and the default flash memory map, it can support",
+                "kvstore and OTA features.",
+
+                "For the Hyper flash, please delete line target.components_remove: [HYPERFLASH_BOOT]",
+                "and adjust the other settings to match the Hyper flash size and flash map.",
+                "1. Bootloader - 64kb from the beginning of flash",
+                "2. Active App Metadata Header - 512B from the end of Bootloader",
+                "3. Active App - From end of header to the 2048kb offset",
+				"4. Firmware Candidate Storage - 1984kb from the 2048kb offset",
+                "5. TDB internal storage - 256kb from the 4096kb offset",
+                "+--------------------------+",
+                "|                          |",
+                "|                          |",
+                "|                          |",
+                "|   storage_tdb_internal   |",
+                "|                          |",
+                "|                          |",
+                "|                          |",
+                "|--------------------------| <-+ storage_tdb_internal.internal_base_address",
+                "|                          |",
+                "|    Firmware Candidate    |",
+                "|        Storage           |",
+                "+--------------------------+ <-+ fota.storage-start-address",
+                "|                          |",
+                "|        Active App        |",
+                "|                          |",
+                "+--------------------------+ <-+ mbed-bootloader.application-start-address",
+                "|Active App Metadata Header|",
+                "+--------------------------+ <-+ mbed-bootloader.application-header-address",
+                "|                          |",
+                "|        Bootloader        |",
+                "|                          |",
+                "+--------------------------+ <-+ 0",
+                "",
+                ""
+            ]
+        }
+    },
+    "requires": [     
+        "platform",
+        "mbed-bootloader",
+        "mbed-trace",
+        "mbedtls",
+        "system-storage",
+        "blockdevice",
+        "storage",
+        "storage_tdb_internal",
+        "flashiap-block-device",
+        "drivers",
+        "storage_filesystem",
+        "SecureStore",
+        "filesystem",
+        "filesystemstore",
+        "littlefs",
+        "fat_chan",
+        "direct-access-devicekey",
+        "tdbstore",
+        "kv-config",
+        "kv-global-api",
+        "kv-map",
+        "device_key",
+        "fota"
+    ],
+    "macros": [
+        "MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION=3",
+        "FOTA_HEADER_HAS_CANDIDATE_READY=1",        
+        "MBED_CLOUD_CLIENT_FOTA_ENABLE=1"
+    ],
+    "target_overrides": {
+        "*": {
+            "target.components_remove"                 : ["HYPERFLASH_BOOT"],
+            "target.console-uart"                      : true,
+            "target.c_lib"                             : "small",
+            "target.mbed_rom_start"                     : "0x60000000",
+            "target.mbed_rom_size"                      : "0x800000",
+            "target.restrict_size"                      : "0x10000",
+            "target.sectors"                            : [[1610612736,4096]],
+            "platform.use-mpu"                         : false,
+            "platform.stdio-baud-rate"                 : 115200,
+            "fota.is-bootloader"                       : true,
+            "target.header_format": [
+                ["magic", "const", "32le", "0x5c0253a3"],
+                ["firmwareSize", "size", "32le", ["application"]],
+                ["firmwareVersion", "const", "64le", "0x0"],
+                ["firmwareDigest", "digest", "SHA256", "application"],
+                ["precursorDigest", "digest", "SHA256", "application"]
+            ],                                            
+            "fota.fi-mitigation-enable"                 : false,
+            "mbed-bootloader.application-header-address": "(MBED_ROM_START + 64*1024)",
+            "mbed-bootloader.application-start-address" : "(MBED_ROM_START + 64*1024 + 512)",
+            "fota.storage-size"                         : "1984*1024",
+            "fota.candidate-block-size"                 : "1024",
+            "fota.encryption-support"                   : false,
+            "fota.trace-enable"                         : false,
+            "mbed-bootloader.debug"                     : false,
+            "mbed-bootloader.external-traces-enabled"   : false,
+            "mbed-bootloader.storage-type"              : "KVSTORE",
+            "storage.storage_type"                      : "TDB_INTERNAL",
+            "fota.block-device-type"                    : "FOTA_INTERNAL_FLASH_MBED_OS_BD",
+            "fota.storage-start-address"                : "MBED_ROM_START + 64*1024 + 1984*1024",
+            "storage_tdb_internal.internal_size"        : "(2*128*1024)",
+            "platform.crash-capture-enabled"            : false,
+            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + 64*1024 + 1984*2*1024 + 64*1024)"
+        },	                   
+        "DISCO_F769NI": {	
+            "target.extra_labels_remove"       : [ "PSA" ]
+        }
+
+    }
+}
