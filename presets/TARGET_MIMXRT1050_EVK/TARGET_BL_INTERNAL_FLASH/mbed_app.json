@@ -2,28 +2,35 @@
     "config": {
         "documentation": {
             "options": [
-                "This configuration takes advantage of the fact that most MCUs have 2 banks of flash",
-                "which can be read from and written to independently of each other. Hence we put all",
-                "executables on the first bank, and all storage on the second bank such that reading",
-                "and writing storage does not halt execution. The regions are as follows:",
-                "1. Bootloader - 32kb from the beginning of flash",
+                "This configration is for MIMXRT1050_EVK internal flash",
+                "With the Soc security modules like HAB, BEE, DCP and others,",
+                "the physical external flash can be treated as internal flash",
+                "with the same security feature.",
+
+                "The configration supports MIMXRT1050_EVK 8MB QSPI flash in default.",
+                "With the FLASHIAP and the default flash memory map, it can support",
+                "kvstore and OTA features.",
+
+                "For the Hyper flash, please delete line target.components_remove: [HYPERFLASH_BOOT]",
+                "and adjust the other settings to match the Hyper flash size and flash map.",
+                "1. Bootloader - 64kb from the beginning of flash",
                 "2. Active App Metadata Header - 512B from the end of Bootloader",
-                "3. Active App - From end of header to the end of first bank of flash",
-                "4. TDB internal storage - 32kb from the beginning of the second bank of the flash",
-                "5. Firmware Candidate Storage - from the end of the TDB internal storage",
+                "3. Active App - From end of header to the 2048kb offset",
+                "4. Firmware Candidate Storage - 1984kb from the 2048kb offset",
+                "5. TDB internal storage - 256kb from the 4096kb offset",
                 "+--------------------------+",
                 "|                          |",
                 "|                          |",
                 "|                          |",
-                "|Firmware Candidate Storage|",
+                "|   storage_tdb_internal   |",
                 "|                          |",
                 "|                          |",
                 "|                          |",
-                "|--------------------------| <-+ fota.storage-start-address",
+                "|--------------------------| <-+ storage_tdb_internal.internal_base_address",
                 "|                          |",
-                "|    storage_tdb_internal  |",
-                "|                          |",
-                "+--------------------------+ <-+storage_tdb_internal.internal_base_address",
+                "|    Firmware Candidate    |",
+                "|        Storage           |",
+                "+--------------------------+ <-+ fota.storage-start-address",
                 "|                          |",
                 "|        Active App        |",
                 "|                          |",
@@ -65,21 +72,21 @@
         "fota"
     ],
     "macros": [
-        "MBED_CONF_TARGET_FLASH_DUAL_BANK=1",
-        "MBED_BOOTLOADER_FLASH_BANK_SIZE=MBED_ROM_SIZE/2",
         "MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION=3",
         "FOTA_HEADER_HAS_CANDIDATE_READY=1",        
         "MBED_CLOUD_CLIENT_FOTA_ENABLE=1"
     ],
     "target_overrides": {
         "*": {
-            "target.components_add"                    : ["FLASHIAP"],
-            "target.components_remove"                 : ["QSPIF"],
+            "target.components_remove"                 : ["HYPERFLASH_BOOT"],
             "target.console-uart"                      : true,
             "target.c_lib"                             : "small",
+            "target.mbed_rom_start"                     : "0x60000000",
+            "target.mbed_rom_size"                      : "0x800000",
+            "target.restrict_size"                      : "0x10000",
+            "target.sectors"                            : [[1610612736,4096]],
             "platform.use-mpu"                         : false,
             "platform.stdio-baud-rate"                 : 115200,
-            "target.restrict_size"                     : "0x8000",
             "fota.is-bootloader"                       : true,
             "target.header_format": [
                 ["magic", "const", "32le", "0x5c0253a3"],
@@ -89,9 +96,9 @@
                 ["precursorDigest", "digest", "SHA256", "application"]
             ],                                            
             "fota.fi-mitigation-enable"                 : false,
-            "mbed-bootloader.application-header-address": "(MBED_ROM_START+0x8000)",
-            "mbed-bootloader.application-start-address" : "(MBED_ROM_START+0x8200)",
-            "fota.storage-size"                         : "MBED_BOOTLOADER_FLASH_BANK_SIZE - MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
+            "mbed-bootloader.application-header-address": "(MBED_ROM_START + 64*1024)",
+            "mbed-bootloader.application-start-address" : "(MBED_ROM_START + 64*1024 + 512)",
+            "fota.storage-size"                         : "1984*1024",
             "fota.candidate-block-size"                 : "1024",
             "fota.encryption-support"                   : false,
             "fota.trace-enable"                         : false,
@@ -100,10 +107,10 @@
             "mbed-bootloader.storage-type"              : "KVSTORE",
             "storage.storage_type"                      : "TDB_INTERNAL",
             "fota.block-device-type"                    : "FOTA_INTERNAL_FLASH_MBED_OS_BD",
-            "fota.storage-start-address"                : "MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE + MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE",
-            "storage_tdb_internal.internal_size"        : "(2*16*1024)",
+            "fota.storage-start-address"                : "MBED_ROM_START + 64*1024 + 1984*1024",
+            "storage_tdb_internal.internal_size"        : "(2*128*1024)",
             "platform.crash-capture-enabled"            : false,
-            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + MBED_BOOTLOADER_FLASH_BANK_SIZE)"
+            "storage_tdb_internal.internal_base_address": "(MBED_ROM_START + 64*1024 + 1984*2*1024 + 64*1024)"
         },	                   
         "DISCO_F769NI": {	
             "target.extra_labels_remove"       : [ "PSA" ]
