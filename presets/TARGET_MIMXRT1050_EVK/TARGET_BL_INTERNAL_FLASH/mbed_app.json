@@ -16,7 +16,7 @@
                 "1. Bootloader - 64kb from the beginning of flash",
                 "2. Active App Metadata Header - 512B from the end of Bootloader",
                 "3. Active App - From end of header to the 2048kb offset",
-				"4. Firmware Candidate Storage - 1984kb from the 2048kb offset",
+                "4. Firmware Candidate Storage - 1984kb from the 2048kb offset",
                 "5. TDB internal storage - 256kb from the 4096kb offset",
                 "+--------------------------+",
                 "|                          |",

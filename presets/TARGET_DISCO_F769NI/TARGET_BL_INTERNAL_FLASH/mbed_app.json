@@ -65,6 +65,7 @@
         "fota"
     ],
     "macros": [
+        "MBED_CONF_TARGET_FLASH_DUAL_BANK=1",
         "MBED_BOOTLOADER_FLASH_BANK_SIZE=MBED_ROM_SIZE/2",
         "MBED_CLOUD_CLIENT_FOTA_FW_HEADER_VERSION=3",
         "FOTA_HEADER_HAS_CANDIDATE_READY=1",        
