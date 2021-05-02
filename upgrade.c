@@ -33,6 +33,7 @@
 #include "mbedtls/sha256.h"
 #include "mbedtls/platform_util.h"
 #include "fota_device_key.h"
+#include "kvstore_global_api.h"
 
 #include <stdlib.h>
 
@@ -213,7 +214,9 @@ static int install_iterate_handler(fota_candidate_iterate_callback_info *info)
 
 int fota_nvm_fw_encryption_key_get(uint8_t buffer[FOTA_ENCRYPT_KEY_SIZE])
 {
-    return fota_get_device_key_128bit(buffer, FOTA_ENCRYPT_KEY_SIZE); 
+    // return fota_get_device_key_128bit(buffer, FOTA_ENCRYPT_KEY_SIZE);
+    size_t actual_size = 0;
+    return kv_get("FTEncryptKey", buffer, FOTA_ENCRYPT_KEY_SIZE, actual_size);
 }
 
 static int check_and_install_update()
