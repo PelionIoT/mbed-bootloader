@@ -130,6 +130,17 @@ int fota_bd_get_erase_size(size_t addr, size_t *erase_size);
  */
 int fota_bd_get_erase_value(int *erase_value);
 
+/**
+ * Pelion FOTA block device translate physical address to logical one.
+ * It is required that block device addresses will be continuous and start from 0.
+ * In most devices, this is the case and this function should simply return the physical address.
+ * Devices like like internal flash, where addresses don't start from 0. require a less trivial translation logic.
+ *
+ * \param[in] phys_addr Physical address.
+ * \return Logical address
+ */
+size_t fota_bd_physical_addr_to_logical_addr(size_t phys_addr);
+
 #ifdef __cplusplus
 }
 #endif

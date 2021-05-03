@@ -57,8 +57,6 @@ static fota_candidate_config_t fota_candidate_config = {
 
 static candidate_contex_t *ctx = NULL;
 
-uint32_t fota_bd_physical_addr_to_logical_addr(uint32_t phys_addr);
-
 void fota_candidate_set_config(fota_candidate_config_t *in_fota_candidate_config)
 {
     FOTA_ASSERT(in_fota_candidate_config->storage_size);
@@ -167,7 +165,7 @@ int fota_candidate_read_header(size_t *addr, uint32_t bd_read_size, uint32_t bd_
         goto end;
     }
 
-    if (header_size < header->external_header_size + offsetof(fota_header_info_t, internal_header_barrier)){
+    if (header_size < header->external_header_size + offsetof(fota_header_info_t, internal_header_barrier)) {
         *addr += FOTA_ALIGN_UP(header->external_header_size + offsetof(fota_header_info_t, internal_header_barrier), bd_prog_size);
     } else {
         *addr += FOTA_ALIGN_UP(header_size, bd_prog_size);

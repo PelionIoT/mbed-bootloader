@@ -28,6 +28,7 @@
 // External BD should supply all these APIs
 
 #if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE != FOTA_EXTERNAL_BD)
+#if defined(__MBED__)
 
 static bool initialized = false;
 
@@ -183,12 +184,6 @@ int fota_bd_get_erase_value(int *erase_value)
     return FOTA_STATUS_SUCCESS;
 }
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif // (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE != FOTA_EXTERNAL_BD)
-
 static bool is_internal_flash_bd()
 {
 #if (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE == FOTA_INTERNAL_FLASH_MBED_OS_BD)
@@ -205,7 +200,7 @@ static bool is_internal_flash_bd()
 #endif
 }
 
-extern "C" size_t fota_bd_physical_addr_to_logical_addr(size_t phys_addr)
+size_t fota_bd_physical_addr_to_logical_addr(size_t phys_addr)
 {
 #ifdef __MBED__
     if (is_internal_flash_bd()) {
@@ -215,4 +210,10 @@ extern "C" size_t fota_bd_physical_addr_to_logical_addr(size_t phys_addr)
     return phys_addr;
 }
 
+#ifdef __cplusplus
+}
+#endif
+
+#endif // defined(__MBED__)
+#endif // (MBED_CLOUD_CLIENT_FOTA_BLOCK_DEVICE_TYPE != FOTA_EXTERNAL_BD)
 #endif  // MBED_CLOUD_CLIENT_FOTA_ENABLE
