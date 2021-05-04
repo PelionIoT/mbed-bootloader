@@ -15,7 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ----------------------------------------------------------------------------
-#include "fota_platform.h"
+#include "fota_platform_hooks.h"
 
 #if defined(MBED_CLOUD_CLIENT_FOTA_ENABLE)
 

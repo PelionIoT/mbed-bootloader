@@ -19,7 +19,7 @@
 #include "fota/fota_block_device.h"
 #include "fota/fota_crypto_defs.h"
 #include "fota/fota_crypto.h"
-#include "fota/fota_platform.h"
+#include "fota/fota_platform_hooks.h"
 #include "fota/fota_header_info.h"
 #include "fota/fota_candidate.h"
 #include "fota/fota_component.h"
@@ -111,17 +111,17 @@ static int install_start(fota_candidate_iterate_callback_info *info)
     size_t volatile loop_check;
 
     FOTA_FI_SAFE_COND((!check_version ||
-                        ((installed_header.magic == FOTA_FW_HEADER_MAGIC) &&
+                       ((installed_header.magic == FOTA_FW_HEADER_MAGIC) &&
                         (!fota_fi_memcmp(installed_header.digest, cand_header->precursor,
-                        FOTA_CRYPTO_HASH_SIZE, &loop_check) &&
-                        (loop_check == FOTA_CRYPTO_HASH_SIZE)))),
-                        FOTA_STATUS_MANIFEST_PRECURSOR_MISMATCH, "Precursor doesn't match installed digest");
+                                         FOTA_CRYPTO_HASH_SIZE, &loop_check) &&
+                         (loop_check == FOTA_CRYPTO_HASH_SIZE)))),
+                      FOTA_STATUS_MANIFEST_PRECURSOR_MISMATCH, "Precursor doesn't match installed digest");
 
     FOTA_FI_SAFE_COND((!check_version ||
-                        ((installed_header.magic == FOTA_FW_HEADER_MAGIC) &&
+                       ((installed_header.magic == FOTA_FW_HEADER_MAGIC) &&
                         (installed_header.version < cand_header->version))),
-                        FOTA_STATUS_MANIFEST_VERSION_REJECTED,
-                        "Candidate version is not newer than installed");
+                      FOTA_STATUS_MANIFEST_VERSION_REJECTED,
+                      "Candidate version is not newer than installed");
 
     pr_info("Candidate verification successful. Starting installation to flash...");
 
@@ -213,17 +213,17 @@ static int install_iterate_handler(fota_candidate_iterate_callback_info *info)
 
 int fota_nvm_fw_encryption_key_get(uint8_t buffer[FOTA_ENCRYPT_KEY_SIZE])
 {
-    return fota_get_device_key_128bit(buffer, FOTA_ENCRYPT_KEY_SIZE); 
+    return fota_get_device_key_128bit(buffer, FOTA_ENCRYPT_KEY_SIZE);
 }
 
 static int check_and_install_update()
 {
     int ret = FOTA_STATUS_NOT_FOUND;
-    bool validate = true;    
+    bool validate = true;
 #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
     bool force_encrypt = true;
 #else
-    bool force_encrypt = false;    
+    bool force_encrypt = false;
 #endif // #if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 1)
 
     ret = init_storage();
@@ -236,8 +236,8 @@ static int check_and_install_update()
 
     ret = fota_candidate_iterate_image(validate, force_encrypt, FOTA_COMPONENT_MAIN_COMPONENT_NAME, flash_page_size,
                                        install_iterate_handler);
-    if (ret) {                                       
-        if(ret == FOTA_STATUS_NOT_FOUND) {
+    if (ret) {
+        if (ret == FOTA_STATUS_NOT_FOUND) {
             deinit_storage();
             pr_cmd("Candidate not found");
             return ret;
@@ -280,7 +280,7 @@ static int validate_installed_fw()
     uint8_t digest[FOTA_CRYPTO_HASH_SIZE] = { 0 };
     int ret = FOTA_STATUS_INTERNAL_ERROR;
     uint32_t addr = MBED_CONF_MBED_BOOTLOADER_APPLICATION_START_ADDRESS;
-    
+
     pr_info("Validating image on flash...");
 
     ret = read_installed_fw_header();
@@ -309,7 +309,7 @@ static int validate_installed_fw()
         ret = FOTA_STATUS_INTERNAL_ERROR;
         goto fail;
     }
-    
+
     pr_debug("Validating image on flash finished");
 
 #if defined(MBED_CLOUD_CLIENT_FOTA_SIGNED_IMAGE_SUPPORT)
@@ -412,7 +412,7 @@ int main(void)
     installed_fw_status = validate_installed_fw();
     FOTA_FI_SAFE_COND(installed_fw_status == FOTA_STATUS_SUCCESS,
                       installed_fw_status, "Validating installed firmware");
-    if (is_new_firmware && installed_fw_status == FOTA_STATUS_SUCCESS ) {
+    if (is_new_firmware && installed_fw_status == FOTA_STATUS_SUCCESS) {
         pr_cmd("New active firmware is valid\r\n");
     }
 
@@ -425,16 +425,16 @@ int main(void)
     }
 #endif
     pr_debug("Jumping to application address 0x%x.\n\n\n",
-            MBED_CONF_MBED_BOOTLOADER_APPLICATION_JUMP_ADDRESS);
+             MBED_CONF_MBED_BOOTLOADER_APPLICATION_JUMP_ADDRESS);
 
     mbed_start_application(MBED_CONF_MBED_BOOTLOADER_APPLICATION_JUMP_ADDRESS);
 
 fail:
     pr_debug("PANIC");
     if (reset) {
-        system_reset();        
+        system_reset();
     } else {
-       mbed_die();
-    }        
+        mbed_die();
+    }
     return 0;
 }

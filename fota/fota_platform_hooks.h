@@ -30,7 +30,7 @@ extern "C" {
 #endif
 
 /**
- * @file fota_platform.h
+ * @file fota_platform_hooks.h
  *  \brief Platform hooks that the platform can implement if the target requires more complex FOTA initialization and teardown steps.
  * By default, Pelion FOTA provides an empty implementation for these hooks.
  * An application developer can override these hooks by injecting the ::FOTA_CUSTOM_PLATFORM macro to the build and implementing all the callback functions listed below.

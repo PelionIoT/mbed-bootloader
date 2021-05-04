@@ -100,7 +100,7 @@ void fota_on_defer(int32_t status);
 void fota_on_authorize(int32_t status);
 void fota_on_fragment(uint8_t *buf, size_t size);
 void fota_on_fragment_failure(int32_t status);
-void fota_on_resume(int32_t status);
+void fota_on_resume(int32_t param);
 #ifdef __cplusplus
 }
 #endif

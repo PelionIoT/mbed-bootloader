@@ -19,36 +19,43 @@
 
 
 CLOUD_CLIENT=${1:?"missing fota directory path"}
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+DST_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+SRC_DIR="$CLOUD_CLIENT/fota"
 
 declare -a FOTA_FILES=(
-        "$CLOUD_CLIENT/fota/fota_base.h"
-        "$CLOUD_CLIENT/fota/fota_block_device.cpp"
-        "$CLOUD_CLIENT/fota/fota_block_device.h"
-        "$CLOUD_CLIENT/fota/fota_candidate.c"
-        "$CLOUD_CLIENT/fota/fota_candidate.h"
-        "$CLOUD_CLIENT/fota/fota_component.c"
-        "$CLOUD_CLIENT/fota/fota_component_defs.h"
-        "$CLOUD_CLIENT/fota/fota_component.h"
-        "$CLOUD_CLIENT/fota/fota_component_internal.h"
-        "$CLOUD_CLIENT/fota/fota_config.h"
-        "$CLOUD_CLIENT/fota/fota_crypto.c"
-        "$CLOUD_CLIENT/fota/fota_crypto_defs.h"
-        "$CLOUD_CLIENT/fota/fota_crypto.h"
-        "$CLOUD_CLIENT/fota/fota_header_info.h"
-        "$CLOUD_CLIENT/fota/fota_header_info_v3.c"
-        "$CLOUD_CLIENT/fota/fota_internal.h"
-        "$CLOUD_CLIENT/fota/fota_nvm.h"
-        "$CLOUD_CLIENT/fota/fota_nvm_int.h"
-        "$CLOUD_CLIENT/fota/fota_platform.h"
-        "$CLOUD_CLIENT/fota/fota_platform_default.c"
-        "$CLOUD_CLIENT/fota/fota_status.h"
-        "$CLOUD_CLIENT/fota/mbed_lib.json"
+        "fota_base.h"
+        "fota_block_device.h"
+        "fota_candidate.c"
+        "fota_candidate.h"
+        "fota_component.c"
+        "fota_component_defs.h"
+        "fota_component.h"
+        "fota_component_internal.h"
+        "fota_config.h"
+        "fota_crypto.c"
+        "fota_crypto_defs.h"
+        "fota_crypto.h"
+        "fota_header_info.h"
+        "fota_header_info_v3.c"
+        "fota_internal.h"
+        "fota_nvm.h"
+        "fota_nvm_int.h"
+        "fota_platform_hooks.h"
+        "fota_platform_hooks_default.c"
+        "fota_status.h"
+        "platform/mbed-os/fota_block_device_mbed_os.cpp"
+        "mbed_lib.json"
 )
+
+shopt -s extglob
+rm -fr $DST_DIR/!(*.sh)
 
 for file in "${FOTA_FILES[@]}"
 do
-   cp -v $file $SCRIPT_DIR
+    SRC_FILE="$SRC_DIR/$file"
+    DST_FILE="$DST_DIR/$file"
+    mkdir -p `dirname $DST_FILE`
+    cp -v $SRC_FILE $DST_FILE
 done
 
-echo "Imported from mbed-cloud-client-internal at hash: $(git -C $CLOUD_CLIENT rev-parse HEAD)" > $SCRIPT_DIR/import_ref.txt
+echo "Imported from mbed-cloud-client-internal at hash: $(git -C $CLOUD_CLIENT rev-parse HEAD)" > $DST_DIR/import_ref.txt
