@@ -79,6 +79,7 @@ typedef int (*fota_component_verify_install_handler_t)(const char *comp_name, co
  * @param install_alignment The preferred installer fragment size. Typically equal to the flash program size.
  * @param support_delta Specify whether the component supports differential (delta) update.
  * @param need_reboot Specify whether the component requires system reboot after the component installation has completed.
+                               Only `true` parameter is currently supported.
  * @param candidate_iterate_cb A callback function the FOTA client calls for installing the candidate.
  *                             The FOTA client calls the callback iteratively with a firmware fragment buffer pointer as an argument.
  *                             Note: For Linux systems, this iterative callback is replaced by ::fota_app_on_install_candidate().

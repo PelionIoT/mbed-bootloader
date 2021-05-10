@@ -96,24 +96,43 @@ int fota_component_add(const fota_component_desc_info_t *comp_desc_info, const c
     fota_component_desc_t *comp_table = user_comp_table;
     unsigned int *num_components = &num_user_components;
 
-    FOTA_ASSERT(comp_name);
-    FOTA_ASSERT(!(comp_desc_info->support_delta && (!comp_desc_info->curr_fw_get_digest || !comp_desc_info->curr_fw_read)));
-
+    if (!comp_name) {
+        FOTA_TRACE_ERROR("Empty component name");
+        return FOTA_STATUS_INVALID_ARGUMENT;
+    }
+    if (comp_desc_info->support_delta && (!comp_desc_info->curr_fw_get_digest || !comp_desc_info->curr_fw_read)) {
+        FOTA_TRACE_ERROR("empty fields in component description");
+        return FOTA_STATUS_INVALID_ARGUMENT;
+    }
+    
 #ifdef FOTA_INTERNAL_COMPONENTS_SUPPORT
     if (comp_name[0] == '%') {
         comp_table = malloc((num_int_components + 1) * sizeof(fota_component_desc_t));
-        FOTA_ASSERT(comp_table);
+        if (!comp_table) {
+            FOTA_TRACE_ERROR("comp_table wasn't allocated");
+            return FOTA_STATUS_OUT_OF_MEMORY;
+        }
         memcpy(comp_table, int_comp_table, num_int_components * sizeof(fota_component_desc_t));
         free(int_comp_table);
         int_comp_table = comp_table;
         num_components = &num_int_components;
     } else {
-        FOTA_ASSERT(*num_components < FOTA_NUM_COMPONENTS);
+        if (*num_components > FOTA_NUM_COMPONENTS) {
+            FOTA_TRACE_ERROR("Wrong number of components");
+            return FOTA_STATUS_INVALID_ARGUMENT;
+        }
     }
 #else
-    FOTA_ASSERT(*num_components < FOTA_NUM_COMPONENTS);
+    if (*num_components > FOTA_NUM_COMPONENTS) {
+        FOTA_TRACE_ERROR("Wrong number of components");
+        return FOTA_STATUS_INVALID_ARGUMENT;
+    }
 #endif
+    if (comp_desc_info->need_reboot == false && comp_table == user_comp_table){
 
+        FOTA_TRACE_ERROR("Component with need_reboot false is not supported");
+        return FOTA_STATUS_INVALID_ARGUMENT;
+    }
     memcpy(&comp_table[*num_components].desc_info, comp_desc_info, sizeof(*comp_desc_info));
     strncpy(comp_table[*num_components].name, comp_name, FOTA_COMPONENT_MAX_NAME_SIZE - 1);
     fota_component_version_semver_to_int(comp_semver, &comp_table[*num_components].version);

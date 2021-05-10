@@ -63,6 +63,7 @@ typedef enum {
     FOTA_STATUS_RESOURCE_BUSY                 = -85, /**< Resource (typically storage) is busy */
     FOTA_STATUS_MULTICAST_UPDATE_ABORTED      = -86, /**< Received abort request from Multicast */
     FOTA_STATUS_MULTICAST_UPDATE_ACTIVATED    = -87, /**< Received abort request or new manifest from Multicast, when previous one was activated*/
+    FOTA_STATUS_INVALID_ARGUMENT			  = -88	 /**< Invalid argument was received */
 } fota_status_e;
 
 

@@ -76,7 +76,10 @@ extern "C" {
 #endif
 
 #if !defined(FOTA_HALT)
-#if defined(TARGET_LIKE_LINUX)
+#if defined(FOTA_UNIT_TEST)
+void unitest_halt(void);
+#define FOTA_HALT unitest_halt()
+#elif defined(TARGET_LIKE_LINUX)
 #define FOTA_HALT assert(0)
 #else
 #define FOTA_HALT for(;;)

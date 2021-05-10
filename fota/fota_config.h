@@ -252,8 +252,8 @@ extern char *program_invocation_name;
 #endif
 
 #if (MBED_CLOUD_CLIENT_FOTA_KEY_ENCRYPTION == FOTA_USE_DEVICE_KEY)
-#if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 0) || !defined(__MBED__)
-#error FOTA_USE_DEVICE_KEY should be used only for with __MBED__ with encryption enabled
+#if (MBED_CLOUD_CLIENT_FOTA_ENCRYPTION_SUPPORT == 0) || (!(defined(MBED_CONF_MBED_CLOUD_CLIENT_EXTERNAL_SST_SUPPORT)) && !(defined(__MBED__)))
+#error FOTA_USE_DEVICE_KEY should be used only for with MBED_CONF_MBED_CLOUD_CLIENT_EXTERNAL_SST_SUPPORT or __MBED__ with encryption enabled
 #endif
 #endif
 
