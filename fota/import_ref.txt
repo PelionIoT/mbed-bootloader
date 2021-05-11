@@ -1,1 +1,1 @@
-Imported from mbed-cloud-client-internal at hash: 3f5822d6760574197f3070cae534c69964ccdbd8
+Imported from mbed-cloud-client-internal at hash: 72343ae3ff2870e7d6d56eebabf11f8cd0a8f63c

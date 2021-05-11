@@ -43,6 +43,7 @@ declare -a FOTA_FILES=(
         "fota_platform_hooks.h"
         "fota_platform_hooks_default.c"
         "fota_status.h"
+        "platform/nxp/fota_block_device_nxp_lpc.cpp"
         "platform/mbed-os/fota_block_device_mbed_os.cpp"
         "mbed_lib.json"
 )
