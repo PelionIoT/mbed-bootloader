@@ -92,8 +92,14 @@ typedef struct {
     uint16_t block_size;                            /*< Block size. Encryption block size if encrypted,
                                                         validated block size if unencrypted and block validation turned on */
     uint8_t precursor[FOTA_CRYPTO_HASH_SIZE];       /*< contains previously installed FW SHA256 digest */
-    uint8_t vendor_data[FOTA_MANIFEST_VENDOR_DATA_SIZE];
     /*< Vendor custom data as received in Pelion FOTA manifest. */
+    uint8_t vendor_data[FOTA_MANIFEST_VENDOR_DATA_SIZE];
+#if (MBED_CLOUD_CLIENT_FOTA_KEY_ENCRYPTION == FOTA_USE_ENCRYPTED_ONE_TIME_FW_KEY)
+    /*< Encrypted info to encrypt\decrypt payload Encryption key */
+    uint8_t encrypted_fw_key[FOTA_ENCRYPT_KEY_SIZE];
+    uint8_t encrypted_fw_key_tag[FOTA_ENCRYPT_TAG_SIZE];
+    uint64_t encrypted_fw_key_iv;
+#endif
     uint32_t footer;
     // !New fields of the external header must me added in the end of the current structure,
     // otherwise additional field will break older version of the bootloader.
