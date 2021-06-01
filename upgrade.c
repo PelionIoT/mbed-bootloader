@@ -211,11 +211,6 @@ static int install_iterate_handler(fota_candidate_iterate_callback_info *info)
     return 0;
 }
 
-int fota_nvm_fw_encryption_key_get(uint8_t buffer[FOTA_ENCRYPT_KEY_SIZE])
-{
-    return fota_get_device_key_128bit(buffer, FOTA_ENCRYPT_KEY_SIZE);
-}
-
 static int check_and_install_update()
 {
     int ret = FOTA_STATUS_NOT_FOUND;

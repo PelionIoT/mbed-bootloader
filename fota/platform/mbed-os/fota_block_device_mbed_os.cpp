@@ -24,6 +24,11 @@
 
 #include "fota/fota_block_device.h"
 #include "fota/fota_status.h"
+#include <stdlib.h>
+
+#if FOTA_BD_SIMULATE_ERASE
+static const uint8_t sim_erase_val = 0xFF;
+#endif
 
 // External BD should supply all these APIs
 
@@ -90,6 +95,7 @@ int fota_bd_init(void)
 
     int ret = bd->init();
     if (!ret) {
+        FOTA_TRACE_DEBUG("BlockDevice type %s", bd->get_type());
         initialized = true;
         return FOTA_STATUS_SUCCESS;
     }
@@ -145,6 +151,46 @@ int fota_bd_erase(size_t addr, size_t size)
     int ret;
     FOTA_ASSERT(bd);
 
+#if FOTA_BD_SIMULATE_ERASE
+    int erase_value = bd->get_erase_value();
+    if (erase_value < 0) {
+        uint8_t *erase_buf = NULL;
+        while (size) {
+            size_t erase_size, prev_erase_size = 0;
+            if (fota_bd_get_erase_size(addr, &erase_size)) {
+                ret = FOTA_STATUS_STORAGE_WRITE_FAILED;
+                goto end;
+            }
+            if ((addr % erase_size) || (size < erase_size)) {
+                ret = FOTA_STATUS_STORAGE_WRITE_FAILED;
+                goto end;
+            }
+
+            if (erase_size > prev_erase_size) {
+                free(erase_buf);
+                erase_buf = (uint8_t *) malloc(erase_size);
+                if (!erase_buf) {
+                    ret = FOTA_STATUS_STORAGE_WRITE_FAILED;
+                    goto end;
+                }
+            }
+
+            memset(erase_buf, sim_erase_val, erase_size);
+            if (bd->program(erase_buf, addr, erase_size)) {
+                ret = FOTA_STATUS_STORAGE_WRITE_FAILED;
+                goto end;
+            }
+            prev_erase_size = erase_size;
+            addr += erase_size;
+            size -= erase_size;
+        }
+        ret = FOTA_STATUS_SUCCESS;
+end:
+        free(erase_buf);
+        return ret;
+    }
+#endif // FOTA_BD_SIMULATE_ERASE
+
     ret = bd->erase(addr, size);
     if (ret) {
         return FOTA_STATUS_STORAGE_WRITE_FAILED;
@@ -181,6 +227,13 @@ int fota_bd_get_erase_value(int *erase_value)
     FOTA_ASSERT(bd);
 
     *erase_value = bd->get_erase_value();
+
+#if FOTA_BD_SIMULATE_ERASE
+    if (*erase_value < 0) {
+        *erase_value = sim_erase_val;
+    }
+#endif
+
     return FOTA_STATUS_SUCCESS;
 }
 

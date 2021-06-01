@@ -33,11 +33,11 @@ extern "C" {
 
 typedef uint8_t ccs_item_type_e;
 
-#define CCS_PRIVATE_KEY_ITEM   0x1
-#define CCS_PUBLIC_KEY_ITEM    0x2
-#define CCS_SYMMETRIC_KEY_ITEM 0x4
-#define CCS_CERTIFICATE_ITEM   0x8
-#define CCS_CONFIG_ITEM        0x10
+#define CCS_PRIVATE_KEY_ITEM   0
+#define CCS_PUBLIC_KEY_ITEM    1
+#define CCS_SYMMETRIC_KEY_ITEM 2
+#define CCS_CERTIFICATE_ITEM   3
+#define CCS_CONFIG_ITEM        4
 
 #else  // (MBED_CLOUD_CLIENT_PROFILE == MBED_CLOUD_CLIENT_PROFILE_FULL)
 

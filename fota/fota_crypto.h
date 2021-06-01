@@ -49,6 +49,35 @@ int fota_decrypt_data(
     uint8_t *tag);
 int fota_encrypt_finalize(fota_encrypt_context_t **ctx);
 
+#if (MBED_CLOUD_CLIENT_FOTA_KEY_ENCRYPTION == FOTA_USE_ENCRYPTED_ONE_TIME_FW_KEY)
+/*
+ * Encrypt fw key.
+ *
+ * \param[in]  plain_key             Key buffer to encrypt
+ * \param[out] encrypted_fw_key      Buffer holding the encrypted data
+ * \param[out] encrypted_fw_key_tag  Buffer holding the encrypted tag
+ * \param[out] encrypted_fw_key_iv   Buffer holding the encrypted buffer
+ * \return FOTA_STATUS_SUCCESS on success
+ */
+int fota_encrypt_fw_key(uint8_t plain_key[FOTA_ENCRYPT_KEY_SIZE],
+                        uint8_t encrypted_fw_key[FOTA_ENCRYPT_KEY_SIZE],
+                        uint8_t encrypted_fw_key_tag[FOTA_ENCRYPT_TAG_SIZE],
+                        uint64_t *encrypted_fw_key_iv);
+/*
+ * Decrypt fw key.
+ *
+ * \param[out] plain_key             Key buffer to encrypt
+ * \param[in]  encrypted_fw_key      Buffer holding the encrypted data
+ * \param[in]  encrypted_fw_key_tag  Buffer holding the encrypted tag
+ * \param[in]  encrypted_fw_key_iv   Buffer holding the encrypted buffer
+ * \return FOTA_STATUS_SUCCESS on success
+ */
+int fota_decrypt_fw_key(uint8_t plain_key[FOTA_ENCRYPT_KEY_SIZE],
+                        uint8_t encrypted_fw_key[FOTA_ENCRYPT_KEY_SIZE],
+                        uint8_t encrypted_fw_key_tag[FOTA_ENCRYPT_TAG_SIZE],
+                        uint64_t encrypted_fw_key_iv);
+#endif // (MBED_CLOUD_CLIENT_FOTA_KEY_ENCRYPTION == FOTA_USE_ENCRYPTED_ONE_TIME_FW_KEY)
+
 typedef struct fota_hash_context_s fota_hash_context_t;
 
 int fota_hash_start(fota_hash_context_t **ctx);
@@ -147,9 +176,7 @@ int fota_verify_signature_prehashed(
     const uint8_t *sig, size_t sig_len
 );
 
-#if (MBED_CLOUD_CLIENT_FOTA_KEY_DERIVATION == FOTA_ENCRYPT_KEY_ECB_DERIVATION || MBED_CLOUD_CLIENT_FOTA_KEY_DERIVATION == FOTA_ENCRYPT_KEY_HMAC_DERIVATION)
 const unsigned char* fota_get_derivation_string(void);
-#endif
 
 #ifdef __cplusplus
 }
