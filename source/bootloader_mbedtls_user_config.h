@@ -168,7 +168,12 @@
 #undef MBEDTLS_ASN1_PARSE_C
 #undef MBEDTLS_ASN1_WRITE_C
 #undef MBEDTLS_BASE64_C
+//For mbedtls 2.16.0 and lower version, fota bootloader with external storage requiers MBEDTLS_BIG_NUM_C define 
+#if  (MBEDTLS_VERSION_NUMBER < 0x02110000)
+#define MBEDTLS_BIGNUM_C
+#else
 #undef MBEDTLS_BIGNUM_C
+#endif
 #undef MBEDTLS_CERTS_C
 #undef MBEDTLS_CRC_C
 #undef MBEDTLS_GCM_C
