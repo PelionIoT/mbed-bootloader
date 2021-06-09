@@ -41,7 +41,7 @@ extern "C" {
  * Platform init hook.
  * Called when the FOTA module is initialized.
  *
- * \param[in] after_upgrade Indicates that the hook is called after a successful upgrade of the installed image.
+ * \param[in] after_upgrade Indicates whether the FOTA client is being initiated after a successful upgrade of the installed image, or as part of a regular boot.
  * \return ::FOTA_STATUS_SUCCESS on success.
  */
 int fota_platform_init_hook(bool after_upgrade);

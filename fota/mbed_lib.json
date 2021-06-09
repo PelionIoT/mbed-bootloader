@@ -31,7 +31,7 @@
         "key-encryption": {
             "help": "Encryption key options",
             "macro_name": "MBED_CLOUD_CLIENT_FOTA_KEY_ENCRYPTION",
-            "accepted_values": ["FOTA_USE_ONE_TIME_FW_KEY", "FOTA_USE_DEVICE_KEY", "FOTA_USE_ENCRYPTED_ONE_TIME_FW_KEY"],
+            "accepted_values": ["FOTA_USE_DEVICE_KEY", "FOTA_USE_ENCRYPTED_ONE_TIME_FW_KEY"],
             "value": null
         },
         "public-key-format": {

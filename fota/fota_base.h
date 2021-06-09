@@ -103,6 +103,14 @@ void unitest_halt(void);
 
 #define FOTA_ALIGN_DOWN(val, size)  ((val) / (size) * (size))
 
+
+#if defined(__GNUC__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define FOTA_UINT64_TO_LE  __builtin_bswap64
+#else
+#define FOTA_UINT64_TO_LE
+#endif
+
+
 #ifdef __cplusplus
 }
 #endif
