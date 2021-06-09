@@ -26,6 +26,7 @@
 #include "fota/fota_status.h"
 #include "fota/fota_crypto_defs.h"
 #include "fota/fota_nvm.h"
+#include "fota_device_key.h"
 #include "mbedtls/sha256.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/ccm.h"
@@ -50,10 +51,6 @@
 #include "mbedtls/x509.h"
 #endif
 #include "mbedtls/pk.h"
-
-#if (MBED_CLOUD_CLIENT_FOTA_KEY_ENCRYPTION == FOTA_USE_ENCRYPTED_ONE_TIME_FW_KEY)
-#include "fota_device_key.h"
-#endif
 
 #if defined(REMOVE_MBEDTLS_SSL_CONF_RNG)
 #undef MBEDTLS_SSL_CONF_RNG
@@ -136,6 +133,7 @@ int fota_encrypt_decrypt_start(fota_encrypt_context_t **ctx, const uint8_t *key,
 
     const uint8_t *key_to_use = key;
 
+#if (MBED_CLOUD_CLIENT_FOTA_KEY_ENCRYPTION == FOTA_USE_DEVICE_KEY)
     uint8_t derived_key[key_size];
     fota_fi_memcpy(derived_key, key_to_use, key_size);
     ret = derive_key(derived_key);
@@ -143,6 +141,7 @@ int fota_encrypt_decrypt_start(fota_encrypt_context_t **ctx, const uint8_t *key,
         return ret;
     }
     key_to_use = derived_key;
+#endif
 
     fota_encrypt_context_t *enc_ctx = (fota_encrypt_context_t *) malloc(sizeof(fota_encrypt_context_t));
     if (!enc_ctx) {
@@ -190,9 +189,11 @@ int fota_encrypt_data(
 
     int ret;
     volatile int flow_control = 0;
+    uint64_t le_iv = FOTA_UINT64_TO_LE(ctx->iv);
+
     ret = mbedtls_ccm_encrypt_and_tag(
               &ctx->ccm_ctx, buf_size,
-              (const unsigned char *) &ctx->iv, sizeof(ctx->iv),
+              (const unsigned char *) &le_iv, sizeof(ctx->iv),
               NULL, 0,
               in_buf, out_buf,
               tag, FOTA_ENCRYPT_TAG_SIZE);
@@ -215,11 +216,13 @@ int fota_decrypt_data(
     FOTA_DBG_ASSERT(in_buf);
     FOTA_DBG_ASSERT(out_buf);
     FOTA_DBG_ASSERT(tag);
+
     int ret;
+    uint64_t le_iv = FOTA_UINT64_TO_LE(ctx->iv);
 
     ret = mbedtls_ccm_auth_decrypt(
               &ctx->ccm_ctx, buf_size,
-              (const unsigned char *) &ctx->iv, sizeof(ctx->iv),
+              (const unsigned char *) &le_iv, sizeof(ctx->iv),
               NULL, 0,
               in_buf, out_buf,
               tag, FOTA_ENCRYPT_TAG_SIZE);
@@ -247,6 +250,38 @@ int fota_encrypt_finalize(fota_encrypt_context_t **ctx)
 }
 
 #if (MBED_CLOUD_CLIENT_FOTA_KEY_ENCRYPTION == FOTA_USE_ENCRYPTED_ONE_TIME_FW_KEY)
+
+static int encrypt_decrypt_fw_key_start(fota_encrypt_context_t **ctx)
+{
+    int ret;
+    uint8_t dev_key[FOTA_ENCRYPT_KEY_SIZE] = {0};
+
+    // init CCM contex with key derived from device key
+
+    ret = fota_get_device_key_128bit(dev_key, FOTA_ENCRYPT_KEY_SIZE);
+    if (ret) {
+        FOTA_TRACE_ERROR("Failed to encrypt key. ret %d", ret);
+        return ret;
+    }
+
+    ret = derive_key(dev_key);
+    if (ret) {
+        FOTA_TRACE_ERROR("Failed to derive key. ret %d", ret);
+        goto fail;
+    }
+
+    ret = fota_encrypt_decrypt_start(ctx, dev_key, sizeof(dev_key));
+    if (ret) {
+        FOTA_TRACE_ERROR("Failed to start encryption engine. ret %d", ret);
+        goto fail;
+    }
+
+fail:
+    // Clear key's buffer from memory due to security reasons
+    memset(dev_key, 0, FOTA_ENCRYPT_KEY_SIZE);
+    return ret;
+}
+
 /*
  * Encrypt fw key.
  *
@@ -263,20 +298,13 @@ int fota_encrypt_fw_key(uint8_t plain_key[FOTA_ENCRYPT_KEY_SIZE],
 {
     FOTA_DBG_ASSERT(encrypted_fw_key_iv);
     int ret;
-    uint8_t dev_key[FOTA_ENCRYPT_KEY_SIZE] = {0};
     fota_encrypt_context_t *temp_ctx = NULL;
 
     // encrypt gen_key buffer using device key and store it in the header
 
-    ret = fota_get_device_key_128bit(dev_key, FOTA_ENCRYPT_KEY_SIZE);
+    ret = encrypt_decrypt_fw_key_start(&temp_ctx);
     if (ret) {
-        FOTA_TRACE_ERROR("Failed to encrypt key. ret %d", ret);
         return ret;
-    }
-    ret = fota_encrypt_decrypt_start(&temp_ctx, dev_key, sizeof(dev_key));
-    if (ret) {
-        FOTA_TRACE_ERROR("Failed to start encryption engine. ret %d", ret);
-        goto fail;
     }
 
     // generate random iv
@@ -298,8 +326,6 @@ int fota_encrypt_fw_key(uint8_t plain_key[FOTA_ENCRYPT_KEY_SIZE],
     }
 
 fail:
-    // Clear key's buffer from memory due to security reasons
-    memset(dev_key, 0, FOTA_ENCRYPT_KEY_SIZE);
     fota_encrypt_finalize(&temp_ctx);
     return ret;
 }
@@ -319,21 +345,13 @@ int fota_decrypt_fw_key(uint8_t plain_key[FOTA_ENCRYPT_KEY_SIZE],
                         uint64_t encrypted_fw_key_iv)
 {
     int ret;
-    uint8_t dev_key[FOTA_ENCRYPT_KEY_SIZE] = {0};
     fota_encrypt_context_t *temp_ctx = NULL;
 
     // decrypt encrypted_fw_key buffer using key derived from device key
 
-    ret = fota_get_device_key_128bit(dev_key, FOTA_ENCRYPT_KEY_SIZE);
+    ret = encrypt_decrypt_fw_key_start(&temp_ctx);
     if (ret) {
-        FOTA_TRACE_ERROR("Failed to decrypt key. ret %d", ret);
         return ret;
-    }
-
-    ret = fota_encrypt_decrypt_start(&temp_ctx, dev_key, FOTA_ENCRYPT_KEY_SIZE);
-    if (ret) {
-        FOTA_TRACE_ERROR("Failed to start encryption engine. ret %d", ret);
-        goto fail;
     }
 
     // set ccm to use generated iv
@@ -347,8 +365,6 @@ int fota_decrypt_fw_key(uint8_t plain_key[FOTA_ENCRYPT_KEY_SIZE],
     }
 
 fail:
-    // Clear key's buffer from memory due to security reasons
-    memset(dev_key, 0, FOTA_ENCRYPT_KEY_SIZE);
     fota_encrypt_finalize(&temp_ctx);
     return ret;
 }
